@@ -1,11 +1,11 @@
 bwipe : main.o HDD.o
-	g++ -o bwipe --std=c++0x -Wall -pthread main.o HDD.o
+	g++ -o bwipe.out --std=c++0x -Wall -pthread main.o HDD.o
 HDD.o : HDD.cpp
 	g++ --std=c++0x -Wall -c HDD.cpp
 main.o : main.cpp
 	g++ --std=c++0x -Wall -c main.cpp
-
-
+run : bwipe
+	./bwipe.out
 edit:
 	gedit *.cpp
 	gedit *.h
@@ -14,3 +14,5 @@ all: edit
 clean:
 	rm HDD.o
 	rm main.o
+load : bwipe
+	sudo ~/homeupdate.zsh

@@ -1,4 +1,5 @@
 #include "HDD.h"
+#include "HDD.h"
 #include <iostream>
 #include <thread>
 #include <exception>
@@ -34,36 +35,43 @@ struct Exception : public exception{
 }
 */
 void HDD::run_body(std::string batch){
-	std::cout<<"running "<< this->path<<std::endl;
-	//std::thread* cnt=this->count_thread();
-	while( !(this->presence()) ){}; //waits for detection use interrupt?
-	//this->get_data();
-	if(!this->presence()){return;}
-	
-	/*this->smartctl_run();
-//
-	if(!this->presence()){return;}
-	this->dd_write(batch);
-	if(!this->presence()){return;}
-	this->dd_read(batch);
-	if(!this->presence()){return;}
-	this->hash_check(batch);
-	if(!this->presence()){return;}
-	//this->erase();
-	//this->partition();
-	this->PresentTask="done, passed";
-	//this->Idle();
-	//delete cnt;//->terminate();
-	//cnt->join();
-//*/
+while(1)
+	{
+		std::cout<<"running "<< this->path<<std::endl;
+		//std::thread* cnt=this->count_thread();
+		while( !(this->presence()) ){break;} //waits for detection use interrupt?
+		this->get_data();
+		if(!this->presence()){continue;}
+		/*this->smartctl_run();
+		if(!this->presence()){continue;}
+		this->dd_write(batch);
+		if(!this->presence()){continue;}
+		this->dd_read(batch);
+		if(!this->presence()){continue;}
+		this->hash_check(batch);
+		if(!this->presence()){continue;}
+		//this->erase();
+		//this->partition();
+		this->PresentTask="done, passed";
+		//this->Idle();
+		//delete cnt;//->terminate();
+		//cnt->join();
+		//*/
+		//this->run_body(batch);
+		
+	}
 }
 void HDD::run(std::string batch){
+	
 	try{
 		this->run_body(batch);
 	}
 	catch(std::string e){
+		std::cout<<e<<std::endl;	
 		this->Exception= e;
+		throw e;
 	}
+	
 }
 std::thread * HDD::count_thread(){
 	std::thread* cnt=new std::thread(&HDD::count,this);
@@ -100,23 +108,41 @@ bool HDD::presence(){
 void HDD::get_data(){
 ///*
 //	local SmartSupportRaw="$(sudo smartctl -i /dev/${1} | awk '/SMART support is:/' | awk '{print substr($0,19,9)}; NR == 1 {exit}')";
-			bool temp=
-			"Available"==
-			StdOut(
+		//std::string output =StdOut("echo Available");
+		//std::cout<<"echo Available :"<<output<<"#"<<std::endl;
+		bool temp="Available\n"==StdOut(//"echo Available");
+			///*
 			"sudo smartctl -i /dev/"
 			+this->path
 			+" | awk '/Model Family:/' | awk '{print substr($0,19,35)}'"
 			);// returns non boolean ?? why?
-			std::cout<<temp<<std::cout;
-			this->SmartSupport;
-//	/*		
-		this->ModelFamily = StdOut("sudo smartctl -i /dev/"+this->path+" | awk '/Model Family:/' | awk '{print substr($0,19,35)}");
+			//*/
+		std::cout<<temp<<std::endl; 
+		this->SmartSupport=temp;
+	/*		
+		this->ModelFamily = StdOut(
+			"sudo smartctl -i /dev/"
+			+this->path+
+			" | awk '/Model Family:/' | awk '{print substr($0,19,35)}"
+			);
 		//local ModelFamilyRaw=sudo smartctl -i /dev/"+this->path+" | awk '/Model Family:/' | awk '{print substr($0,19,35)};
-		this->Model = StdOut("sudo smartctl -i /dev/"+this->path+" | awk '/Device Model:/' | awk '{print substr($0,19,35)}'");	
+		this->Model = StdOut(
+			"sudo smartctl -i /dev/"
+			+this->path
+			+" | awk '/Device Model:/' | awk '{print substr($0,19,35)}'"
+			);	
 		//local ModelRaw="$(sudo smartctl -i /dev/"+this->path+" | awk '/Device Model:/' | awk '{print substr($0,19,35)}')";
-		this->SerialNumber = StdOut("sudo smartctl -i /dev/"+this->path+" | awk '/Serial Number:/' | awk '{print substr($0,19,35)}'");	
+		this->SerialNumber = StdOut(
+			"sudo smartctl -i /dev/"
+			+this->path
+			+" | awk '/Serial Number:/' | awk '{print substr($0,19,35)}'"
+			);	
 		//local SerialNumberRaw="$(sudo smartctl -i /dev/"+this->path+" | awk '/Serial Number:/' | awk '{print substr($0,19,35)}')";
-		this->UserCapacity=StdOut("sudo smartctl -i /dev/"+this->path+" | awk '/User Capacity:/' | awk -F\"[\" '{print $2}' | grep -o '[0-9]\\+' | head -n 1");
+		this->UserCapacity=StdOut(
+			"sudo smartctl -i /dev/"
+			+this->path
+			+" | awk '/User Capacity:/' | awk -F\"[\" '{print $2}' | grep -o '[0-9]\\+' | head -n 1"
+			);
 		this->size= std::stol(this->UserCapacity);
 		//local UserCapacityGB="$(sudo smartctl -i /dev/"+this->path+" | awk '/User Capacity:/' | awk -F"[" '{print $2}' | grep -o '[0-9]\\+' | head -n 1)";
 	//		*/
