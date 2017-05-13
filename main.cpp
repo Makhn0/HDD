@@ -3,7 +3,7 @@
 #include <stdlib.h>
 //#include <system.h>
 #include "HDD.h"
-
+//git works
 extern std::string GetStdoutFromCommand(std::string);
 std::string BatchName="may1";
 std::string EraseCmd="nwipe";
