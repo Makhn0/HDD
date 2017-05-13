@@ -1,0 +1,16 @@
+bwipe : main.o HDD.o
+	g++ -o bwipe --std=c++0x -Wall -pthread main.o HDD.o
+HDD.o : HDD.cpp
+	g++ --std=c++0x -Wall -c HDD.cpp
+main.o : main.cpp
+	g++ --std=c++0x -Wall -c main.cpp
+
+
+edit:
+	gedit *.cpp
+	gedit *.h
+all: edit
+	gedit makefile-linux
+clean:
+	rm HDD.o
+	rm main.o
