@@ -23,4 +23,4 @@ open-test:
 	notepad++ test.cpp
 linux:
 	#I'm only gussing this will work
-	-f makefile-linux
+	make -f makefile-linux
