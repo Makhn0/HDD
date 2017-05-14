@@ -1,26 +1,29 @@
+CPFLAGS = --std=c++0x -Wall
+CC= g++
+editor=notepad++
 bwipe.exe: main.o HDD.o
-	g++ -o bwipe.exe --std=c++0x -Wall main.o HDD.o
+	$(CC) -o bwipe.exe $(CPFlAGS) main.o HDD.o
 HDD.o : HDD.cpp
-	g++ -c --std=c++0x -Wall HDD.cpp
+	$(CC) -c $(CPFLAGS) HDD.cpp
 main.o : main.cpp
-	g++ -c --std=c++0x -Wall main.cpp	
+	$(CC) -c $(CPFLAGS) main.cpp	
 run : main.exe
 	bwipe.exe
-open :
+edit :
 	notepad++ main.cpp
-	notepad++ HDD.cpp
+	notepad ++ HDD.cpp
 	notepad++ HDD.h
 all:open
 	notepad++ makefile
 clean:
-	del main.o
-	del HDD.o
-	#del *~
+	del *.o
+	del bwipe.exe
+	del bwipe.out
 	
 test:
-	g++ -o test.exe test.cpp
+	$(CC) -o test.exe test.cpp
 open-test:
 	notepad++ test.cpp
 linux:
-	#I'm only gussing this will work
+#	I'm only gussing this will work
 	make -f makefile-linux
