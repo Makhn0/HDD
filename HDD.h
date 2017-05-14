@@ -2,7 +2,8 @@
 #define HDD_h
 #include <iostream>
 #include <thread>
-
+typedef void (*Proc)(std::string);
+// type Proc to be used in run to make code pretier/better
 class HDD{
 	public:
 
@@ -18,7 +19,7 @@ class HDD{
 		bool Lock;//not used yet
 		bool present;
 		bool running;
-		
+		// bool getting data
 			
 		bool SmartSupport=false;
 		std::string Model;
@@ -61,6 +62,7 @@ class HDD{
 		void run_body(std::string);
 		void run(std::string);
 		void reset();
+		Proc * ProcQ;
 		
 };
 #endif

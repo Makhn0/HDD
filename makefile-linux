@@ -14,5 +14,5 @@ all: edit
 clean:
 	rm HDD.o
 	rm main.o
-load : bwipe
-	sudo ~/homeupdate.zsh
+#load : bwipe
+	#sudo ~/homeupdate.zsh
