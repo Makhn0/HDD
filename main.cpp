@@ -3,7 +3,7 @@
 #include <stdlib.h>
 //#include <system.h>
 #include "HDD.h"
-//git works
+
 extern std::string GetStdoutFromCommand(std::string);
 std::string BatchName="may1";
 std::string EraseCmd="nwipe";
@@ -23,13 +23,12 @@ void print(HDD * HDDs[], int length){
 }
 void contPrint(HDD * HDDs[], int length)
 {
-	//int i=0;
 	while(true){
 		print(HDDs,length);
 		std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+		system("clear");//maybe works better with linux?
 		system("cls");
-//		i++;
-	//	if(i>1000) break;
+
 	}
 }
 
@@ -37,21 +36,22 @@ int main(int argc, char * argv[]){
 	if(argv[1]){
 		BatchName=argv[1];
 	}
-	int N=1;//max number of drives
+	int DriveNum=1;//max number of drives
 	std::cout<< "making dev path prefix =";
 	std::string devPath="/dev/sd";
 	puts(devPath.c_str());
-	///*
-	HDD * HDDs[N];
-	HDDs[0]= new HDD(devPath+'a');//+((char)(0xaa)) ) ;
+
+	HDD * HDDs[DriveNum];
+	HDDs[0]= new HDD(devPath+'a');
+	/*
 	//HDDs[1]= new HDD(devPath+'b');
 	//HDDs[2]= new HDD("/dev/sdc");
 	//HDDs[3]= new HDD("/dev/sdd");
 	//*/
 	///*
-	std::thread * runner[N];
-
-	for(int i =0;i<N;i++){
+	
+	std::thread * runner[DriveNum];
+	for(int i =0;i<DriveNum;i++){
 		runner[i]=new std::thread(&HDD::run,HDDs[i],BatchName);
 		//runner[i]->join();
 	}
@@ -70,7 +70,7 @@ int main(int argc, char * argv[]){
 //	printer->join();
 
 //just in case threads don't exit when main does
-	for(int i =0;i<N;i++){
+	for(int i =0;i<DriveNum;i++){
 		//runner[i]=new std::thread(&HDD::run,HDDs[i],BatchName);
 		runner[i]->join();
 	}

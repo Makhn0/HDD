@@ -11,7 +11,7 @@ run : main.exe
 	bwipe.exe
 edit :
 	notepad++ main.cpp
-	notepad ++ HDD.cpp
+	notepad++ HDD.cpp
 	notepad++ HDD.h
 all:open
 	notepad++ makefile
