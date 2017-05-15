@@ -17,8 +17,8 @@ class HDD{
 		std::string path;
 		
 		bool Lock;//not used yet
-		bool present;
-		bool running;
+		bool Present;
+		bool Running;
 		// bool getting data
 			
 		bool SmartSupport=false;
@@ -65,4 +65,5 @@ class HDD{
 		Proc * ProcQ;
 		
 };
+//enum SmartControl {Unavailable, Available_Disabled, Avialable_Enabled}
 #endif

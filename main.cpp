@@ -14,7 +14,7 @@ void print(HDD * HDDs[], int length){
 	std::cout<<"EraseCmd: "<<EraseCmd<<std::endl<<std::endl;
 	std::cout<<"#################################################\n\n";
 	for(int i=0;i<length;i++){
-			if(HDDs[i]->present){	
+			if(HDDs[i]->Present){	
 			HDDs[i]->print();
 			std::cout<<"___________________________"<<std::endl;
 			}	
@@ -26,22 +26,22 @@ void contPrint(HDD * HDDs[], int length)
 	while(true){
 		print(HDDs,length);
 		std::this_thread::sleep_for(std::chrono::milliseconds(2000));
-		system("clear");//maybe works better with linux?
-		system("cls");
+		system("clear||cls");
+
 
 	}
 }
 
 int main(int argc, char * argv[]){
 	if(argv[1]){
-		BatchName=argv[1];
+		BatchName=*argv[1];
 	}
 	int DriveNum=1;//max number of drives
 	std::cout<< "making dev path prefix =";
 	std::string devPath="/dev/sd";
 	puts(devPath.c_str());
 
-	HDD * HDDs[DriveNum];
+	HDD * HDDs[1];
 	HDDs[0]= new HDD(devPath+'a');
 	/*
 	//HDDs[1]= new HDD(devPath+'b');
@@ -52,11 +52,11 @@ int main(int argc, char * argv[]){
 	
 	std::thread * runner[DriveNum];
 	for(int i =0;i<DriveNum;i++){
-		runner[i]=new std::thread(&HDD::run,HDDs[i],BatchName);
+		runner[i]=new std::thread(&HDD::run,HDDs[i],&BatchName);
 		//runner[i]->join();
 	}
 	//*/
-	///*
+	/*
 	try{
 		throw ((std::string) "name");
 	}
@@ -65,13 +65,13 @@ int main(int argc, char * argv[]){
 		HDDs[0]->Exception=e;
 	}
 	//*/
-	///std::cout<<"here"<<std::endl;
-//	std::thread * printer= new std::thread(contPrint,HDDs,0);
-//	printer->join();
-
+	std::cout<<"here"<<std::endl;
+	std::thread * printer= new std::thread(contPrint,HDDs,1);
+	printer->join();
+	
 //just in case threads don't exit when main does
 	for(int i =0;i<DriveNum;i++){
-		//runner[i]=new std::thread(&HDD::run,HDDs[i],BatchName);
+		//runner[i]=new std::thread(&HDD::run,HDDs[i],&BatchName);
 		runner[i]->join();
 	}
 	

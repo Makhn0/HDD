@@ -47,7 +47,7 @@ long myStol(std::string a){
 }
 //*/
 
-void HDD::run_body(std::string batch){
+void HDD::run_body(std::string* batch){
 	std::cout<<"running "<< this->path<<std::endl;
 	while(1)
 	{
@@ -55,12 +55,12 @@ void HDD::run_body(std::string batch){
 		/* follwing code will produce warnings and idgaf*/
 		this->PresentTask="waiting to detect...";
 		//std::thread* cnt=this->count_thread();
-		/*
+		//*
 		while( !(this->presence()) ){} //waits for detection use interrupt?
-		/*
+		//*
 		this->get_data();
 		if(!this->presence()){continue;}
-		/*
+		//*
 		this->smartctl_run();
 		if(!this->presence()){continue;}
 		/*
@@ -89,7 +89,7 @@ void HDD::run_body(std::string batch){
 		
 	}
 }
-void HDD::run(std::string batch){
+void HDD::run(std::string* batch){
 	//this->ProcQ=(Proc*) malloc(1);
 	//this->ProcQ[0]=(Proc) this->get_data;
 	try{
@@ -114,22 +114,23 @@ void HDD::count(){
 }
 void HDD::print(){
 	this->Model= StdOut("echo solid as a rock");
-	//*
-	printf("Smart Control Support: %b",this-SmartSupport);
-	printf("Status of: %s",this-path);
-	printf("Model Family: %s",this-ModelFamily);
-	printf("Model: %s",this-Model);
-	printf("Serial: %s",this-SerialNumber);
-	printf("User Capacity: %s",this-UserCapacity);
-	printf("Last Exception: %s",this-Exception);
-	printf("Present Tack: %s",this-PresentTask);
-	printf("Last/Current Command: %s",this-CmdString);
-	printf("RunTime: %d",this-RunTime);
+	/* //printf not as cool as I thought :(
+	printf("Smart Control Support: %B",this->SmartSupport);
+	printf("Status of: %S",this->path.c_str());
+	printf("Model Family: %s",this->ModelFamily.c_str());
+	printf("Model: %s",this->Model.c_str());
+	printf("Serial: %s",this->SerialNumber.c_str());
+	printf("User Capacity: %s",this->UserCapacity.c_str());
+	printf("Last Exception: %s",this->Exception.c_str());
+	printf("Present Tack: %s",this->PresentTask.c_str());
+	printf("Last/Current Command: %s",this->CmdString.c_str());
+	printf("RunTime: %d",this->RunTime);
 	/*/
-	std::cout<<" smrtCtrl  support:"<<this-SmartSupport<<std::endl;
 	std::cout<<"Status of: "<<this->path<<std::endl;
+	std::cout<<"Presence :    "<<((this->Present)?"detected":"undetected")/*<<this->Present*/<<std::endl;
+	std::cout<<"Smart Support: "<<(this->SmartSupport?"available":"unavailable")<<std::endl;
 	std::cout<<"Model Family: "<<this->ModelFamily<<std::endl;
-	std::cout<<"Model : "<<this->Model;//<<std::endl;
+	std::cout<<"Model  : "<<this->Model;//<<std::endl;
 	std::cout<<"Serial : "<<this->SerialNumber<<std::endl;
 	std::cout<<"User Capacity: "<<this->UserCapacity<<std::endl;
 	std::cout<<"Last Exception : "<<this->Exception<<std::endl;
@@ -145,10 +146,10 @@ bool HDD::presence(){
 	return temp==0;
 	/*/
 	//std::ifstream infile(this->path.c_str());
-	this->present=
+	this->Present=
 		//infile.good();
 		access( this->path.c_str(),0 )==0;//got off internet never used "access" before
-	return this->present;
+	return this->Present;
 	//*/
 
 }
@@ -157,10 +158,10 @@ void HDD::get_data(){
 	std::string temp =StdOut(//"echo Available");
 		"sudo smartctl -i "
 		+this->path
-		+" | awk '/SMART support is:/' |sed -n '1,1p' | awk '{print substr($0,19,9)}'"
+		+" | awk '/SMART support is:/' | sed -n '1,1p' | awk '{print substr($0,19,9)}'"
 		);
 	std::cout<<temp<<std::endl; 
-	this->SmartSupport=temp=="Available\n";		
+	this->SmartSupport=(temp=="Available\n");		
 	this->ModelFamily = StdOut(
 		"sudo smartctl -i "
 		+this->path
@@ -221,10 +222,10 @@ void HDD::smartctl_kill(){
 	}
 	//*/
 }
-void HDD::dd_write(std::string batch){
+void HDD::dd_write(std::string* batch){
 	this->PresentTask="Writing With dd...";
 	this->CmdString="sudo dd if=/dev/urandom of=/tmp/"
-		+batch
+		+*batch
 		+"_File.dd count=100KB 1>/dev/null";
 	//*
 	std::cout<<this->CmdString<<std::endl;
@@ -237,7 +238,7 @@ void HDD::dd_write(std::string batch){
 	std::cout<<this->CmdString<<std::endl;
 	std::cout<<StdOut(this->CmdString);
 	/*/
-	this->CmdString="sudo dd if=/tmp/"+batch+"_File.dd of=/dev/"
+	this->CmdString="sudo dd if=/tmp/"+*batch+"_File.dd of=/dev/"
 		+this->path
 		+" count=100KB 1>/dev/null";
 	if(system(this->CmdString.c_str())){
@@ -245,12 +246,12 @@ void HDD::dd_write(std::string batch){
 	}
 	//*/
 }
-void HDD::dd_read(std::string batch){
+void HDD::dd_read(std::string* batch){
 	this->PresentTask="Reading With dd...";
 	this->CmdString="sudo dd if=/dev/"
 		+this->path
 		+" of=/tmp/"
-		+batch
+		+*batch
 		+"_FileRead.dd count=100KB "
 		//+1>/dev/null"
 		;
@@ -263,14 +264,14 @@ void HDD::dd_read(std::string batch){
 	}
 	//*/
 }
-void HDD::hash_check(std::string batch){
+void HDD::hash_check(std::string* batch){
 	this->PresentTask="Checking Hash...";
 	this->CmdString="md5sum /tmp/"
-		+batch
+		+*batch
 		+"_File.dd |awk '{print substr($0,0,32)}')";
 	std::string MainHash= StdOut(this->CmdString);
 	this->CmdString="md5sum /tmp/"
-		+batch 
+		+*batch 
 		+"_FileRead.dd |awk '{print substr($0,0,32)}')";
 	std::string ReadHash= StdOut(this->CmdString);
 	if(MainHash!=ReadHash){
@@ -309,7 +310,7 @@ void HDD::partition(){
 void HDD::reset(){
 	this->Lock=false;
 	this->SmartSupport=false;
-	this->present=false;
+	this->Present=false;
 	this->SmartKill=false;
 	this->SmartctlScsiPid=0;
 	this->Exception="none";

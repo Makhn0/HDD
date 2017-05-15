@@ -1,14 +1,14 @@
 bwipe : main.o HDD.o
 	g++ -o bwipe.out --std=c++0x -Wall -pthread main.o HDD.o
 HDD.o : HDD.cpp
-	g++ --std=c++0x -Wall -c HDD.cpp
+	g++ --std=c++0x -pthread -Wall -c HDD.cpp
 main.o : main.cpp
-	g++ --std=c++0x -Wall -c main.cpp
+	g++ --std=c++0x -pthread -Wall -c main.cpp
 run : bwipe
 	./bwipe.out
 edit:
-	gedit *.cpp
-	gedit *.h
+	gedit ./*.cpp
+	gedit ./*.h
 all: edit
 	gedit makefile-linux
 clean:
