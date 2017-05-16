@@ -58,9 +58,12 @@ void HDD::run_body(std::string* batch){
 		//*
 		get_data();
 		if(!presence()){continue;}
-		//*
+		/*
 		smartctl_run();
+		while(smartctl_running()){
 		if(!presence()){continue;}
+		sleep(100);		
+		}
 		/*
 		this-smartctl_kill();//just testing exclude in final buildS
 		if(!this->presence()){continue;}
@@ -181,7 +184,7 @@ void HDD::get_data(){
 
 void HDD::smartctl_run(){
 	this->smartctl_kill();
-	this->PresentTask="Checking Smart Control...";
+	this->PresentTask="Running Smart Control...";
 	this->CmdString="sudo smartctl --device=auto --smart=on --saveauto=on --tolerance=normal --test=long "
 		+ this->path
 		+" 1>/dev/null"// last argument redundant with system()?
@@ -194,6 +197,20 @@ void HDD::smartctl_run(){
 		throw (std::string) "smartctl error";
 	}
 	*/
+}
+bool HDD::smartctl_running(){
+this->PresentTask="Checking Smart Control is still running...";
+	this->CmdString="sudo smartctl --a"
+		+this->path
+		+" | awk '/Self-test execution status:/' | awk '{pring substr($0,41,37)}'";
+		/*local TestStatus="$(sudo smartctl -a /dev/${1} | awk '/Self-test execution status:/' | awk '{print substr($0,41,37)}')";
+*/
+		
+	std::cout<<this->CmdString<<std::endl;
+	std::string output=StdOut(this->CmdString.c_str());
+	bool foutput=output=="running";
+	std::cout<<output<<foutput<<std::endl;
+	return foutput;
 }
 void HDD::smartctl_kill(){
 	this->PresentTask="Checking Smart Control...";

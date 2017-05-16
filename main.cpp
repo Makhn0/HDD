@@ -48,7 +48,7 @@ int main(int argc, char * argv[]){
 	///*	
 	std::thread * runner[DriveNum];
 	for(int i =0;i<DriveNum;i++){
-		runner[i]=new std::thread(HDD::run, HDDs[i],&BatchName);
+		runner[i]=new std::thread(&HDD::run, HDDs[i],&BatchName);
 		//runner[i]->join();
 	}
 	//*/
