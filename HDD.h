@@ -2,6 +2,7 @@
 #define HDD_h
 #include <iostream>
 #include <thread>
+#include <time.h>
 typedef void (*Proc)(std::string);
 // type Proc to be used in run to make code pretier/better
 class HDD{
@@ -32,17 +33,18 @@ class HDD{
 		std::string Exception="none";
 		std::string CmdString;
 		static int instances;
-		int RunTime;
+		long StartTime;
+		long RunTime;
 		///* learn how to make constructor in src
-		HDD(std::string path1){
-			
-			this->path=path1;
-			this->RunTime=0;
+		HDD(std::string path1) : path(path1),StartTime(time(0)){
 			instances++;
 		}
 		//*/
 		~HDD(){
 			instances--;
+		}
+		void UpdateRunTime(){
+			RunTime=time(0)-StartTime;
 		}
 		void count();
 		std::thread * count_thread();
@@ -56,7 +58,8 @@ class HDD{
 		void hash_check(std::string*);
 		void erase();
 		void partition();
-		
+		void verify();
+		void log(std::string*);
 		void print();
 		
 		void run_body(std::string*);

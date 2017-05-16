@@ -53,16 +53,14 @@ void HDD::run_body(std::string* batch){
 	{
 		
 		/* follwing code will produce warnings and idgaf*/
-		this->PresentTask="waiting to detect...";
-		//std::thread* cnt=this->count_thread();
+		PresentTask="waiting to detect...";
+		while( !(presence()) ){} //waits for detection use interrupt?
 		//*
-		while( !(this->presence()) ){} //waits for detection use interrupt?
+		get_data();
+		if(!presence()){continue;}
 		//*
-		this->get_data();
-		if(!this->presence()){continue;}
-		//*
-		this->smartctl_run();
-		if(!this->presence()){continue;}
+		smartctl_run();
+		if(!presence()){continue;}
 		/*
 		this-smartctl_kill();//just testing exclude in final buildS
 		if(!this->presence()){continue;}
@@ -81,19 +79,17 @@ void HDD::run_body(std::string* batch){
 		/*
 		//this->partition();
 		//this->verify(); //undeclared
-		this->PresentTask="done,";
-		//delete cnt;//->terminate();
-		//cnt->join();
-		//*/
-		while(this->presence()){}//waiting for it to be unplugged
 		
+		*/
+		PresentTask="done,";
+		while(presence()){}//waiting for it to be unplugged
 	}
 }
 void HDD::run(std::string* batch){
 	//this->ProcQ=(Proc*) malloc(1);
 	//this->ProcQ[0]=(Proc) this->get_data;
 	try{
-		this->run_body(batch);
+		run_body(batch);
 	}
 	catch(std::string e){
 		std::cout<<e<<std::endl;	
@@ -102,17 +98,8 @@ void HDD::run(std::string* batch){
 	}
 	
 }
-std::thread * HDD::count_thread(){
-	std::thread* cnt=new std::thread(&HDD::count,this);
-	return cnt;
-}
-void HDD::count(){
-	while(true){
-		this->RunTime+=2;
-		std::this_thread::sleep_for	(std::chrono::milliseconds(500));
-	}
-}
 void HDD::print(){
+	UpdateRunTime();
 	this->Model= StdOut("echo solid as a rock");
 	/* //printf not as cool as I thought :(
 	printf("Smart Control Support: %B",this->SmartSupport);

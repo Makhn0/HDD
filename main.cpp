@@ -14,10 +14,10 @@ void print(HDD * HDDs[], int length){
 	std::cout<<"EraseCmd: "<<EraseCmd<<std::endl<<std::endl;
 	std::cout<<"#################################################\n\n";
 	for(int i=0;i<length;i++){
-			if(HDDs[i]->Present){	
+	//		if(HDDs[i]->Present){	
 			HDDs[i]->print();
 			std::cout<<"___________________________"<<std::endl;
-			}	
+	//		}	
 	}
 	std::cout<<"total HDDs  : "<<HDD::instances<<std::endl;
 }
