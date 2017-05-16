@@ -8,7 +8,7 @@ HDD.o : HDD.cpp
 main.o : main.cpp
 	$(CC) -c $(CPFLAGS) main.cpp	
 run : bwipe.exe
-	bwipe.exe
+	bwipe.exe ${args}
 edit :
 	notepad++ main.cpp
 	notepad++ HDD.cpp
@@ -19,11 +19,9 @@ clean:
 	del *.o
 	del bwipe.exe
 	del bwipe.out
-	
 test:
 	$(CC) -o test.exe test.cpp
 open-test:
 	notepad++ test.cpp
 linux:
-#	$2 I'm only gussing this will work
-	make -f makefile-linux ${arg}
+	make -f makefile-linux ${args}

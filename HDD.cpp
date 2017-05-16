@@ -58,32 +58,32 @@ void HDD::run_body(std::string* batch){
 		//*
 		get_data();
 		if(!presence()){continue;}
-		/*
+		//*
 		smartctl_run();
 		while(smartctl_running()){
 		if(!presence()){continue;}
 		sleep(100);		
 		}
-		/*
-		this-smartctl_kill();//just testing exclude in final buildS
-		if(!this->presence()){continue;}
 		//*
+		this->smartctl_kill();//just testing exclude in final buildS
+		if(!this->presence()){continue;}
+		/*
 		this->dd_write(batch);
 		if(!this->presence()){continue;}
 		//*
 		this->dd_read(batch);
 		if(!this->presence()){continue;}
-		/*
+		//*
 		this->hash_check(batch);
 		if(!this->presence()){continue;}
-		/*
+		//*
 		//this->erase();
 		if(!this->presence()){continue;}
-		/*
+		//*
 		//this->partition();
 		//this->verify(); //undeclared
 		
-		*/
+		//*/
 		PresentTask="done,";
 		while(presence()){}//waiting for it to be unplugged
 	}
@@ -127,6 +127,7 @@ void HDD::print(){
 	std::cout<<"Present Task: "<<this->PresentTask<<std::endl;
 	std::cout<<"Last/Current Command :" << this->CmdString<<std::endl;
 	std::cout<<"Run Time: "<<this->RunTime<<std::endl;
+	std::cout<<"Last Output : "<<this->LastOutput<<std::endl;
 	//*/
 }
 bool HDD::presence(){
@@ -184,6 +185,13 @@ void HDD::get_data(){
 
 void HDD::smartctl_run(){
 	this->smartctl_kill();
+	Command(
+		"sudo smartctl --device=auto --smart=on --saveauto=on --tolerance=normal --test=long "
+		+ this->path
+		+" 1>/dev/null"
+		,"Running Smart Control..."
+		);
+	/*
 	this->PresentTask="Running Smart Control...";
 	this->CmdString="sudo smartctl --device=auto --smart=on --saveauto=on --tolerance=normal --test=long "
 		+ this->path
@@ -192,41 +200,54 @@ void HDD::smartctl_run(){
 	//*
 	std::cout<<this->CmdString<<std::endl;
 	std::cout<<StdOut(this->CmdString.c_str());
-	/*	/
+	/* 
 	if( system( this->CmdString.c_str()  )){
 		throw (std::string) "smartctl error";
 	}
 	*/
 }
 bool HDD::smartctl_running(){
-this->PresentTask="Checking Smart Control is still running...";
+	Command("sudo smartctl --a"
+		+this->path
+		+" | awk '/Self-test execution status:/' | awk '{pring substr($0,41,37)}'"
+		,"Checking Smart Control is still running..."
+		);
+	/*
+	this->PresentTask="Checking Smart Control is still running...";
 	this->CmdString="sudo smartctl --a"
 		+this->path
 		+" | awk '/Self-test execution status:/' | awk '{pring substr($0,41,37)}'";
 		/*local TestStatus="$(sudo smartctl -a /dev/${1} | awk '/Self-test execution status:/' | awk '{print substr($0,41,37)}')";
-*/
-		
-	std::cout<<this->CmdString<<std::endl;
-	std::string output=StdOut(this->CmdString.c_str());
-	bool foutput=output=="running";
-	std::cout<<output<<foutput<<std::endl;
+	*/
+	bool foutput=LastOutput=="running";
+	std::cout<<LastOutput<<foutput<<std::endl;
 	return foutput;
 }
 void HDD::smartctl_kill(){
+	Command("sudo smartctl -X "
+		+this->path
+		,"Checking Smart Control...");
+	/*
 	this->PresentTask="Checking Smart Control...";
 	this->CmdString="sudo smartctl -X "+this->path
 		//+" 1>/dev/null"
 	;
-	//*
+	/*
 	std::cout<<this->CmdString<<std::endl;
 	std::cout<<StdOut(this->CmdString);
-	/*/
+	/*
 	if(system(this->CmdString.c_str() )){
 		throw (std::string) "smartct kill error";
 	}
 	//*/
 }
 void HDD::dd_write(std::string* batch){
+	Command("sudo dd if=/dev/urandom of=/tmp/"
+		+*batch
+		+"_File.dd count=100KB 1>/dev/null"
+		,"Writing With dd..."
+		);
+	/*
 	this->PresentTask="Writing With dd...";
 	this->CmdString="sudo dd if=/dev/urandom of=/tmp/"
 		+*batch
@@ -234,23 +255,39 @@ void HDD::dd_write(std::string* batch){
 	//*
 	std::cout<<this->CmdString<<std::endl;
 	std::cout<<StdOut(this->CmdString);
-	/*/
+	/*
+	if(system(this->CmdString.c_str())){
+		throw (std::string) "smartctl error";
+	}
+	*/
+	Command("sudo dd if=/tmp/"+*batch+"_File.dd of=/dev/"
+		+this->path
+		+" count=100KB 1>/dev/null");
+	/*
+	this->CmdString="sudo dd if=/tmp/"+*batch+"_File.dd of=/dev/"
+		+this->path
+		+" count=100KB 1>/dev/null";
+	/*
+	if(system(this->CmdString.c_str())){
+		throw (std::string) "sdd write error";
+	}
+	std::cout<<this->CmdString<<std::endl;
+	std::cout<<StdOut(this->CmdString);
+	/*
 	if(system(this->CmdString.c_str())){
 		throw (std::string) "smartctl error";
 	}
 	/*/
-	std::cout<<this->CmdString<<std::endl;
-	std::cout<<StdOut(this->CmdString);
-	/*/
-	this->CmdString="sudo dd if=/tmp/"+*batch+"_File.dd of=/dev/"
-		+this->path
-		+" count=100KB 1>/dev/null";
-	if(system(this->CmdString.c_str())){
-		throw (std::string) "sdd write error";
-	}
-	//*/
 }
 void HDD::dd_read(std::string* batch){
+	Command("sudo dd if=/dev/"
+		+this->path
+		+" of=/tmp/"
+		+*batch
+		+"_FileRead.dd count=100KB "
+	,"Reading With dd..."
+	);
+	/*
 	this->PresentTask="Reading With dd...";
 	this->CmdString="sudo dd if=/dev/"
 		+this->path
@@ -262,22 +299,28 @@ void HDD::dd_read(std::string* batch){
 	//*
 	std::cout<<this->CmdString<<std::endl;
 	std::cout<<StdOut(this->CmdString);
-	/*/
+	/*
 	if(system(this->CmdString.c_str())){	
 		throw (std::string) "dd read error";
 	}
 	//*/
 }
 void HDD::hash_check(std::string* batch){
-	this->PresentTask="Checking Hash...";
-	this->CmdString="md5sum /tmp/"
+	Command("md5sum /tmp/"
 		+*batch
-		+"_File.dd |awk '{print substr($0,0,32)}')";
-	std::string MainHash= StdOut(this->CmdString);
+		+"_File.dd |awk '{print substr($0,0,32)}')"
+		,"Checking Hash...");
+	std::string MainHash= LastOutput;
+	/*
 	this->CmdString="md5sum /tmp/"
 		+*batch 
-		+"_FileRead.dd |awk '{print substr($0,0,32)}')";
-	std::string ReadHash= StdOut(this->CmdString);
+		+"_FileRead.dd |awk '{print substr($0,0,32)}')";*/
+	Command(
+	"md5sum /tmp/"
+		+*batch 
+		+"_FileRead.dd |awk '{print substr($0,0,32)}')"
+	);
+	std::string ReadHash= LastOutput;
 	if(MainHash!=ReadHash){
 		throw (std::string) "hash rw failure";
 	}
@@ -286,6 +329,18 @@ void HDD::hash_check(std::string* batch){
 	}
 }
 void HDD::erase(){
+//	/*
+	Command(
+	"sudo ./nwipe --autonuke --nogui --method=zero  "
+		+this->path
+		+ "1>/dev/null "
+		,"Erasing With Nwipe..."
+	);/*)
+		"sudo ./nwipe --autonuke --nogui --method=zero  "
+		+this->path
+		+ "1>/dev/null "*/
+		
+	/*
 	this->PresentTask="Erasing With Nwipe..." ;
 	this->CmdString="sudo ./nwipe --autonuke --nogui --method=zero  "
 		+this->path
@@ -293,6 +348,7 @@ void HDD::erase(){
 	//*
 	std::cout<<this->CmdString<<std::endl;
 	std::cout<<StdOut(this->CmdString);
+	//*/
 	/*/
 	if(system(this->CmdString.c_str())){
 		throw (std::string) "nwipe error";
@@ -300,12 +356,17 @@ void HDD::erase(){
 	//*/
 }
 void HDD::partition(){
+	Command(
+		"sudo smar...  wait I'm skipping you anyway"
+		,"Partitioning Drives..."
+	);
+	/*
 	this->PresentTask="Partitioning Drives...";
 	this->CmdString="sudo smar...  wait I'm skipping you anyway";
-	//*
+	/*
 	std::cout<<this->CmdString<<std::endl;
 	std::cout<<StdOut(this->CmdString);
-	/*/
+	/*
 	if(system(this->CmdString.c_str())){
 		throw (std::string) "partitioning error";
 	}
@@ -324,4 +385,14 @@ void HDD::reset(){
 	this->UserCapacity="";
 	this->RunTime=0;
 	this->size=0;
+}
+void HDD::Command(std::string a){
+	this->CmdString=a;
+	this->LastOutput=StdOut(this->CmdString);
+	std::cout<<this->CmdString<<std::endl;
+	std::cout<<this->LastOutput<<std::endl;	
+}
+void HDD::Command(std::string a,std::string b  ){
+	this->PresentTask=b;
+	Command(a);
 }

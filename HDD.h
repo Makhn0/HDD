@@ -21,8 +21,10 @@ class HDD{
 		bool Present;
 		bool Running;
 		// bool getting data
-			
+		
+		
 		bool SmartSupport=false;
+		std::string LastOutput;
 		std::string Model;
 		std::string ModelFamily;
 		std::string SerialNumber;
@@ -35,7 +37,7 @@ class HDD{
 		static int instances;
 		long StartTime;
 		long RunTime;
-		///* learn how to make constructor in src
+		///* learn how to make constructor in src*/
 		HDD(std::string path1) : path(path1),StartTime(time(0)){
 			instances++;
 		}
@@ -46,13 +48,15 @@ class HDD{
 		void UpdateRunTime(){
 			RunTime=time(0)-StartTime;
 		}
+		void Command(std::string a,std::string b);
+		void Command(std::string a);
 		void count();
 		std::thread * count_thread();
 		
 		bool presence();
 		void get_data();
 		void smartctl_run();
-		bool smartctl_running();
+/**/	bool smartctl_running();
 		void smartctl_kill();
 		void dd_write(std::string*);
 		void dd_read(std::string*);

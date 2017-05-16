@@ -31,7 +31,7 @@ void contPrint(HDD * HDDs[], int length)
 }
 int main(int argc, char * argv[]){
 	if(argv[1]){
-		//BatchName=*argv[1];
+		BatchName=argv[1];
 	}
 	int DriveNum=1;//max number of drives
 	std::cout<< "making dev path prefix =";
@@ -51,25 +51,14 @@ int main(int argc, char * argv[]){
 		runner[i]=new std::thread(&HDD::run, HDDs[i],&BatchName);
 		//runner[i]->join();
 	}
-	//*/
-	/*
-	try{
-		throw ((std::string) "name");
-	}
-	catch(std::string e){
-		std::cout<<e<<std::endl;
-		HDDs[0]->Exception=e;
-	}
-	//*/
+	//*
 	std::cout<<"here"<<std::endl;
 	std::thread * printer= new std::thread(&contPrint,HDDs,1);
 	printer->join();
-	
 //just in case threads don't exit when main does
 	for(int i =0;i<DriveNum;i++){
 		//runner[i]=new std::thread(&HDD::run,HDDs[i],&BatchName);
 		runner[i]->join();
 	}
-	
 	return 0;
 }
