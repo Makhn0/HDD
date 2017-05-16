@@ -51,16 +51,16 @@ class HDD{
 		void get_data();
 		void smartctl_run();
 		void smartctl_kill();
-		void dd_write(std::string);
-		void dd_read(std::string);
-		void hash_check(std::string);
+		void dd_write(std::string*);
+		void dd_read(std::string*);
+		void hash_check(std::string*);
 		void erase();
 		void partition();
 		
 		void print();
 		
-		void run_body(std::string);
-		void run(std::string);
+		void run_body(std::string*);
+		void run(std::string*);
 		void reset();
 		Proc * ProcQ;
 		

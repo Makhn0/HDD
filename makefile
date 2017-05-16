@@ -7,13 +7,13 @@ HDD.o : HDD.cpp
 	$(CC) -c $(CPFLAGS) HDD.cpp
 main.o : main.cpp
 	$(CC) -c $(CPFLAGS) main.cpp	
-run : main.exe
+run : bwipe.exe
 	bwipe.exe
 edit :
 	notepad++ main.cpp
 	notepad++ HDD.cpp
 	notepad++ HDD.h
-all:open
+all:edit
 	notepad++ makefile
 clean:
 	del *.o
@@ -25,5 +25,5 @@ test:
 open-test:
 	notepad++ test.cpp
 linux:
-#	I'm only gussing this will work
-	make -f makefile-linux
+#	$2 I'm only gussing this will work
+	make -f makefile-linux ${arg}
