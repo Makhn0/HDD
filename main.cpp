@@ -53,8 +53,8 @@ int main(int argc, char * argv[]){
 	}
 	//*
 	std::cout<<"here"<<std::endl;
-	std::thread * printer= new std::thread(&contPrint,HDDs,1);
-	printer->join();
+	//std::thread * printer= new std::thread(&contPrint,HDDs,1);
+	//printer->join();
 //just in case threads don't exit when main does
 	for(int i =0;i<DriveNum;i++){
 		//runner[i]=new std::thread(&HDD::run,HDDs[i],&BatchName);
