@@ -62,12 +62,12 @@ void HDD::run_body(std::string* batch){
 		smartctl_run();
 		while(smartctl_running()){
 		if(!presence()){continue;}
-		sleep(100);		
+		sleep(10);		
 		}
 		//*
-		this->smartctl_kill();//just testing exclude in final buildS
+		//this->smartctl_kill();//just testing exclude in final buildS
 		if(!this->presence()){continue;}
-		/*
+		//*
 		this->dd_write(batch);
 		if(!this->presence()){continue;}
 		//*
@@ -77,7 +77,7 @@ void HDD::run_body(std::string* batch){
 		this->hash_check(batch);
 		if(!this->presence()){continue;}
 		//*
-		//this->erase();
+		this->erase();
 		if(!this->presence()){continue;}
 		//*
 		//this->partition();
@@ -179,19 +179,26 @@ void HDD::smartctl_run(){
 	Command(
 		"sudo smartctl --device=auto --smart=on --saveauto=on --tolerance=normal --test=long "
 		+ this->path
-		+" 1>/dev/null"
+		//+" 1>/dev/null"
 		,"Running Smart Control..."
 		);
 }
+
 bool HDD::smartctl_running(){
-	Command("sudo smartctl --a"
+	Command("sudo smartctl -a "
 		+this->path
-		+" | awk '/Self-test execution status:/' | awk '{pring substr($0,41,37)}'"
+		+" | awk '/Self-test execution status:/' "
+		+"| awk '{print substr($0,35,4)}'"
 		,"Checking Smart Control is still running..."
 		);
-	bool foutput=LastOutput=="running";
-	std::cout<<LastOutput<<foutput<<std::endl;
-	return foutput;
+	bool done=LastOutput=="   0\n";
+	std::cout<<"LastOutput : "<<LastOutput<<std::endl;
+	std::cout<<!done<<std::endl;
+	if (done) return !done;
+	if (LastOutput[0]==' '&&LastOutput[1]=='2'&& LastOutput[2]=='4'){
+		return !done;
+	}
+		throw (std::string) "smartctl error";
 }
 void HDD::smartctl_kill(){
 	Command("sudo smartctl -X "
@@ -201,15 +208,18 @@ void HDD::smartctl_kill(){
 void HDD::dd_write(std::string* batch){
 	Command("sudo dd if=/dev/urandom of=/tmp/"
 		+*batch
-		+"_File.dd count=100KB 1>/dev/null"
+		+"_File.dd count=100KB "
+		//+"1>/dev/null"
 		,"Writing With dd..."
 		);
-	Command("sudo dd if=/tmp/"+*batch+"_File.dd of=/dev/"
+	Command("sudo dd if=/tmp/"+*batch+"_File.dd of="
 		+this->path
-		+" count=100KB 1>/dev/null");
+		+" count=100KB "
+		//+"1>/dev/null"
+		);
 }
 void HDD::dd_read(std::string* batch){
-	Command("sudo dd if=/dev/"
+	Command("sudo dd if="
 		+this->path
 		+" of=/tmp/"
 		+*batch
@@ -237,11 +247,10 @@ void HDD::hash_check(std::string* batch){
 	}
 }
 void HDD::erase(){
-
 	Command(
-	"sudo ./nwipe --autonuke --nogui --method=zero  "
+	"sudo ./nwipe --autonuke --nogui --method=zero "
 		+this->path
-		+ "1>/dev/null "
+		//+ "1>/dev/null "
 		,"Erasing With Nwipe..."
 	);
 }
