@@ -180,7 +180,7 @@ void HDD::get_data(){
 		+" | awk '/User Capacity:/' | awk '{print substr($0,19,20)}'"
 	);
 	this->size= myStol(this->UserCapacity);
-	printf("%s Smart Support %s\n",this->path.c_str(),(this->SmartSupport)?"enabled":"disabled");
+	printf("%s Smart Support %s\n",this->path.c_str(),this->SmartSupport);
 	printf("%s ModelFamily: %s\n",this->path.c_str(),this->ModelFamily.c_str());
 	printf("%s Model %s\n",this->path.c_str(),this->Model.c_str());
 	printf("%s Serial Number %s\n",this->path.c_str(),this->SerialNumber.c_str());
