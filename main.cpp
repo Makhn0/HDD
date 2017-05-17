@@ -16,7 +16,7 @@ void print(HDD * HDDs[], int length){
 	for(int i=0;i<length;i++){
 	//		if(HDDs[i]->Present){	
 			HDDs[i]->print();
-			std::cout<<"___________________________"<<std::endl;
+			std::cout<<"___________________________________________\n_"<<std::endl;
 	//		}	
 	}
 	std::cout<<"total HDDs  : "<<HDD::instances<<std::endl;
