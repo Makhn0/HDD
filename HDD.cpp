@@ -66,7 +66,7 @@ void HDD::run_body(std::string* batch){
 		
 		/* follwing code will produce warnings and idgaf*/
 		PresentTask="waiting to detect...";
-		while( !(presence()) ){} //waits for detection use interrupt?
+		while( !(presence()) ){Sleep(5);} //waits for detection use interrupt?
 		//*
 		get_data();
 		if(!presence()){continue;}
@@ -98,7 +98,9 @@ void HDD::run_body(std::string* batch){
 		//*/
 		PresentTask="done,";
 		std::cout<<"end of run, waiting"<<std::endl;
-		while(presence()){}//waiting for it to be unplugged
+		while(presence()){
+			Sleep(1000);
+		}//waiting for it to be unplugged
 	}
 }
 void HDD::run(std::string* batch){
