@@ -233,7 +233,7 @@ void HDD::dd_read(std::string* batch){
 		+" of=/tmp/"
 		+*batch
 		+"_FileRead.dd count=100KB "
-	,"Reading With dd..."
+		,"Reading With dd..."
 	);
 }
 void HDD::hash_check(std::string* batch){
@@ -280,3 +280,4 @@ void HDD::reset(){
 	this->RunTime=0;
 	this->size=0;
 }
+
