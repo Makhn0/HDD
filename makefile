@@ -1,4 +1,4 @@
-CPFLAGS = --std=c++0x -Wall
+CPFLAGS=--std=c++0x -pthread -Wall
 os=NT
 
 #ifeq($(os),"NT")
@@ -13,7 +13,7 @@ BinName:=ewhde
 del:=sudo rm
 endif
 $(BinName): main.o HDD.o
-	$(CXX) -o $(BinName) $(CPFlAGS) main.o HDD.o
+	$(CXX) $(CPFLAGS) -o $(BinName)  main.o HDD.o
 HDD.o : HDD.cpp
 	$(CXX) -c $(CPFLAGS) HDD.cpp
 main.o : main.cpp
