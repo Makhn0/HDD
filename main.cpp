@@ -9,14 +9,14 @@ std::string BatchName="may1";
 std::string EraseCmd="nwipe";
 
 void print(HDD * HDDs[], int length){
-	std::cout<<"HDD's are erasing \n";
+	std::cout<<"Welcome to Eric's Wonderful Hard Drive Eraser !!! :D \n";
 	std::cout<<"BatchName : "<<BatchName<<std::endl;
 	std::cout<<"EraseCmd: "<<EraseCmd<<std::endl<<std::endl;
 	std::cout<<"#################################################\n\n";
 	for(int i=0;i<length;i++){
 	//		if(HDDs[i]->Present){	
 			HDDs[i]->print();
-			std::cout<<"___________________________________________\n_"<<std::endl;
+			std::cout<<"___________________________________________\n"<<std::endl;
 	//		}	
 	}
 	std::cout<<"total HDDs  : "<<HDD::instances<<std::endl;
@@ -33,31 +33,23 @@ int main(int argc, char * argv[]){
 	if(argv[1]){
 		BatchName=argv[1];
 	}
-	int DriveNum=1;//max number of drives
+	const int DriveNum=4;
 	std::cout<< "making dev path prefix =";
 	std::string devPath="/dev/sd";
 	puts(devPath.c_str());
-
-	HDD * HDDs[1];
-	HDDs[0]= new HDD(devPath+'a');
-	/*
-	//HDDs[1]= new HDD(devPath+'b');
-	//HDDs[2]= new HDD("/dev/sdc");
-	//HDDs[3]= new HDD("/dev/sdd");
-	//*/
-	///*	
+	
+	std::string a;
+	HDD * HDDs[DriveNum];
 	std::thread * runner[DriveNum];
 	for(int i =0;i<DriveNum;i++){
+		HDDs[i]= new HDD(devPath+(char)('a'+i));
 		runner[i]=new std::thread(&HDD::run, HDDs[i],&BatchName);
-		//runner[i]->join();
 	}
-	//*
+
 	std::cout<<"here"<<std::endl;
-	//std::thread * printer= new std::thread(&contPrint,HDDs,1);
-	//printer->join();
-//just in case threads don't exit when main does
+	std::thread * printer= new std::thread(&contPrint,HDDs,DriveNum);
+	printer->join();
 	for(int i =0;i<DriveNum;i++){
-		//runner[i]=new std::thread(&HDD::run,HDDs[i],&BatchName);
 		runner[i]->join();
 	}
 	return 0;

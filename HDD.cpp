@@ -63,10 +63,8 @@ void HDD::run_body(std::string* batch){
 	std::cout<<"running "<< this->path<<std::endl;
 	while(1)
 	{
-		
-		/* follwing code will produce warnings and idgaf*/
 		PresentTask="waiting to detect...";
-		while( !(presence()) ){Sleep(5);} //waits for detection use interrupt?
+		while( !(presence()) ){sleep(5);} //waits for detection use interrupt?
 		//*
 		get_data();
 		if(!presence()){continue;}
@@ -79,28 +77,19 @@ void HDD::run_body(std::string* batch){
 		//*/
 		//this->smartctl_kill();//just testing exclude in final buildS
 		if(!this->presence()){continue;}
-		//*
 		this->dd_write(batch);
 		if(!this->presence()){continue;}
-		//*
 		this->dd_read(batch);
 		if(!this->presence()){continue;}
-		//*
 		this->hash_check(batch);
 		if(!this->presence()){continue;}
-		//*
 		this->erase();
 		if(!this->presence()){continue;}
-		//*
-		//this->partition();
-		//this->verify(); //undeclared
-		
-		//*/
 		PresentTask="done,";
 		std::cout<<"end of run, waiting"<<std::endl;
 		while(presence()){
-			Sleep(1000);
-		}//waiting for it to be unplugged
+			sleep(1000);
+		}
 	}
 }
 void HDD::run(std::string* batch){
@@ -118,23 +107,22 @@ void HDD::run(std::string* batch){
 }
 void HDD::print(){
 	UpdateRunTime();
-	this->Model= StdOut("echo solid as a rock");
-	/* //printf not as cool as I thought :(
-	printf("Status of: %13s",this->path.c_str());
-	printf("Presence : %13s",((this->Present)?"detected":"undetected").c_str());)
-	printf("Smart Control Support: %s",(this->SmartSupport?"True":"False").c_str());
-	printf("Model Family: %10s",this->ModelFamily.c_str());
-	printf("Model: %20s",this->Model.c_str());
-	printf("Serial: %17s",this->SerialNumber.c_str());
-	printf("User Capacity: %15s",this->UserCapacity.c_str());
-	printf("Last Exception: %17s",this->Exception.c_str());
-	printf("Present Tack: %20s",this->PresentTask.c_str());
-	printf("Last/Current Command: %s",this->CmdString.c_str());
-	printf("RunTime: %15d",this->RunTime);
+	//*
+	printf("Status of: %-18s\n",this->path.c_str());
+	printf("Presence : %20s\n",((this->Present)?"detected":"undetected"));
+	printf("Smart Control Support: %s\n",(this->SmartSupport?"True":"False"));
+	printf("Model Family: %10s\n",this->ModelFamily.c_str());
+	printf("Model: %20s\n",this->Model.c_str());
+	printf("Serial: %17s\n",this->SerialNumber.c_str());
+	printf("User Capacity: %15s\n",this->UserCapacity.c_str());
+	printf("Last Exception: %15s\n",this->Exception.c_str());
+	printf("Present Tack: %20s\n",this->PresentTask.c_str());
+	printf("Last/Current Command: %s\n",this->CmdString.c_str());
+	printf("RunTime: %15ld\n",this->RunTime);
 	printf("Last Output : %30s\n",this->LastOutput.c_str() );
 	/*/
 	std::cout<<"Status of: "<<this->path<<std::endl;
-	std::cout<<"Presence :    "<<((this->Present)?"detected":"undetected")/*<<this->Present*/<<std::endl;
+	std::cout<<"Presence :    "<<((this->Present)?"detected":"undetected")<<std::endl;
 	std::cout<<"Smart Support: "<<(this->SmartSupport?"available":"unavailable")<<std::endl;
 	std::cout<<"Model Family: "<<this->ModelFamily<<std::endl;
 	std::cout<<"Model  : "<<this->Model;//<<std::endl;

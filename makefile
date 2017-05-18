@@ -1,27 +1,36 @@
 CPFLAGS = --std=c++0x -Wall
-CC= g++
-editor=notepad++
-bwipe.exe: main.o HDD.o
-	$(CC) -o bwipe.exe $(CPFlAGS) main.o HDD.o
+os=NT
+
+#ifeq($(os),"NT")
+Editor:=notepad++
+BinName:=ewhde.exe
+del:=del
+#endif
+
+ifeq ($(os),linux)
+Editor:=gedit
+BinName:=ewhde
+del:=sudo rm
+endif
+$(BinName): main.o HDD.o
+	$(CXX) -o $(BinName) $(CPFlAGS) main.o HDD.o
 HDD.o : HDD.cpp
-	$(CC) -c $(CPFLAGS) HDD.cpp
+	$(CXX) -c $(CPFLAGS) HDD.cpp
 main.o : main.cpp
-	$(CC) -c $(CPFLAGS) main.cpp	
-run : bwipe.exe
-	bwipe.exe ${args}
+	$(CXX) -c $(CPFLAGS) main.cpp	
+run : $(BinName)
+	$(BinName) ${args}
 edit :
-	notepad++ main.cpp
-	notepad++ HDD.cpp
-	notepad++ HDD.h
+	$(Editor) main.cpp
+	$(Editor) HDD.cpp
+	$(Editor) HDD.h
 all:edit
-	notepad++ makefile
+	$(Editor) makefile
 clean:
-	del *.o
-	del bwipe.exe
-	del bwipe.out
+	$(del) *.o
+	$(del) $(BinName)
+
 test:
-	$(CC) -o test.exe test.cpp
+	$(CXX) -o test.exe test.cpp
 open-test:
-	notepad++ test.cpp
-linux:
-	make -f makefile-linux ${args}
+	$(Editor) test.cpp
