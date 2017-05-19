@@ -1,6 +1,7 @@
 #include "HDD.h"
 #include <stdio.h>
 #include <iostream>
+#include <fstream>
 #include <thread>
 #include <exception>
 #include <string>
@@ -65,7 +66,6 @@ void HDD::run_body(std::string* batch){
 	{
 		PresentTask="waiting to detect...";
 		while( !(presence()) ){sleep(5);} //waits for detection use interrupt?
-		//*
 		get_data();
 		if(!presence()){continue;}
 		/*
@@ -75,6 +75,11 @@ void HDD::run_body(std::string* batch){
 		sleep(10);		
 		}
 		//*/
+		
+		/*//read to disk section do not uncomment unless you want to kill all
+		//	disks on machine control-c won't save you.		
+		
+		
 		//this->smartctl_kill();//just testing exclude in final buildS
 		if(!this->presence()){continue;}
 		this->dd_write(batch);
@@ -83,8 +88,10 @@ void HDD::run_body(std::string* batch){
 		if(!this->presence()){continue;}
 		this->hash_check(batch);
 		if(!this->presence()){continue;}
-		this->erase();
+		break;
+		//this->erase();
 		if(!this->presence()){continue;}
+		*/
 		PresentTask="done,";
 		std::cout<<"end of run, waiting"<<std::endl;
 		while(presence()){
@@ -114,12 +121,13 @@ void HDD::print(){
 	printf("Model Family: %10s\n",this->ModelFamily.c_str());
 	printf("Model: %20s\n",this->Model.c_str());
 	printf("Serial: %17s\n",this->SerialNumber.c_str());
-	printf("User Capacity: %15s\n",this->UserCapacity.c_str());
+	printf("User Capacity: %15s\n\n",this->UserCapacity.c_str());
 	printf("Last Exception: %15s\n",this->Exception.c_str());
 	printf("Present Tack: %20s\n",this->PresentTask.c_str());
 	printf("Last/Current Command: %s\n",this->CmdString.c_str());
-	printf("RunTime: %15ld\n",this->RunTime);
 	printf("Last Output : %30s\n",this->LastOutput.c_str() );
+	printf("RunTime: %15ld\n",this->RunTime);
+
 	/*/
 	std::cout<<"Status of: "<<this->path<<std::endl;
 	std::cout<<"Presence :    "<<((this->Present)?"detected":"undetected")<<std::endl;
@@ -134,6 +142,25 @@ void HDD::print(){
 	std::cout<<"Run Time: "<<this->RunTime<<std::endl;
 	printf("Last Output : %30s\n",this->LastOutput.c_str() );
 	//*/
+}
+void HDD::log(std::string *batch){
+/*
+	all that stuff in print would be good minus present task
+
+*/
+	std::string data="look at me I'm mr mseeks";
+	const char * filename ="~/test";
+	std::cout<<"making object"<<std::endl;
+	std::fstream LogFile;
+	
+	std::cout<<"opening"<<std::endl;
+	LogFile.open ("~/test.txt");
+	std::cout<<LogFile.is_open()<<std::endl;
+	std::cout<<"writeing"<<std::endl;
+	LogFile<<data;
+	LogFile<<"literal\n";
+	std::cout<<"close"<<std::endl;
+	LogFile.close();
 }
 bool HDD::presence(){
 	this->Present=

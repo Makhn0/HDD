@@ -1,12 +1,12 @@
 CPFLAGS=--std=c++0x -pthread -Wall
-os=NT
+os=linux
 BinName:=ewhde
 BinNameC:=$(BinName)_C
-#ifeq($(os),"NT")
+ifeq ($(os),NT)
 Editor:=notepad++
 Ext=.exe
 del:=del
-#endif
+endif
 
 ifeq ($(os),linux)
 Editor:=gedit
@@ -15,7 +15,7 @@ del:=sudo rm
 endif
 
 $(BinName): main.o HDD.o
-	$(CXX) $(CPFLAGS) -o $(BinName)  main.o HDD.o
+	$(CXX) $(CPFLAGS) -o $(BinName) main.o HDD.o
 $(BinNameC): main.o HDD_C.o
 	$(CXX) $(CPFLAGS) -o $(BinNameC) main.o HDD_C.o
 HDD_C.o:HDD_C.cpp
@@ -36,7 +36,7 @@ edit :
 edit-all:edit
 	$(Editor) makefile
 	$(Editor) HDD_C.cpp
-clean:
+clean: 
 	$(del) *.o
 	$(del) $(BinName)
 run-all: 
@@ -44,7 +44,14 @@ run-all:
 	make edit-all
 	make run
 	echo "all running"
-
+install:
+	sudo cp ./$(BinName) /usr/bin/$(BinName)
+load:
+	#for use on server
+	sudo cp ./$(BinName) ~/$(BinName)
+	sudo ~/homeupdate.zsh
+update:
+	sudo git pull
 test:
 	$(CXX) -o test.exe test.cpp
 open-test:

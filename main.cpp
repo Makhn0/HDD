@@ -30,6 +30,10 @@ void contPrint(HDD * HDDs[], int length)
 	}
 }
 int main(int argc, char * argv[]){
+HDD * test= new HDD("/dev/sda");
+std::string in= "a";
+test->log(&in);
+/*
 	if(argv[1]){
 		BatchName=argv[1];
 	}
@@ -53,6 +57,6 @@ int main(int argc, char * argv[]){
 		runner[i]->join();
 	}
 
-
+*/
 	return 0;
 }
