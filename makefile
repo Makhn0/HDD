@@ -1,16 +1,14 @@
 CPFLAGS=--std=c++0x -pthread -Wall
-os=linux
+#os=linux
 BinName:=ewhde
 BinNameC:=$(BinName)_C
-ifeq ($(os),NT)
+ifeq ($(os),nt)
 Editor:=notepad++
-Ext=.exe
 del:=del
 endif
 
 ifeq ($(os),linux)
 Editor:=gedit
-BinName:=ewhde
 del:=sudo rm
 endif
 

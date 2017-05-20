@@ -1,12 +1,13 @@
 #include "HDD.h"
 #include <stdio.h>
-#include <iostream>
 #include <fstream>
+#include <ostream>
+#include <iostream>
+
 #include <thread>
 #include <exception>
 #include <string>
-#include <unistd.h>// for access in presense
-///*
+#include <unistd.h>
 int HDD::instances;
 
 /* // might be more usefull than throwing strings
@@ -14,7 +15,6 @@ struct Exception : public exception{
 	const char * what() const throw(){
 		return "C++";
 	}
-	
 }
 */
 std::string StdOut(std::string cmd);
@@ -29,17 +29,14 @@ void HDD::Command(std::string a){
 	std::cout<<"LastOutput:"<<this->LastOutput<<std::endl;	
 }
 std::string StdOut(std::string cmd) {
-	// doesn't return exit status?
     std::string data;
     FILE * stream;
     const int max_buffer = 256;
     char buffer[max_buffer];
-    //cmd.append(" 2>&1"); // Do we want STDERR?
-
     stream = popen(cmd.c_str(), "r");
-    if (stream) {
-        while (!feof(stream))
-            if (fgets(buffer, max_buffer, stream) != NULL) data.append(buffer);
+    if(stream) {
+        while(!feof(stream))
+            if(fgets(buffer, max_buffer, stream) != NULL) data.append(buffer);
         pclose(stream);
     }
     return data;
@@ -49,7 +46,6 @@ long myStol(std::string a){
 	const char * data =a.c_str();
 	for(unsigned int i=0;i<a.length();i++)
 	{// unisigned to avoid warning. i guess its bad.
-		//std::cout<<data[i]<< (int) data[i]<<std::endl;
 		if (data[i]>47 && data[i]<58){
 			output*=10;
 			output += (long)(data[i]-48);
@@ -58,28 +54,39 @@ long myStol(std::string a){
 	}
 	return output;
 }
-//*/
-
+void HDD::reset(){
+	this->SmartSupport=false;
+	this->Present=false;
+	this->Exception="none";
+	this->SerialNumber="";
+	this->Model="";
+	this->ModelFamily="";
+	this->UserCapacity="";
+	this->StartTime=time(0);
+	this->RunTime=0;
+	this->size=0;
+}
 void HDD::run_body(std::string* batch){
 	std::cout<<"running "<< this->path<<std::endl;
 	while(1)
 	{
 		PresentTask="waiting to detect...";
-		while( !(presence()) ){sleep(5);} //waits for detection use interrupt?
+		while( !(presence()) ){sleep(5);}
 		get_data();
 		if(!presence()){continue;}
-		/*
 		smartctl_run();
+		bool a=false;
 		while(smartctl_running()){
-		if(!presence()){continue;}
-		sleep(10);		
+			if(!presence()){
+				a=true;
+				break;
+			}
+			sleep(10);		
 		}
+		if(a) continue;
 		//*/
-		
-		/*//read to disk section do not uncomment unless you want to kill all
+		/*read to disk section do not uncomment unless you want to kill all
 		//	disks on machine control-c won't save you.		
-		
-		
 		//this->smartctl_kill();//just testing exclude in final buildS
 		if(!this->presence()){continue;}
 		this->dd_write(batch);
@@ -92,16 +99,16 @@ void HDD::run_body(std::string* batch){
 		//this->erase();
 		if(!this->presence()){continue;}
 		*/
+		this->EndTime=time(0);
 		PresentTask="done,";
 		std::cout<<"end of run, waiting"<<std::endl;
+		log(batch);
 		while(presence()){
 			sleep(1000);
 		}
 	}
 }
 void HDD::run(std::string* batch){
-	//this->ProcQ=(Proc*) malloc(1);
-	//this->ProcQ[0]=(Proc) this->get_data;
 	try{
 		run_body(batch);
 	}
@@ -110,11 +117,10 @@ void HDD::run(std::string* batch){
 		this->Exception= e;
 		throw e;
 	}
-	
 }
-void HDD::print(){
+void HDD::print(std::ostream* textgohere){
 	UpdateRunTime();
-	//*
+	/*
 	printf("Status of: %-18s\n",this->path.c_str());
 	printf("Presence : %20s\n",((this->Present)?"detected":"undetected"));
 	printf("Smart Control Support: %s\n",(this->SmartSupport?"True":"False"));
@@ -127,40 +133,36 @@ void HDD::print(){
 	printf("Last/Current Command: %s\n",this->CmdString.c_str());
 	printf("Last Output : %30s\n",this->LastOutput.c_str() );
 	printf("RunTime: %15ld\n",this->RunTime);
-
 	/*/
-	std::cout<<"Status of: "<<this->path<<std::endl;
-	std::cout<<"Presence :    "<<((this->Present)?"detected":"undetected")<<std::endl;
-	std::cout<<"Smart Support: "<<(this->SmartSupport?"available":"unavailable")<<std::endl;
-	std::cout<<"Model Family: "<<this->ModelFamily<<std::endl;
-	std::cout<<"Model  : "<<this->Model;//<<std::endl;
-	std::cout<<"Serial : "<<this->SerialNumber<<std::endl;
-	std::cout<<"User Capacity: "<<this->UserCapacity<<std::endl;
-	std::cout<<"Last Exception : "<<this->Exception<<std::endl;
-	std::cout<<"Present Task: "<<this->PresentTask<<std::endl;
-	std::cout<<"Last/Current Command :" << this->CmdString<<std::endl;
-	std::cout<<"Run Time: "<<this->RunTime<<std::endl;
-	printf("Last Output : %30s\n",this->LastOutput.c_str() );
-	//*/
+	*textgohere<<"Status of: "<<this->path<<std::endl;
+	*textgohere<<"Presence :    "<<((this->Present)?"detected":"undetected")<<std::endl;
+	*textgohere<<"Smart Support: "<<(this->SmartSupport?"available":"unavailable")<<std::endl;
+	*textgohere<<"Model Family: "<<this->ModelFamily<<std::endl;
+	*textgohere<<"Model  : "<<this->Model;//<<std::endl;
+	*textgohere<<"Serial : "<<this->SerialNumber<<std::endl;
+	*textgohere<<"User Capacity: "<<this->UserCapacity<<std::endl;
+	*textgohere<<"Last Exception : "<<this->Exception<<std::endl;
+	*textgohere<<"Present Task: "<<this->PresentTask<<std::endl;
+	*textgohere<<"Last/Current Command :" << this->CmdString<<std::endl;
+	*textgohere<<"Last Output "<<this->LastOutput<<std::endl;
+	*textgohere<<"Start Time: "<<this->StartTime<<std::endl;
+	*textgohere<<"End Time: "<<this->EndTime<<std::endl;
+	*textgohere<<"Run Time: "<<this->RunTime<<std::endl;
+	*textgohere<<"______________________________________________________"<<std::endl;
+}	
+void HDD::print(){
+	print(&std::cout);
 }
-void HDD::log(std::string *batch){
-/*
-	all that stuff in print would be good minus present task
-
-*/
-	std::string data="look at me I'm mr mseeks";
-	const char * filename ="~/test";
-	std::cout<<"making object"<<std::endl;
-	std::fstream LogFile;
-	
-	std::cout<<"opening"<<std::endl;
-	LogFile.open ("~/test.txt");
+void HDD::log(std::string * batch){
+	this->PresentTask ="Writing to the log file";	
+	std::fstream LogFile(*batch+"_log.txt",std::ios::app);;
 	std::cout<<LogFile.is_open()<<std::endl;
-	std::cout<<"writeing"<<std::endl;
-	LogFile<<data;
-	LogFile<<"literal\n";
-	std::cout<<"close"<<std::endl;
-	LogFile.close();
+	print(&LogFile);
+}
+void HDD::log(){
+	std::string * temp =new std::string("may1");
+	log(temp);
+	delete( temp);
 }
 bool HDD::presence(){
 	this->Present=
@@ -173,7 +175,7 @@ void HDD::get_data(){
 		"sudo smartctl -i "
 		+this->path
 		+" | awk '/SMART support is:/' | sed -n '1,1p' | awk '{print substr($0,19,9)}'"
-		);
+	);
 	std::cout<<temp<<std::endl; 
 	this->SmartSupport=(temp=="Available\n");		
 	this->ModelFamily = StdOut(
@@ -197,30 +199,26 @@ void HDD::get_data(){
 		+" | awk '/User Capacity:/' | awk '{print substr($0,19,20)}'"
 	);
 	this->size= myStol(this->UserCapacity);
-	printf("%s Smart Support %s\n",this->path.c_str(),(this->SmartSupport)?"enabled":"disabled");
-	printf("%s ModelFamily: %s\n",this->path.c_str(),this->ModelFamily.c_str());
-	printf("%s Model %s\n",this->path.c_str(),this->Model.c_str());
-	printf("%s Serial Number %s\n",this->path.c_str(),this->SerialNumber.c_str());
-	printf("%s UserCapcity:  %s  %ld \n",this->path.c_str(),this->UserCapacity.c_str(),this->size);
-
+	print(&std::cout);
 }
-void HDD::smartctl_run(){
+void HDD::smartctl_run()
+{
 	this->smartctl_kill();
 	Command(
 		"sudo smartctl --device=auto --smart=on --saveauto=on --tolerance=normal --test=long "
 		+ this->path
 		//+" 1>/dev/null"
 		,"Running Smart Control..."
-		);
+	);
 }
-
-bool HDD::smartctl_running(){
+bool HDD::smartctl_running()
+{
 	Command("sudo smartctl -a "
 		+this->path
 		+" | awk '/Self-test execution status:/' "
 		+"| awk '{print substr($0,35,4)}'"
 		,"Checking Smart Control is still running..."
-		);
+	);
 	bool done=LastOutput=="   0\n";
 	std::cout<<!done<<std::endl;
 	if (done) return !done;
@@ -229,12 +227,15 @@ bool HDD::smartctl_running(){
 	}
 		throw (std::string) "smartctl error";
 }
-void HDD::smartctl_kill(){
+void HDD::smartctl_kill()
+{
 	Command("sudo smartctl -X "
 		+this->path
-		,"Checking Smart Control...");
+		,"Checking Smart Control..."
+	);
 }
-void HDD::dd_write(std::string* batch){
+void HDD::dd_write(std::string* batch)
+{
 	try{
 		Command("sudo rm /temp/"+*batch+"_File.dd","erasing old hash file");
 	}
@@ -254,7 +255,8 @@ void HDD::dd_write(std::string* batch){
 		//+"1>/dev/null"
 		);
 }
-void HDD::dd_read(std::string* batch){
+void HDD::dd_read(std::string* batch)
+{
 	Command("sudo dd if="
 		+this->path
 		+" of=/tmp/"
@@ -263,12 +265,14 @@ void HDD::dd_read(std::string* batch){
 		,"Reading With dd..."
 	);
 }
-void HDD::hash_check(std::string* batch){
+void HDD::hash_check(std::string* batch)
+{
 	Command("md5sum /tmp/"
 		+*batch
 		+"_File.dd | awk '{print substr($0,0,32)}'"
-		,"Checking Hash...");
-	std::string MainHash= LastOutput;
+		,"Checking Hash..."
+	);
+	std::string MainHash=LastOutput;
 	Command(
 	"md5sum /tmp/"
 		+*batch 
@@ -282,7 +286,8 @@ void HDD::hash_check(std::string* batch){
 		//move along nothing to see here;
 	}
 }
-void HDD::erase(){
+void HDD::erase()
+{
 	Command(
 	"sudo ./nwipe --autonuke --nogui --method=zero "
 		+this->path
@@ -290,21 +295,10 @@ void HDD::erase(){
 		,"Erasing With Nwipe..."
 	);
 }
-void HDD::partition(){
+void HDD::partition()
+{
 	Command(
 		"sudo smar...  wait I'm skipping you anyway"
 		,"Partitioning Drives..."
 	);
 }
-void HDD::reset(){
-	this->SmartSupport=false;
-	this->Present=false;
-	this->Exception="none";
-	this->SerialNumber="";
-	this->Model="";
-	this->ModelFamily="";
-	this->UserCapacity="";
-	this->RunTime=0;
-	this->size=0;
-}
-

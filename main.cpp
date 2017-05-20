@@ -8,55 +8,48 @@ extern std::string GetStdoutFromCommand(std::string);
 std::string BatchName="may1";
 std::string EraseCmd="nwipe";
 
-void print(HDD * HDDs[], int length){
+void print(HDD * HDDs[], int length)
+{
 	std::cout<<"Welcome to Eric's Wonderful Hard Drive Eraser !!! :D \n";
 	std::cout<<"BatchName : "<<BatchName<<std::endl;
-	std::cout<<"EraseCmd: "<<EraseCmd<<std::endl<<std::endl;
-	std::cout<<"#################################################\n\n";
-	for(int i=0;i<length;i++){
-	//		if(HDDs[i]->Present){	
-			HDDs[i]->print();
-			std::cout<<"___________________________________________\n"<<std::endl;
-	//		}	
-	}
+	std::cout<<"EraseCmd: "<<EraseCmd<<std::endl;
 	std::cout<<"total HDDs  : "<<HDD::instances<<std::endl;
+	std::cout<<"########################################################\n\n";
+	for(int i=0;i<length;i++)	
+	{
+		if(HDDs[i]->Present) HDDs[i]->print();
+	}
 }
 void contPrint(HDD * HDDs[], int length)
 {
-	while(true){
+	while(true)
+	{
 		print(HDDs,length);
 		std::this_thread::sleep_for(std::chrono::milliseconds(2000));
 		system("clear||cls");
 	}
 }
 int main(int argc, char * argv[]){
-HDD * test= new HDD("/dev/sda");
-std::string in= "a";
-test->log(&in);
-/*
-	if(argv[1]){
+	if(argv[1])
+	{
 		BatchName=argv[1];
 	}
 	const int DriveNum=4;
 	std::cout<< "making dev path prefix =";
 	std::string devPath="/dev/sd";
-	puts(devPath.c_str());
-	
-	std::string a;
 	HDD * HDDs[DriveNum];
 	std::thread * runner[DriveNum];
-	for(int i =0;i<DriveNum;i++){
+	for(int i =0;i<DriveNum;i++)
+	{
 		HDDs[i]= new HDD(devPath+(char)('a'+i));
 		runner[i]=new std::thread(&HDD::run, HDDs[i],&BatchName);
 	}
-
-	std::cout<<"here"<<std::endl;
+	puts("here");
 	std::thread * printer= new std::thread(&contPrint,HDDs,DriveNum);
 	printer->join();
-	for(int i =0;i<DriveNum;i++){
+	for(int i =0;i<DriveNum;i++)
+	{
 		runner[i]->join();
 	}
-
-*/
 	return 0;
 }

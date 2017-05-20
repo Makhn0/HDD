@@ -1,10 +1,9 @@
 #ifndef HDD_h
 #define HDD_h
+#include <ostream>
 #include <iostream>
 #include <thread>
 #include <time.h>
-typedef void (*Proc)(std::string);
-// type Proc to be used in run to make code pretier/better
 class HDD{
 	public:
 		std::string path;
@@ -25,8 +24,10 @@ class HDD{
 		std::string CmdString;
 		static int instances;
 		
-		long StartTime;
+		long StartTime=0;
+		long EndTime=0;
 		long RunTime;
+		
 		///* learn how to make constructor in src*/
 		HDD(std::string path) : path(path),StartTime(time(0)){
 			instances++;
@@ -53,13 +54,12 @@ class HDD{
 		void partition();
 		void verify();
 		void log(std::string*);
+		void log();
+		void print(std::ostream *);
 		void print();
-		
 		void run_body(std::string*);
 		void run(std::string*);
 		void reset();
-		Proc * ProcQ;
-		
 };
 //enum SmartControl {Unavailable, Available_Disabled, Avialable_Enabled}
 #endif
