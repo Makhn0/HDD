@@ -1,5 +1,5 @@
 CPFLAGS=--std=c++0x -pthread -Wall
-#os=linux
+os=linux
 BinName:=ewhde
 BinNameC:=$(BinName)_C
 ifeq ($(os),nt)
@@ -13,27 +13,27 @@ del:=sudo rm
 endif
 
 $(BinName): main.o HDD.o
-	$(CXX) $(CPFLAGS) -o $(BinName) main.o HDD.o
+	$(CXX) $(CPFLAGS) -o $(BinName) $(args) main.o HDD.o
 $(BinNameC): main.o HDD_C.o
-	$(CXX) $(CPFLAGS) -o $(BinNameC) main.o HDD_C.o
+	$(CXX) $(CPFLAGS) -o $(BinNameC) $(args) main.o HDD_C.o
 HDD_C.o:HDD_C.cpp
-	$(CXX) -c $(CPFLAGS) HDD_C.cpp
+	$(CXX) -c $(CPFLAGS) $(args) HDD_C.cpp
 	
 HDD.o : HDD.cpp
-	$(CXX) -c $(CPFLAGS) HDD.cpp
+	$(CXX) -c $(CPFLAGS) $(args) HDD.cpp
 main.o : main.cpp
-	$(CXX) -c $(CPFLAGS) main.cpp	
+	$(CXX) -c $(CPFLAGS) $(args) main.cpp	
 run : $(BinName)
 	$(BinName) ${args}
 runC : $(BinNameC) 
 	$(BinNameC) ${args}
 edit :
-	$(Editor) main.cpp
-	$(Editor) HDD.cpp
-	$(Editor) HDD.h
+	$(Editor) main.cpp &
+	$(Editor) HDD.cpp &
+	$(Editor) HDD.h &
 edit-all:edit
-	$(Editor) makefile
-	$(Editor) HDD_C.cpp
+	$(Editor) makefile &
+	$(Editor) HDD_C.cpp &
 clean: 
 	$(del) *.o
 	$(del) $(BinName)
@@ -51,6 +51,6 @@ load:
 update:
 	sudo git pull
 test:
-	$(CXX) -o test.exe test.cpp
+	$(CXX) $(args) -o test.exe test.cpp
 open-test:
 	$(Editor) test.cpp

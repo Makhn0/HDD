@@ -1,0 +1,63 @@
+problems
+1.drives not detected on mhdd
+old questions
+1. why did old sample of drives have incomplete erasing?
+2. do the  current processes, 2-step, mhdd and ewhde do the same? 
+mhdd questions:
+1.smartcontrol; ?? command
+2.detect in bios for faster erase
+3.scan z=2, ?what is erase delay?
+4.will other commands work in batchfile?
+
+
+smartctl vs mhdd scan
+?1.what do they do? are they the same?
+
+batch commands
+________
+
+HALT_ON		terminate batch on any error
+HALT_OFF 	do not terminate batch on error
+ENDSND_ON 	make sound on the end of any test
+ENDSND_OFF 	do not make any sound on the end of any test
+ASK_ON 		ask for permission to execute every command
+ASK_OFF		do not ask
+DEV_SELECT	select a drive from menu
+DRV_ID		device identify
+DRV_RESET	reset a drive
+DRV_STOP	stop the spindle
+SOUND <x>	turn on the sound (frequency = x)
+NOSOUND		turn off the sound
+
+DRV_SCAN <x> <y> <z> 		surface scan
+	x= start LBA (or "MIN" without quotes)
+	y= end LBA (of "MAX" without quotes)
+	z: 0= just scan; 1=scan + remap;
+	   2= scan + Erase Delays
+
+DRV_PORT <x>  switch port
+		x: 1 = Primary Master
+		  ...
+		x: 3 = Secondary Master
+		  ...
+		x: 6 = PCI board, first channel
+BEEP <x> 	beep x seconds
+PAUSE <x>	pause x seconds
+REPEAT <x>	repeat next line x time
+DRV_SEEK <X> 	seek test x seconds
+DRV_NHPA 	recover native drive size
+DRV_WAIT	wait for drive ready
+DRV_ERASE <x> <y> 	erase sectors
+		x - start lba (or "MIN" without quotes)
+		y - end lba (of "MAX" without quotes)
+
+The Rest of Man Page:
+
+
+cls		clear console screen
+   	clearconsole
+
+SCREENSHOT 	take a screenshot <F10>
+	Take a screenshot to file SCRSHOT.LOG
+
+PORT	;finish later

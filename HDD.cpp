@@ -8,6 +8,18 @@
 #include <exception>
 #include <string>
 #include <unistd.h>
+
+#ifdef release
+#define _debug //
+#else
+#define _debug /**/
+#endif
+
+#ifndef ERASE
+#define _ERASE //
+#else
+#define _ERASE /**/
+#endif
 int HDD::instances;
 
 /* // might be more usefull than throwing strings
@@ -68,13 +80,14 @@ void HDD::reset(){
 }
 void HDD::run_body(std::string* batch){
 	std::cout<<"running "<< this->path<<std::endl;
+	_debug std::cout<<"debug mode"<< std::endl;
 	while(1)
 	{
 		PresentTask="waiting to detect...";
 		while( !(presence()) ){sleep(5);}
 		get_data();
 		if(!presence()){continue;}
-		smartctl_run();
+		smartctl_run();m
 		bool a=false;
 		while(smartctl_running()){
 			if(!presence()){
@@ -96,7 +109,7 @@ void HDD::run_body(std::string* batch){
 		this->hash_check(batch);
 		if(!this->presence()){continue;}
 		break;
-		//this->erase();
+	_ERASE this->erase();
 		if(!this->presence()){continue;}
 		*/
 		this->EndTime=time(0);
