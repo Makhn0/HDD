@@ -120,15 +120,16 @@ void HDD::run_body(std::string* batch){
 		#endif
 		
 		this->EndTime=time(0);
-
+	
 		log(batch);
 		PresentTask="done";		
-		#ifdef _Debug
-		std::cout<<this->path<<" : end of run, waiting"<<std::endl;
-		#endif
+
 		while(presence())
 		{
-			sleep(1000);
+		#ifdef _Debug
+		std::cout<<this->path<<" : end of run, waiting for pull out"<<std::endl;
+		#endif
+			sleep(100);
 		}
 		#ifdef _Debug
 		std::cout<<this->path<<" : past waiting"<<std::endl<<std::endl;
@@ -136,16 +137,22 @@ void HDD::run_body(std::string* batch){
 	}
 }
 void HDD::run(std::string* batch){
-	try{
-		run_body(batch);
-	}
-	catch(std::string e){
-		this->Exception= e;
-		this->PresentTask = "critical error, stopping. ";
-		#ifdef _Debug
-		std::cout<<e<<std::endl;	
-		std::cout<<this->path<<" PresentTask : "<<this->PresentTask<<std::endl;
-		#endif
+	while(1){
+		try{
+			run_body(batch);
+		}
+		catch(std::string e){
+			this->Exception= e;
+			this->PresentTask = "critical error, stopping. ";
+			#ifdef _Debug
+			std::cout<<e<<std::endl;	
+			std::cout<<this->path<<" PresentTask : "<<this->PresentTask<<std::endl;
+			#endif
+		}
+		while(presense())
+		{
+			sleep(100);
+		}
 	}
 }
 void HDD::print(std::ostream* textgohere){
@@ -272,7 +279,7 @@ bool HDD::smartctl_running()
 	if (LastOutput[0]==' '&&LastOutput[1]=='2'&& LastOutput[2]=='4'){
 		return !done;
 	}
-		throw (std::string) "smartctl error";
+		throw (std::string) "smartctl error "+"__FILE__"+" : "+"__LINE__";
 }
 void HDD::smartctl_kill()
 {
@@ -327,7 +334,7 @@ void HDD::hash_check(std::string* batch)
 	);
 	std::string ReadHash= LastOutput;
 	if(MainHash!=ReadHash){
-		throw (std::string) "hash rw failure";
+		throw (std::string) "hash rw failure : "+"__FILE__"+" : "+"__LINE__";
 	}
 	else{
 		//move along nothing to see here;
