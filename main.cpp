@@ -1,9 +1,8 @@
 #include <iostream>
 #include <thread>
 #include <stdlib.h>
-//#include <system.h>
 #include "HDD.h"
-
+#include <unistd.h>
 extern std::string GetStdoutFromCommand(std::string);
 std::string BatchName="may1";
 std::string EraseCmd="nwipe";
@@ -24,9 +23,10 @@ void contPrint(HDD * HDDs[], int length)
 {
 	while(true)
 	{
+		system("clear||cls");
 		print(HDDs,length);
 		std::this_thread::sleep_for(std::chrono::milliseconds(2000));
-		system("clear||cls");
+
 	}
 }
 int main(int argc, char * argv[]){
@@ -35,18 +35,36 @@ int main(int argc, char * argv[]){
 		BatchName=argv[1];
 	}
 	const int DriveNum=4;
+	
+	#ifdef _Debug
+	std::cout<<"Debug Mode"<<std::endl;
 	std::cout<< "making dev path prefix =";
+	#endif
 	std::string devPath="/dev/sd";
+	#ifdef _Debug
+	std::cout<<devPath;
+	std::cout<<std::endl;
+	#endif
+
 	HDD * HDDs[DriveNum];
 	std::thread * runner[DriveNum];
 	for(int i =0;i<DriveNum;i++)
 	{
 		HDDs[i]= new HDD(devPath+(char)('a'+i));
 		runner[i]=new std::thread(&HDD::run, HDDs[i],&BatchName);
+		#ifdef _Debug
+		sleep(1);
+		#endif
 	}
+	#ifdef _Debug
 	puts("here");
+	sleep(1);
+	#endif
+
+	#ifndef _Debug
 	std::thread * printer= new std::thread(&contPrint,HDDs,DriveNum);
 	printer->join();
+	#endif
 	for(int i =0;i<DriveNum;i++)
 	{
 		runner[i]->join();

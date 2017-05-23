@@ -4,6 +4,7 @@
 #include <iostream>
 #include <thread>
 #include <time.h>
+
 class HDD{
 	public:
 		std::string path;
@@ -17,6 +18,7 @@ class HDD{
 		std::string ModelFamily;
 		std::string SerialNumber;
 		std::string UserCapacity="";
+		
 		long size=0;
 		
 		std::string PresentTask;

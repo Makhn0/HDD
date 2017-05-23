@@ -1,32 +1,34 @@
 CPFLAGS=--std=c++0x -pthread -Wall
 os=linux
-BinName:=ewhde
+
 BinNameC:=$(BinName)_C
+
 ifeq ($(os),nt)
+BinName:=ewhde.exe
 Editor:=notepad++
 del:=del
 endif
 
 ifeq ($(os),linux)
+BinName:=ewhde
 Editor:=gedit
 del:=sudo rm
 endif
 
-$(BinName): main.o HDD.o
-	$(CXX) $(CPFLAGS) -o $(BinName) $(args) main.o HDD.o
+$(BinName):clean  main.o HDD.o
+	$(CXX) $(CPFLAGS) $(args) -o $(BinName)  main.o HDD.o
 $(BinNameC): main.o HDD_C.o
-	$(CXX) $(CPFLAGS) -o $(BinNameC) $(args) main.o HDD_C.o
+	$(CXX) $(CPFLAGS) $(args) -o $(BinNameC) main.o HDD_C.o
 HDD_C.o:HDD_C.cpp
 	$(CXX) -c $(CPFLAGS) $(args) HDD_C.cpp
-	
 HDD.o : HDD.cpp
 	$(CXX) -c $(CPFLAGS) $(args) HDD.cpp
 main.o : main.cpp
 	$(CXX) -c $(CPFLAGS) $(args) main.cpp	
 run : $(BinName)
-	$(BinName) ${args}
+	$(BinName)
 runC : $(BinNameC) 
-	$(BinNameC) ${args}
+	$(BinNameC)
 edit :
 	$(Editor) main.cpp &
 	$(Editor) HDD.cpp &

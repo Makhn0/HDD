@@ -9,19 +9,7 @@
 #include <string>
 #include <unistd.h>
 
-#ifdef release
-#define _debug //
-#else
-#define _debug /**/
-#endif
-
-#ifndef ERASE
-#define _ERASE //
-#else
-#define _ERASE /**/
-#endif
 int HDD::instances;
-
 /* // might be more usefull than throwing strings
 struct Exception : public exception{
 	const char * what() const throw(){
@@ -32,14 +20,22 @@ struct Exception : public exception{
 std::string StdOut(std::string cmd);
 void HDD::Command(std::string a,std::string b  ){
 	this->PresentTask=b;
+	#ifdef _Debug
+	std::cout<<this->path<<" : "<<this->PresentTask<<std::endl;
+	#endif
 	Command(a);
 }
 void HDD::Command(std::string a){
 	this->CmdString=a;
+	#ifdef _Debug
 	std::cout<<"LastCommand:"<<this->CmdString<<std::endl;
+	#endif
 	this->LastOutput=StdOut(this->CmdString);
+	#ifdef _Debug
 	std::cout<<"LastOutput:"<<this->LastOutput<<std::endl;	
+	#endif
 }
+
 std::string StdOut(std::string cmd) {
     std::string data;
     FILE * stream;
@@ -79,15 +75,19 @@ void HDD::reset(){
 	this->size=0;
 }
 void HDD::run_body(std::string* batch){
+	#ifdef _Debug
 	std::cout<<"running "<< this->path<<std::endl;
-	_debug std::cout<<"debug mode"<< std::endl;
+	sleep(5);
+	#endif
 	while(1)
 	{
 		PresentTask="waiting to detect...";
-		while( !(presence()) ){sleep(5);}
+		while( !(presence()) ){
+			sleep(2);
+		}
 		get_data();
 		if(!presence()){continue;}
-		smartctl_run();m
+		smartctl_run();
 		bool a=false;
 		while(smartctl_running()){
 			if(!presence()){
@@ -97,7 +97,7 @@ void HDD::run_body(std::string* batch){
 			sleep(10);		
 		}
 		if(a) continue;
-		//*/
+		#ifdef _Erase
 		/*read to disk section do not uncomment unless you want to kill all
 		//	disks on machine control-c won't save you.		
 		//this->smartctl_kill();//just testing exclude in final buildS
@@ -109,16 +109,25 @@ void HDD::run_body(std::string* batch){
 		this->hash_check(batch);
 		if(!this->presence()){continue;}
 		break;
-	_ERASE this->erase();
+		//this->erase();
 		if(!this->presence()){continue;}
 		*/
+		#endif
+		
 		this->EndTime=time(0);
-		PresentTask="done,";
-		std::cout<<"end of run, waiting"<<std::endl;
+
 		log(batch);
-		while(presence()){
+		PresentTask="done";		
+		#ifdef _Debug
+		std::cout<<this->path<<" : end of run, waiting"<<std::endl;
+		#endif
+		while(presence())
+		{
 			sleep(1000);
 		}
+		#ifdef _Debug
+		std::cout<<this->path<<" : past waiting"<<std::endl<<std::endl;
+		#endif
 	}
 }
 void HDD::run(std::string* batch){
@@ -169,27 +178,40 @@ void HDD::print(){
 void HDD::log(std::string * batch){
 	this->PresentTask ="Writing to the log file";	
 	std::fstream LogFile(*batch+"_log.txt",std::ios::app);;
+	#ifdef _Debug
 	std::cout<<LogFile.is_open()<<std::endl;
+	#endif
 	print(&LogFile);
 }
 void HDD::log(){
 	std::string * temp =new std::string("may1");
 	log(temp);
-	delete( temp);
+	delete(temp);
 }
 bool HDD::presence(){
+	#ifdef _Debug
+	std::cout<<this->path<<" : checking presence... "<<std::endl;
+	#endif
 	this->Present=
 		access( this->path.c_str(),0 )==0;
+	#ifdef _Debug
+		std::cout<<this->path<<" : presence "<<((this->Present)?"detected":"not detected")<<std::endl;
+	#endif
 	return this->Present;
 }
 void HDD::get_data(){
 	this->PresentTask="getting data...";
+	#ifdef _Debug
+	std::cout<<this->path<<" :  "<<this->PresentTask<<std::endl;
+	#endif
 	std::string temp =StdOut(
 		"sudo smartctl -i "
 		+this->path
 		+" | awk '/SMART support is:/' | sed -n '1,1p' | awk '{print substr($0,19,9)}'"
 	);
-	std::cout<<temp<<std::endl; 
+	#ifdef _Debug
+	std::cout<<this->path<<" : "<<temp<<std::endl; 
+	#endif
 	this->SmartSupport=(temp=="Available\n");		
 	this->ModelFamily = StdOut(
 		"sudo smartctl -i "
@@ -212,7 +234,9 @@ void HDD::get_data(){
 		+" | awk '/User Capacity:/' | awk '{print substr($0,19,20)}'"
 	);
 	this->size= myStol(this->UserCapacity);
+	#ifdef _Debug
 	print(&std::cout);
+	#endif
 }
 void HDD::smartctl_run()
 {
@@ -233,7 +257,9 @@ bool HDD::smartctl_running()
 		,"Checking Smart Control is still running..."
 	);
 	bool done=LastOutput=="   0\n";
-	std::cout<<!done<<std::endl;
+	#ifdef _Debug
+	std::cout<<this->path<<" smartctl: "<<((!done)?"is running":" has stopped ")<<std::endl;
+	#endif
 	if (done) return !done;
 	if (LastOutput[0]==' '&&LastOutput[1]=='2'&& LastOutput[2]=='4'){
 		return !done;
@@ -253,8 +279,7 @@ void HDD::dd_write(std::string* batch)
 		Command("sudo rm /temp/"+*batch+"_File.dd","erasing old hash file");
 	}
 	catch(std::exception e)
-	{
-
+	{
 	}
 	Command("sudo dd if=/dev/urandom of=/tmp/"
 		+*batch
