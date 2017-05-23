@@ -76,11 +76,16 @@ void HDD::reset(){
 }
 void HDD::run_body(std::string* batch){
 	#ifdef _Debug
-	std::cout<<"running "<< this->path<<std::endl;
+	std::cout<<this->path<<" : beginning running loop... "<< std::endl;
 	sleep(5);
 	#endif
 	while(1)
 	{
+		PresentTask="reseting";
+		#ifdef _debug
+		std::cout<<this->path<<" : resetting... "<<std::endl;
+		#endif
+		reset();
 		PresentTask="waiting to detect...";
 		while( !(presence()) ){
 			sleep(2);
