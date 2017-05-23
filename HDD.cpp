@@ -98,7 +98,7 @@ void HDD::run_body(std::string* batch){
 		}
 		if(a) continue;
 		#ifdef _Erase
-		/*read to disk section do not uncomment unless you want to kill all
+		///*read to disk section do not uncomment unless you want to kill all
 		//	disks on machine control-c won't save you.		
 		//this->smartctl_kill();//just testing exclude in final buildS
 		if(!this->presence()){continue;}
@@ -108,10 +108,10 @@ void HDD::run_body(std::string* batch){
 		if(!this->presence()){continue;}
 		this->hash_check(batch);
 		if(!this->presence()){continue;}
-		break;
-		//this->erase();
+		
+		this->erase();
 		if(!this->presence()){continue;}
-		*/
+		//*/
 		#endif
 		
 		this->EndTime=time(0);
@@ -279,7 +279,8 @@ void HDD::dd_write(std::string* batch)
 		Command("sudo rm /temp/"+*batch+"_File.dd","erasing old hash file");
 	}
 	catch(std::exception e)
-	{
+	{
+
 	}
 	Command("sudo dd if=/dev/urandom of=/tmp/"
 		+*batch

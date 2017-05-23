@@ -15,7 +15,7 @@ Editor:=gedit
 del:=sudo rm
 endif
 
-$(BinName):clean  main.o HDD.o
+$(BinName): main.o HDD.o
 	$(CXX) $(CPFLAGS) $(args) -o $(BinName)  main.o HDD.o
 $(BinNameC): main.o HDD_C.o
 	$(CXX) $(CPFLAGS) $(args) -o $(BinNameC) main.o HDD_C.o
@@ -37,7 +37,8 @@ edit-all:edit
 	$(Editor) makefile &
 	$(Editor) HDD_C.cpp &
 clean: 
-	$(del) *.o
+	$(del) HDD.o
+	$(del) main.o
 	$(del) $(BinName)
 run-all: 
 	make clean

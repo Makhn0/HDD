@@ -34,7 +34,7 @@ int main(int argc, char * argv[]){
 	{
 		BatchName=argv[1];
 	}
-	const int DriveNum=4;
+	const int DriveNum=1;
 	
 	#ifdef _Debug
 	std::cout<<"Debug Mode"<<std::endl;
