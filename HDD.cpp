@@ -135,9 +135,12 @@ void HDD::run(std::string* batch){
 		run_body(batch);
 	}
 	catch(std::string e){
-		std::cout<<e<<std::endl;	
 		this->Exception= e;
-		throw e;
+		this->PresentTask = "critical error, stopping. ";
+		#ifdef _Debug
+		std::cout<<e<<std::endl;	
+		std::cout<<this->path<<" PresentTask : "<<this->PresentTask<<std::endl;
+		#endif
 	}
 }
 void HDD::print(std::ostream* textgohere){
