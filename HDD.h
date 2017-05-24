@@ -55,8 +55,8 @@ class HDD{
 		void erase();
 		void partition();
 		void verify();
+		
 		void log(std::string*);
-		void log();
 		void print(std::ostream *);
 		void print();
 		void run_body(std::string*);
