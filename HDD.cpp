@@ -35,7 +35,8 @@ void HDD::Command(std::string a){
 	this->LastOutput=StdOut(this->CmdString);
 	
 	#ifdef _Debug
-	std::cout<<this->path<<" LastOutput:"<<this->LastOutput<<std::endl;	
+	std::cout<<this->path<<" LastOutput:"<<this->LastOutput
+	<<"_::"<<std::endl;	
 	#endif
 }
 
@@ -91,6 +92,7 @@ void HDD::run_body(std::string* batch){
 		}
 		get_data();
 		if(!presence()){continue;}
+		#ifndef _skip_smart
 		smartctl_run();
 		bool a=false;
 		while(smartctl_running()){
@@ -101,6 +103,7 @@ void HDD::run_body(std::string* batch){
 			sleep(10);		
 		}
 		if(a) continue;
+		#endif
 		#ifdef _Erase
 		if(!this->presence()){continue;}
 		this->dd_write(batch);
@@ -145,7 +148,7 @@ void HDD::run(std::string* batch){
 			this->PresentTask = " Critical error, stopping. ";
 			
 			#ifdef _Debug
-			std::cout<<e<<std::endl;	
+			std::cout<<this->path<<" Exception thrown : "<<this->Exception<<std::endl;		
 			std::cout<<this->path<<" PresentTask : "<<this->PresentTask<<std::endl;
 			#endif
 		}
@@ -154,7 +157,7 @@ void HDD::run(std::string* batch){
 			this->PresentTask = "critical error, stopping. ";
 			
 			#ifdef _Debug
-			std::cou<<this->patht<<" Exception : "<<this->Exception<<std::endl;	
+			std::cout<<this->path<<" Exception thrown : "<<this->Exception<<std::endl;	
 			std::cout<<this->path<<" PresentTask : "<<this->PresentTask<<std::endl;
 			#endif
 		}
@@ -171,7 +174,7 @@ void HDD::print(std::ostream* textgohere){
 	*textgohere<<"Presence :    "<<((this->Present)?"detected":"undetected")<<std::endl;
 	*textgohere<<"Smart Support: "<<(this->SmartSupport?"available":"unavailable")<<std::endl;
 	*textgohere<<"Model Family: "<<this->ModelFamily<<std::endl;
-	*textgohere<<"Model  : "<<this->Model;//<<std::endl;
+	*textgohere<<"Model  : "<<this->Model<<std::endl;
 	*textgohere<<"Serial : "<<this->SerialNumber<<std::endl;
 	*textgohere<<"User Capacity: "<<this->UserCapacity<<std::endl;
 	*textgohere<<"Last Exception : "<<this->Exception<<std::endl;
@@ -187,9 +190,11 @@ void HDD::print(){
 	print(&std::cout);
 }
 void HDD::log(std::string * batch){
-	this->PresentTask ="Writing to the log file";	
-	//TODO find Log path
-	std::fstream* LogFile= new std::fstream("/home/hdd-test-server/"+(*batch)+".txt",std::ios::app);
+	std::string filename="/home/hdd-test-server/HDD_logs"
+		+(*batch)+".log";
+	this->PresentTask ="Writing to the log file:"+filename;	
+	std::fstream* LogFile
+		= new std::fstream(filename,std::ios::app);
 	#ifdef _Debug
 	std::cout<<this->path<<" :  "<<this->PresentTask<<std::endl;
 	std::cout<<this->path<<"log file is open:"<<LogFile->is_open()<<std::endl;
@@ -212,14 +217,15 @@ bool HDD::presence(){
 	return this->Present;
 }
 void HDD::get_data(){
+	//very concerned that this needs work
 	Command(
 		"sudo smartctl -i "
 		+this->path
 		+" | awk '/SMART support is:/' | sed -n '1,1p'"
 		,"getting data..."
 	);
-	std::string temp = LastOutput.substr(19,9);
-	this->SmartSupport=(temp=="Available\n");	
+	std::string temp = LastOutput.substr(18,9);
+	this->SmartSupport=(temp=="Available");	
 	
 	#ifdef _Debug
 	std::cout<<this->path<<" SmartSupport : "<<temp<<" : "<<this->SmartSupport<<std::endl; 
@@ -229,27 +235,49 @@ void HDD::get_data(){
 		+this->path
 		+" | awk '/Model Family:/'"
 	);
-	this->ModelFamily= LastOutput.substr(19,35);	
+	//TODO unconfirmed substr parameters
+	if(LastOutput!=""){
+		this->ModelFamily=LastOutput.substr(18,35);	
+	}
+	else
+	{
+		this->ModelFamily="none detected";
+	}
 	this->Model = StdOut(
 		"sudo smartctl -i "
 		+this->path
 		+" | awk '/Device Model:/'"
-	);	
-	this->Model= LastOutput.substr(19,35);	
+	);
+	if(LastOutput!=""){	
+		this->Model= LastOutput.substr(18,35);	
+	}
+	else
+	{
+		this->Model=" none detected";
+	}
 	Command(
 		"sudo smartctl -i "
 		+this->path
 		+" | awk '/Serial Number:/'"
 	);	
-	this->SerialNumber =LastOutput.substr(19,35);
+	this->SerialNumber =LastOutput.substr(18,35);
 
 	Command(
 		"sudo smartctl -i "
 		+this->path
 		+" | awk '/User Capacity:/'"
 	);
-	this->UserCapacity=LastOutput.substr(19,20);
-	this->size= myStol(this->UserCapacity);
+	if(LastOutput!=""){
+		this->UserCapacity=LastOutput.substr(18,20);
+		this->size= myStol(this->UserCapacity);
+	}
+	else
+	{
+		this->UserCapacity=" none detected";
+		this->size =0;
+		throw " no capacity detected";
+	}
+
 	#ifdef _Debug
 	print(&std::cout);
 	#endif
@@ -259,6 +287,7 @@ void HDD::smartctl_run()
 	this->smartctl_kill();
 	Command(
 		"sudo smartctl --device=auto --smart=on --saveauto=on --tolerance=normal --test=long "
+		//+" -C"// no longer need smartctl_running
 		+ this->path
 		,"Running Smart Control..."
 	);
@@ -270,15 +299,18 @@ bool HDD::smartctl_running()
 		+" | awk '/Self-test execution status:/' "
 		,"Checking Smart Control is still running..."
 	);
-	bool done=LastOutput.substr(35,4)=="   0\n";
+//TODO add to class
+	std::string code=LastOutput.substr(34,4);
+	bool done=code=="   0";
 	#ifdef _Debug
-	std::cout<<this->path<<" smartctl: "<<((!done)?"is running":" has stopped ")<<std::endl;
+	std::cout<<this->path<<" smartctl: "<<((!done)?"is running":" has stopped ")<<" code :"<<code<<std::endl;
 	#endif
-	if (done) return !done;
-	if (LastOutput[0]==' '&&LastOutput[1]=='2'&& LastOutput[2]=='4'){
+
+	if (code[0]==' '&&code[1]=='2'&& code[2]=='4'){
 		return !done;
 	}
-	throw (std::string) "smartctl error "+"__FILE__"+" : "+"__LINE__";
+	if (done) return !done;
+	throw (std::string) "smartctl error test runtime  "+code;
 }
 void HDD::smartctl_kill()
 {
@@ -289,11 +321,16 @@ void HDD::smartctl_kill()
 }
 void HDD::dd_write(std::string* batch)
 {
-	Command("sudo rm /temp/"
-		+*batch
-		+"_File.dd"
-		,"erasing old hash file"
-	);
+	std::string hashfile="/temp/"+*batch+"_File.dd";
+	if(access( hashfile.c_str(),0 )==0){
+		#ifdef _Debug
+		std::cout<<this->path<<" old hash exists: "<<std::endl;
+		#endif
+		Command("sudo rm "
+			+hashfile
+			,"erasing old hash file"
+		);
+	}
 	Command("sudo dd if=/dev/urandom of=/tmp/"
 		+*batch
 		+"_File.dd count=100KB "
@@ -329,7 +366,7 @@ void HDD::hash_check(std::string* batch)
 	);
 	std::string ReadHash= LastOutput.substr(0,32);
 	if(MainHash!=ReadHash){
-		throw (std::string) "hash rw failure : "+"__FILE__"+" : "+"__LINE__";
+		throw (std::string) "hash rw failure...";
 	}
 }
 void HDD::erase()

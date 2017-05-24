@@ -48,6 +48,7 @@ std::string month(int i){
 	}
 }
 int main(int argc, char * argv[]){
+	//TODO test time is accurate on all clients
 	time_t now=time(0);
 	tm * date=localtime(&now);
 	std::stringstream * temp=new std::stringstream();
@@ -56,7 +57,7 @@ int main(int argc, char * argv[]){
 			<<month(date->tm_mon)
 			<<"_"
 			<<(1+date->tm_mday);		
-	BatchName=temp->str();;
+	BatchName=temp->str();
 	if(argv[1])
 	{
 		BatchName=argv[1];
@@ -70,6 +71,7 @@ int main(int argc, char * argv[]){
 	std::string devPath="/dev/sd";
 	#ifdef _Debug
 	std::cout<<devPath<<std::endl;
+	std::cout<<"BatchName :"<<BatchName<<std::endl;
 	#endif
 
 	HDD * HDDs[DriveNum];
@@ -83,7 +85,7 @@ int main(int argc, char * argv[]){
 		#endif
 	}
 	#ifdef _Debug
-	puts("here __LINE__");
+	puts("ended instantiating HDD objects");
 	sleep(1);
 	#endif
 
