@@ -18,18 +18,18 @@ struct Exception : public exception{
 */
 std::string StdOut(std::string cmd);
 void HDD::Command(std::string a,std::string b,bool err2out=true  ){
-	this->PresentTask=b;
+	PresentTask=b;
 	#ifdef _Debug
-	std::cout<<this->path<<" : "<<this->PresentTask<<std::endl;
+	std::cout<<path<<" : "<<PresentTask<<std::endl;
 	#endif
 	if(err2out)a.append(" 2>&1");
 	Command(a);
 }
 void HDD::Command(std::string a){
-	this->CmdString=a;
+	CmdString=a;
 	
 	#ifdef _Debug
-	std::cout<<this->path<<" Last Command:"<<this->CmdString<<std::endl;
+	std::cout<<path<<" Last Command:"<<CmdString<<std::endl;
 	#endif
 	
 	this->LastOutput=StdOut(this->CmdString);
@@ -346,7 +346,7 @@ void HDD::erase()
 	PresentTask="Erasing With Nwipe...";
 	CmdString="sudo ./nwipe --autonuke --nogui --method=zero " 
 		+this->path 
-		+" 2>&1 ";
+		+" 2>&1";
 	LastOutput="";
 	FILE * stream;
 	const int max_buffer = 256;
@@ -361,9 +361,9 @@ void HDD::erase()
 	if(stream) {
 		while(!feof(stream)){
 			i++;
-			if (i%100)std::cout<<"in loop"<<std::endl;
-			if(fgets(buffer, max_buffer, stream) != NULL) 			{
-std::cout<<"in loop and if 1"<<std::endl;
+			if (i%100==0)std::cout<<"in loop"<<std::endl;
+			if(fgets(buffer, max_buffer, stream) != NULL){
+				std::cout<<"in loop and if 1"<<std::endl;
 				#ifdef _Debug
 				std::cout<<"in loop and if 2 "<<std::endl;
 				std::cout<<buffer;
@@ -373,7 +373,6 @@ std::cout<<"in loop and if 1"<<std::endl;
 		}
 	        if (pclose(stream)==-1)throw (std::string) "critical error stopping";
 	}
-	std::cout<<stream;
 	#ifdef _Debug
 	std::cout<<path<<" "<<PresentTask<<" done"<<std::endl;
 	std::cout<<path<<" final nwipe output "
