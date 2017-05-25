@@ -95,10 +95,14 @@ void HDD::run(std::string* batch){
 			std::cout<<this->path<<" PresentTask : "<<this->PresentTask<<std::endl;
 			#endif
 		}
+		/* just stop when finished for now uncomment when  making release
 		while(presence())
 		{
 			sleep(30);
 		}
+		/*/
+		break;
+		//*/
 	}
 }
 void HDD::run_body(std::string* batch){
@@ -152,7 +156,8 @@ void HDD::run_body(std::string* batch){
 		while(presence())
 		{
 		#ifdef _Debug
-		std::cout<<this->path<<" : end of run, waiting for pull out"<<std::endl;
+		std::cout<<this->path<<" : end of run, no pull out test"<<std::endl;
+		break;
 		#endif
 			sleep(100);
 		}
@@ -344,9 +349,9 @@ void HDD::erase()
 {  
 	///* make this throw when fails if it doesn't already
 	PresentTask="Erasing With Nwipe...";
-	CmdString="sudo ./nwipe --autonuke --nogui --method=zero " 
+	CmdString="sudo ./nwipe --autonuke --nogui --method=zero 2>&1 " 
 		+this->path 
-		+" 2>&1";
+		+"";
 	LastOutput="";
 	FILE * stream;
 	const int max_buffer = 256;
