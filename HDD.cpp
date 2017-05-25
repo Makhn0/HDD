@@ -16,7 +16,6 @@ struct Exception : public exception{
 	}
 }
 */
-
 std::string StdOut(std::string cmd);
 void HDD::Command(std::string a,std::string b  ){
 	this->PresentTask=b;
@@ -37,6 +36,7 @@ void HDD::Command(std::string a){
 	#ifdef _Debug
 	std::cout<<this->path<<" LastOutput:"<<this->LastOutput
 	<<"_::"<<std::endl;	
+	std::cout<<this->path<<" "<<this->PresentTask<<" done "<<std::endl;
 	#endif
 }
 
@@ -66,19 +66,42 @@ long myStol(std::string a){
 	}
 	return output;
 }
-void HDD::reset(){
-	this->SmartSupport=false;
-	this->Present=false;
-	this->Exception="none";
-	this->SerialNumber="";
-	this->Model="";
-	this->ModelFamily="";
-	this->UserCapacity="";
-	this->StartTime=time(0);
-	this->RunTime=0;
-	this->size=0;
+//void HDD::run_body(std::string* batch);
+void HDD::run(std::string* batch){
+	while(1){
+		#ifdef _Debug
+		std::cout<<this->path<<" : beginning running loop... "<< std::endl;
+		sleep(5);
+		#endif
+		try{
+			run_body(batch);
+		}
+		catch(std::string e){
+			this->Exception= e;
+			this->PresentTask = " Critical error, stopping. ";
+			
+			#ifdef _Debug
+			std::cout<<this->path<<" Exception thrown : "<<this->Exception<<std::endl;		
+			std::cout<<this->path<<" PresentTask : "<<this->PresentTask<<std::endl;
+			#endif
+		}
+		catch(std::exception e){
+			this->Exception=e.what();
+			this->PresentTask = "critical error, stopping. ";
+			
+			#ifdef _Debug
+			std::cout<<this->path<<" Exception thrown : "<<this->Exception<<std::endl;	
+			std::cout<<this->path<<" PresentTask : "<<this->PresentTask<<std::endl;
+			#endif
+		}
+		while(presence())
+		{
+			sleep(1000);
+		}
+	}
 }
 void HDD::run_body(std::string* batch){
+	throw (std::string)"fuck you";
 	while(1)
 	{
 		PresentTask="reseting";
@@ -115,10 +138,15 @@ void HDD::run_body(std::string* batch){
 		
 		this->erase();
 		if(!this->presence()){continue;}
+
 		#endif
 		
 		this->EndTime=time(0);
 	
+		#ifdef _Debug	
+		std::cout<<this->path<<" end of erase: writing to logs";
+		print();
+		#endif
 		log(batch);
 		PresentTask="done";		
 		while(presence())
@@ -133,74 +161,17 @@ void HDD::run_body(std::string* batch){
 		#endif
 	}
 }
-void HDD::run(std::string* batch){
-	while(1){
-		#ifdef _Debug
-		std::cout<<this->path<<" : beginning running loop... "<< std::endl;
-		sleep(5);
-		#endif
-		
-		try{
-			run_body(batch);
-		}
-		catch(std::string e){
-			this->Exception= e;
-			this->PresentTask = " Critical error, stopping. ";
-			
-			#ifdef _Debug
-			std::cout<<this->path<<" Exception thrown : "<<this->Exception<<std::endl;		
-			std::cout<<this->path<<" PresentTask : "<<this->PresentTask<<std::endl;
-			#endif
-		}
-		catch(std::exception e){
-			this->Exception=e.what();
-			this->PresentTask = "critical error, stopping. ";
-			
-			#ifdef _Debug
-			std::cout<<this->path<<" Exception thrown : "<<this->Exception<<std::endl;	
-			std::cout<<this->path<<" PresentTask : "<<this->PresentTask<<std::endl;
-			#endif
-		}
-		while(presence())
-		{
-			sleep(100);
-		}
-	}
-}
-void HDD::print(std::ostream* textgohere){
-	UpdateRunTime();
-	//TODO add info on which client is running
-	*textgohere<<"Status of: "<<this->path<<std::endl;
-	*textgohere<<"Presence :    "<<((this->Present)?"detected":"undetected")<<std::endl;
-	*textgohere<<"Smart Support: "<<(this->SmartSupport?"available":"unavailable")<<std::endl;
-	*textgohere<<"Model Family: "<<this->ModelFamily<<std::endl;
-	*textgohere<<"Model  : "<<this->Model<<std::endl;
-	*textgohere<<"Serial : "<<this->SerialNumber<<std::endl;
-	*textgohere<<"User Capacity: "<<this->UserCapacity<<std::endl;
-	*textgohere<<"Last Exception : "<<this->Exception<<std::endl;
-	*textgohere<<"Present Task: "<<this->PresentTask<<std::endl;
-	*textgohere<<"Last/Current Command :" << this->CmdString<<std::endl;
-	*textgohere<<"Last Output "<<this->LastOutput<<std::endl;
-	*textgohere<<"Start Time: "<<this->StartTime<<std::endl;
-	*textgohere<<"End Time: "<<this->EndTime<<std::endl;
-	*textgohere<<"Run Time: "<<this->RunTime<<std::endl;
-	*textgohere<<"______________________________________________________"<<std::endl;
-}	
-void HDD::print(){
-	print(&std::cout);
-}
-void HDD::log(std::string * batch){
-	std::string filename="/home/hdd-test-server/HDD_logs"
-		+(*batch)+".log";
-	this->PresentTask ="Writing to the log file:"+filename;	
-	std::fstream* LogFile
-		= new std::fstream(filename,std::ios::app);
-	#ifdef _Debug
-	std::cout<<this->path<<" :  "<<this->PresentTask<<std::endl;
-	std::cout<<this->path<<"log file is open:"<<LogFile->is_open()<<std::endl;
-	print(&std::cout);
-	#endif
-	print(LogFile);
+void HDD::reset(){
+	this->SmartSupport=false;
+	this->Present=false;
+	this->Exception="none";
+	this->SerialNumber="";
+	this->Model="";
+	this->ModelFamily="";
+	this->UserCapacity="";
+	this->StartTime=time(0);
+	this->RunTime=0;
+	this->size=0;
 }
 bool HDD::presence(){
 	#ifdef _Debug
@@ -275,10 +246,11 @@ void HDD::get_data(){
 	{
 		this->UserCapacity=" none detected";
 		this->size =0;
-		throw " no capacity detected";
+		throw path+" no capacity detected";
 	}
 
 	#ifdef _Debug
+	puts("Data Extracted...");
 	print(&std::cout);
 	#endif
 }
@@ -299,18 +271,17 @@ bool HDD::smartctl_running()
 		+" | awk '/Self-test execution status:/' "
 		,"Checking Smart Control is still running..."
 	);
-//TODO add to class
+	//TODO add to class
 	std::string code=LastOutput.substr(34,4);
+	//only possible problem would be if " 240" is an error
+	// it would return still running
+	if (code[0]==' '&&code[1]=='2'&& code[2]=='4') return true;
 	bool done=code=="   0";
 	#ifdef _Debug
 	std::cout<<this->path<<" smartctl: "<<((!done)?"is running":" has stopped ")<<" code :"<<code<<std::endl;
 	#endif
-
-	if (code[0]==' '&&code[1]=='2'&& code[2]=='4'){
-		return !done;
-	}
-	if (done) return !done;
-	throw (std::string) "smartctl error test runtime  "+code;
+	if (done) return false;
+	throw (std::string) path+" smartctl error test runtime  "+code;
 }
 void HDD::smartctl_kill()
 {
@@ -366,16 +337,75 @@ void HDD::hash_check(std::string* batch)
 	);
 	std::string ReadHash= LastOutput.substr(0,32);
 	if(MainHash!=ReadHash){
-		throw (std::string) "hash rw failure...";
+		throw (std::string) path+"hash rw failure...";
 	}
 }
 void HDD::erase()
-{
+{  
+	///* make this throw when fails if it doesn't already
+	PresentTask="Erasing With Nwipe...";
+	std::string data;
+	std::string cmd="sudo ./nwipe --autonuke --nogui --method=zero "+this->path ;
+	FILE * stream;
+    const int max_buffer = 256;
+    char buffer[max_buffer];
+    stream = popen(cmd.c_str(), "r");
+    if(stream) {
+        while(!feof(stream))
+            if(fgets(buffer, max_buffer, stream) != NULL) {
+				#ifdef _Debug
+				std::cout<<buffer;
+				#endif
+				data.append(buffer);
+			}
+        pclose(stream);
+    }
+	LastOutput=data;
+	#ifdef _Debug
+	std::cout<<path<<" "<<PresentTask<<" done"<<std::endl;
+	#endif
+	/*/
 	Command(
 	"sudo ./nwipe --autonuke --nogui --method=zero "
 		+this->path
 		,"Erasing With Nwipe..."
 	);
+	//*/
+}
+void HDD::print(std::ostream* textgohere){
+	UpdateRunTime();
+	//TODO add info on which client is running
+	*textgohere<<"Status of: "<<this->path<<std::endl;
+	*textgohere<<"Presence :    "<<((this->Present)?"detected":"undetected")<<std::endl;
+	*textgohere<<"Smart Support: "<<(this->SmartSupport?"available":"unavailable")<<std::endl;
+	*textgohere<<"Model Family: "<<this->ModelFamily<<std::endl;
+	*textgohere<<"Model  : "<<this->Model<<std::endl;
+	*textgohere<<"Serial : "<<this->SerialNumber<<std::endl;
+	*textgohere<<"User Capacity: "<<this->UserCapacity<<std::endl;
+	*textgohere<<"Last Exception : "<<this->Exception<<std::endl;
+	*textgohere<<"Present Task: "<<this->PresentTask<<std::endl;
+	*textgohere<<"Last/Current Command :" << this->CmdString<<std::endl;
+	*textgohere<<"Last Output "<<this->LastOutput<<std::endl;
+	*textgohere<<"Start Time: "<<this->StartTime<<std::endl;
+	*textgohere<<"End Time: "<<this->EndTime<<std::endl;
+	*textgohere<<"Run Time: "<<this->RunTime<<std::endl;
+	*textgohere<<"______________________________________________________"<<std::endl;
+}	
+void HDD::print(){
+	print(&std::cout);
+}
+void HDD::log(std::string * batch){
+	std::string filename="/home/hdd-test-server/HDD_logs"
+		+(*batch)+".log";
+	this->PresentTask ="Writing to the log file:"+filename;	
+	std::fstream* LogFile
+		= new std::fstream(filename,std::ios::app);
+	#ifdef _Debug
+	std::cout<<this->path<<" :  "<<this->PresentTask<<std::endl;
+	std::cout<<this->path<<"log file is open:"<<LogFile->is_open()<<std::endl;
+	print(&std::cout);
+	#endif
+	print(LogFile);
 }
 void HDD::partition()
 {

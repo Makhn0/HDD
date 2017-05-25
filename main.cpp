@@ -18,7 +18,8 @@ void print(HDD * HDDs[], int length)
 	std::cout<<"########################################################\n\n";
 	for(int i=0;i<length;i++)	
 	{
-		if(HDDs[i]->Present) HDDs[i]->print();
+//		if(HDDs[i]->Present)
+			HDDs[i]->print();
 	}
 }
 void contPrint(HDD * HDDs[], int length)
@@ -27,7 +28,7 @@ void contPrint(HDD * HDDs[], int length)
 	{
 		system("clear||cls");
 		print(HDDs,length);
-		std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+		std::this_thread::sleep_for(std::chrono::milliseconds(5000));
 	}
 }
 std::string month(int i){
