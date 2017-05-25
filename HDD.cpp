@@ -17,24 +17,25 @@ struct Exception : public exception{
 }
 */
 std::string StdOut(std::string cmd);
-void HDD::Command(std::string a,std::string b  ){
+void HDD::Command(std::string a,std::string b,bool err2out=true  ){
 	this->PresentTask=b;
 	#ifdef _Debug
 	std::cout<<this->path<<" : "<<this->PresentTask<<std::endl;
 	#endif
+	if(err2out)a.append(" 2>&1");
 	Command(a);
 }
 void HDD::Command(std::string a){
 	this->CmdString=a;
 	
 	#ifdef _Debug
-	std::cout<<this->path<<" LastCommand:"<<this->CmdString<<std::endl;
+	std::cout<<this->path<<" Last Command:"<<this->CmdString<<std::endl;
 	#endif
 	
 	this->LastOutput=StdOut(this->CmdString);
 	
 	#ifdef _Debug
-	std::cout<<this->path<<" LastOutput:"<<this->LastOutput
+	std::cout<<this->path<<" Last Output:"<<this->LastOutput
 	<<"_::"<<std::endl;	
 	std::cout<<this->path<<" "<<this->PresentTask<<" done "<<std::endl;
 	#endif
@@ -49,7 +50,7 @@ std::string StdOut(std::string cmd) {
     if(stream) {
         while(!feof(stream))
             if(fgets(buffer, max_buffer, stream) != NULL) data.append(buffer);
-        pclose(stream);
+        if (pclose(stream)==-1)throw (std::string) "critical error stopping";
     }
     return data;
 }
@@ -96,12 +97,11 @@ void HDD::run(std::string* batch){
 		}
 		while(presence())
 		{
-			sleep(1000);
+			sleep(30);
 		}
 	}
 }
 void HDD::run_body(std::string* batch){
-	throw (std::string)"fuck you";
 	while(1)
 	{
 		PresentTask="reseting";
@@ -115,7 +115,7 @@ void HDD::run_body(std::string* batch){
 		}
 		get_data();
 		if(!presence()){continue;}
-		#ifndef _skip_smart
+		#ifndef _Skip_Smart
 		smartctl_run();
 		bool a=false;
 		while(smartctl_running()){
@@ -344,30 +344,46 @@ void HDD::erase()
 {  
 	///* make this throw when fails if it doesn't already
 	PresentTask="Erasing With Nwipe...";
-	std::string data;
-	std::string cmd="sudo ./nwipe --autonuke --nogui --method=zero "+this->path ;
+	CmdString="sudo ./nwipe --autonuke --nogui --method=zero " 
+		+this->path 
+		+" 2>&1 ";
+	LastOutput="";
 	FILE * stream;
-    const int max_buffer = 256;
-    char buffer[max_buffer];
-    stream = popen(cmd.c_str(), "r");
-    if(stream) {
-        while(!feof(stream))
-            if(fgets(buffer, max_buffer, stream) != NULL) {
+	const int max_buffer = 256;
+	char buffer[max_buffer];
+	#ifdef _Debug
+	std::cout<< path <<" Present Task : "
+		<<PresentTask<<std::endl;
+	std::cout<<path<<" Last Command : "<<CmdString<<std::endl;
+	#endif
+	stream = popen(CmdString.c_str(), "r");
+	int i=0;
+	if(stream) {
+		while(!feof(stream)){
+			i++;
+			if (i%100)std::cout<<"in loop"<<std::endl;
+			if(fgets(buffer, max_buffer, stream) != NULL) 			{
+std::cout<<"in loop and if 1"<<std::endl;
 				#ifdef _Debug
+				std::cout<<"in loop and if 2 "<<std::endl;
 				std::cout<<buffer;
 				#endif
-				data.append(buffer);
+				LastOutput.append(buffer);
 			}
-        pclose(stream);
-    }
-	LastOutput=data;
+		}
+	        if (pclose(stream)==-1)throw (std::string) "critical error stopping";
+	}
+	std::cout<<stream;
 	#ifdef _Debug
 	std::cout<<path<<" "<<PresentTask<<" done"<<std::endl;
+	std::cout<<path<<" final nwipe output "
+		<<LastOutput<<std::endl;
 	#endif
 	/*/
 	Command(
 	"sudo ./nwipe --autonuke --nogui --method=zero "
 		+this->path
+		+" 2>&1 "
 		,"Erasing With Nwipe..."
 	);
 	//*/
@@ -375,6 +391,7 @@ void HDD::erase()
 void HDD::print(std::ostream* textgohere){
 	UpdateRunTime();
 	//TODO add info on which client is running
+//extra \ns?
 	*textgohere<<"Status of: "<<this->path<<std::endl;
 	*textgohere<<"Presence :    "<<((this->Present)?"detected":"undetected")<<std::endl;
 	*textgohere<<"Smart Support: "<<(this->SmartSupport?"available":"unavailable")<<std::endl;

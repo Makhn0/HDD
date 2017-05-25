@@ -66,6 +66,7 @@ int main(int argc, char * argv[]){
 	const int DriveNum=1;
 	
 	#ifdef _Debug
+	std::cerr<<"cerr Debug"<<std::endl;
 	std::cout<<"Debug Mode"<<std::endl;
 	std::cout<< "making dev path prefix =";
 	#endif
