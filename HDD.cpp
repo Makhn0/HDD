@@ -132,15 +132,16 @@ void HDD::run_body(std::string* batch){
 		if(a) continue;
 		#endif
 		#ifdef _Erase
-		if(!this->presence()){continue;}
+		/*if(!this->presence()){continue;}
 		this->dd_write(batch);
 		if(!this->presence()){continue;}
 		this->dd_read(batch);
 		if(!this->presence()){continue;}
 		this->hash_check(batch);
 		if(!this->presence()){continue;}
-		
+		//*/
 		this->erase();
+		break;
 		if(!this->presence()){continue;}
 
 		#endif
@@ -347,11 +348,12 @@ void HDD::hash_check(std::string* batch)
 }
 void HDD::erase()
 {  
-	///* make this throw when fails if it doesn't already
+	/* make this throw when fails if it doesn't already
 	PresentTask="Erasing With Nwipe...";
-	CmdString="sudo ./nwipe --autonuke --nogui --method=zero 2>&1 " 
+	CmdString="sudo ./nwipe --autonuke --nogui --method=zero " 
 		+this->path 
-		+"";
+		+" | cat "
+		;
 	LastOutput="";
 	FILE * stream;
 	const int max_buffer = 256;
@@ -359,14 +361,17 @@ void HDD::erase()
 	#ifdef _Debug
 	std::cout<< path <<" Present Task : "
 		<<PresentTask<<std::endl;
-	std::cout<<path<<" Last Command : "<<CmdString<<std::endl;
+	std::cout<<path<<" Last Command : "<<CmdString.c_str()<<std::endl;
 	#endif
 	stream = popen(CmdString.c_str(), "r");
 	int i=0;
+	std::cout <<"stream= "<<stream<<std::endl;
 	if(stream) {
+		std::cout<<"in outer if"<<std::endl;
 		while(!feof(stream)){
+			
+			if (i%50==0)std::cout<<"in loop"<<std::endl;
 			i++;
-			if (i%100==0)std::cout<<"in loop"<<std::endl;
 			if(fgets(buffer, max_buffer, stream) != NULL){
 				std::cout<<"in loop and if 1"<<std::endl;
 				#ifdef _Debug
@@ -387,7 +392,6 @@ void HDD::erase()
 	Command(
 	"sudo ./nwipe --autonuke --nogui --method=zero "
 		+this->path
-		+" 2>&1 "
 		,"Erasing With Nwipe..."
 	);
 	//*/
