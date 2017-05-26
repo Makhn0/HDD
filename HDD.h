@@ -8,12 +8,12 @@
 class HDD{
 	public:
 		std::string path;
+		static int instances;
 		
 		bool Present;
 		bool Running;		
 		
 		bool SmartSupport=false;
-		std::string LastOutput;
 		std::string Model;
 		std::string ModelFamily;
 		std::string SerialNumber;
@@ -24,7 +24,10 @@ class HDD{
 		std::string PresentTask;
 		std::string Exception="none";
 		std::string CmdString;
-		static int instances;
+		std::string LastOutput;
+		int LastExitStatus;
+
+
 		
 		long StartTime=0;
 		long EndTime=0;
@@ -53,6 +56,7 @@ class HDD{
 		void dd_read(std::string*);
 		void hash_check(std::string*);
 		void erase();
+		void erase_debrief();
 		void partition();
 		void verify();
 		

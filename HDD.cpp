@@ -36,7 +36,7 @@ void HDD::Command(std::string a){
 	
 	#ifdef _Debug
 	std::cout<<this->path<<" Last Output:"<<this->LastOutput
-	<<"_::"<<std::endl;	
+	<<"_::exit status :"<<LastExitStatus<<std::endl;	
 	std::cout<<this->path<<" "<<this->PresentTask<<" done "<<std::endl;
 	#endif
 }
@@ -50,7 +50,8 @@ std::string StdOut(std::string cmd) {
     if(stream) {
         while(!feof(stream))
             if(fgets(buffer, max_buffer, stream) != NULL) data.append(buffer);
-        if (pclose(stream)==-1)throw (std::string) "critical error stopping";
+	int LastExitStatus=pclose(stream);
+        if (LastExitStatus==-1)throw (std::string) "critical error stopping";
     }
     return data;
 }
@@ -72,7 +73,7 @@ void HDD::run(std::string* batch){
 	while(1){
 		#ifdef _Debug
 		std::cout<<this->path<<" : beginning running loop... "<< std::endl;
-		sleep(5);
+		//sleep(1);
 		#endif
 		try{
 			run_body(batch);
@@ -141,6 +142,7 @@ void HDD::run_body(std::string* batch){
 		if(!this->presence()){continue;}
 		//*/
 		this->erase();
+		this->erase_debrief();
 		break;
 		if(!this->presence()){continue;}
 
@@ -396,6 +398,7 @@ void HDD::erase()
 	);
 	//*/
 }
+void HDD::erase_debrief(){}
 void HDD::print(std::ostream* textgohere){
 	UpdateRunTime();
 	//TODO add info on which client is running

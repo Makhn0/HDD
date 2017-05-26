@@ -83,12 +83,12 @@ int main(int argc, char * argv[]){
 		HDDs[i]= new HDD(devPath+(char)('a'+i));
 		runner[i]=new std::thread(&HDD::run, HDDs[i],&BatchName);
 		#ifdef _Debug
-		sleep(1);
+		//sleep(1);
 		#endif
 	}
 	#ifdef _Debug
 	puts("ended instantiating HDD objects");
-	sleep(1);
+	//sleep(1);
 	#endif
 
 	#ifndef _Debug
