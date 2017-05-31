@@ -55,6 +55,7 @@ class HDD{
 		void dd_write(std::string*);
 		void dd_read(std::string*);
 		void hash_check(std::string*);
+		void erase(std::string*);
 		void erase();
 		void erase_debrief();
 		void partition();

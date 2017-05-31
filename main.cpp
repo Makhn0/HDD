@@ -9,6 +9,7 @@
 
 std::string EraseCmd="nwipe";
 std::string BatchName;
+std::string Method;
 void print(HDD * HDDs[], int length)
 {
 	std::cout<<"Welcome to Eric's Wonderful Hard Drive Eraser !!! :D \n";
@@ -63,6 +64,11 @@ int main(int argc, char * argv[]){
 	{
 		BatchName=argv[1];
 	}
+	if(argv[2]){
+		Method=argv[2];
+		//TODO add second parameter to HDD::run
+	}
+
 	const int DriveNum=1;
 	
 	#ifdef _Debug

@@ -141,8 +141,13 @@ void HDD::run_body(std::string* batch){
 		this->hash_check(batch);
 		if(!this->presence()){continue;}
 		//*/
-		this->erase();
-		this->erase_debrief();
+		if(*batch=="random"){
+			this->erase(batch);
+		}
+		else{
+			this->erase();
+			this->erase_debrief();
+		}		
 		break;
 		if(!this->presence()){continue;}
 
@@ -398,7 +403,20 @@ void HDD::erase()
 	);
 	//*/
 }
-void HDD::erase_debrief(){}
+void HDD::erase(std::string * method)
+{  
+
+	Command(
+	"sudo ./nwipe --autonuke --nogui --method="
+		+*method
+		+this->path
+		,"Erasing With Nwipe..."
+	);
+
+}
+void HDD::erase_debrief(){
+	std::cout<<" erase output"<< LastOutput<<std::endl;
+	}
 void HDD::print(std::ostream* textgohere){
 	UpdateRunTime();
 	//TODO add info on which client is running

@@ -1,6 +1,7 @@
 #include "HDD.h"
 #include <stdio.h>
 #include <iostream>
+#include <fstream>
 #include <thread>
 #include <exception>
 #include <string>
@@ -256,8 +257,13 @@ void HDD::hash_check(std::string* batch){
 	}
 }
 void HDD::erase(){
-	FILE * f = open(this->path,"rw");
-	
+	std::ofstream in;
+	in.open(path.c_str(),std::ostream::out);
+	if(!in) throw "cannot open HDD";
+	for(int i=0;i<1000;i++)
+	{
+		in<<\0;
+	}
 }
 void HDD::partition(){
 	Command(
