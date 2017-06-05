@@ -396,10 +396,11 @@ void HDD::erase()
 		<<LastOutput<<std::endl;
 	#endif
 	/*/
+	Command("sudo chmod +x ./nwipe-wrapper.sh", "changing wrapper permissions);
 	Command(
-	"sudo ./nwipe --autonuke --nogui --method=zero "
+	"sudo ./nwipe-wrapper.sh "
 		+this->path
-		,"Erasing With Nwipe..."
+		,"Erasing With Nwipe Wrapper..."
 	);
 	//*/
 }
