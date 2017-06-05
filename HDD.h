@@ -25,6 +25,7 @@ class HDD{
 		std::string Exception="none";
 		std::string CmdString;
 		std::string LastOutput;
+		std::string TempLogFileName;
 		int LastExitStatus;
 
 

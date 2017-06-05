@@ -396,10 +396,13 @@ void HDD::erase()
 		<<LastOutput<<std::endl;
 	#endif
 	/*/
-	Command("sudo chmod +x ./nwipe-wrapper.sh", "changing wrapper permissions);
-	Command(
-	"sudo ./nwipe-wrapper.sh "
-		+this->path
+	TempLogFileName="Temp_"+path[path.size()-1]+".txt";
+	Command("sudo rm "+TempLogFileName, "erasing old temporay log file");
+	Command("sudo ./nwipe --autonuke --nogui --method=zero -l"
+		+TempLogFileName
+		+ " "
+		+this->path	
+		+" 2>&1"
 		,"Erasing With Nwipe Wrapper..."
 	);
 	//*/
@@ -416,7 +419,7 @@ void HDD::erase(std::string * method)
 
 }
 void HDD::erase_debrief(){
-	std::cout<<" erase output"<< LastOutput<<std::endl;
+	Command("sudo cat "+TempLogFileName,"retreiving log file contents");
 	}
 void HDD::print(std::ostream* textgohere){
 	UpdateRunTime();
