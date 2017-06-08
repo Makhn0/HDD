@@ -6,6 +6,7 @@
 #include <time.h>
 
 enum Result_t{Unfinished,FinishedSuccess,FinishedFail};
+
 class HDD{
 	public:
 		const std::string path;
