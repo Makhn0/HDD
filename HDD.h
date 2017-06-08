@@ -5,6 +5,7 @@
 #include <thread>
 #include <time.h>
 
+enum Result_t{Unfinished,FinishedSuccess,FinishedFail};
 class HDD{
 	public:
 		const std::string path;
@@ -21,6 +22,7 @@ class HDD{
 		
 		long size=0;
 		
+		Result_t Status =Unfinished;
 		std::string PresentTask;
 		std::string Exception="none";
 		std::string CmdString;
@@ -70,4 +72,5 @@ class HDD{
 		void reset();
 };
 //enum SmartControl {Unavailable, Available_Disabled, Avialable_Enabled}
+
 #endif

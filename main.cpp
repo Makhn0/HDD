@@ -51,18 +51,23 @@ std::string month(int i){
 }
 int main(int argc, char * argv[]){
 	//TODO test time is accurate on all clients
-	time_t now=time(0);
-	tm * date=localtime(&now);
-	std::stringstream * temp=new std::stringstream();
-		*temp<<(1900+ date->tm_year)
-			<<"_"
-			<<month(date->tm_mon)
-			<<"_"
-			<<(1+date->tm_mday);		
-	BatchName=temp->str();
+	
+
 	if(argv[1])
 	{
 		BatchName=argv[1];
+	}
+	else{
+		//if time needed for other things take out of else
+		time_t now=time(0);
+		tm * date=localtime(&now);
+		std::stringstream * temp=new std::stringstream();
+			*temp<<(1900+ date->tm_year)
+				<<"_"
+				<<month(date->tm_mon)
+				<<"_"
+				<<(1+date->tm_mday);	
+		BatchName=temp->str();
 	}
 	if(argv[2]){
 		Method=argv[2];

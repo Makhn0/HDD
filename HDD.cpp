@@ -16,30 +16,6 @@ struct Exception : public exception{
 	}
 }
 */
-std::string StdOut(std::string cmd);
-void HDD::Command(std::string a,std::string b,bool err2out=true  ){
-	PresentTask=b;
-	#ifdef _Debug
-	std::cout<<path<<" : "<<PresentTask<<std::endl;
-	#endif
-	//if(err2out)a.append(" 2>&1");
-	Command(a);
-}
-void HDD::Command(std::string a){
-	CmdString=a;
-	
-	#ifdef _Debug
-	std::cout<<path<<" Last Command:"<<CmdString<<std::endl;
-	#endif
-	
-	this->LastOutput=StdOut(this->CmdString);
-	
-	#ifdef _Debug
-	std::cout<<this->path<<" Last Output:"<<this->LastOutput
-	<<"_::exit status :"<<LastExitStatus<<std::endl;	
-	std::cout<<this->path<<" "<<this->PresentTask<<" done "<<std::endl;
-	#endif
-}
 
 std::string StdOut(std::string cmd) {
     std::string data;
@@ -68,9 +44,34 @@ long myStol(std::string a){
 	}
 	return output;
 }
+void HDD::Command(std::string a,std::string b,bool err2out=true  ){
+	PresentTask=b;
+	#ifdef _Debug
+	std::cout<<path<<" : "<<PresentTask<<std::endl;
+	#endif
+	//if(err2out)a.append(" 2>&1");
+	Command(a);
+}
+void HDD::Command(std::string a){
+	CmdString=a;
+	
+	#ifdef _Debug
+	std::cout<<path<<" Last Command:"<<CmdString<<std::endl;
+	#endif
+	
+	this->LastOutput=StdOut(this->CmdString);
+	
+	#ifdef _Debug
+	std::cout<<this->path<<" Last Output:"<<this->LastOutput
+	<<"_::exit status :"<<LastExitStatus<<std::endl;	
+	std::cout<<this->path<<" "<<this->PresentTask<<" done "<<std::endl;
+	#endif
+}
+
+
 //void HDD::run_body(std::string* batch);
 void HDD::run(std::string* batch){
-	while(1){
+	while(Status==Unfinished){
 		#ifdef _Debug
 		std::cout<<this->path<<" : beginning running loop... "<< std::endl;
 		//sleep(1);
@@ -133,7 +134,8 @@ void HDD::run_body(std::string* batch){
 		if(a) continue;
 		#endif
 		#ifdef _Erase
-		/*if(!this->presence()){continue;}
+		///*
+		if(!this->presence()){continue;}
 		this->dd_write(batch);
 		if(!this->presence()){continue;}
 		this->dd_read(batch);
@@ -141,6 +143,7 @@ void HDD::run_body(std::string* batch){
 		this->hash_check(batch);
 		if(!this->presence()){continue;}
 		//*/
+		//obviously needs more work
 		if(*batch=="random"){
 			this->erase(batch);
 		}
@@ -148,7 +151,7 @@ void HDD::run_body(std::string* batch){
 			this->erase();
 			this->erase_debrief();
 		}		
-		break;
+		//break;
 		if(!this->presence()){continue;}
 
 		#endif
@@ -159,8 +162,7 @@ void HDD::run_body(std::string* batch){
 		std::cout<<this->path<<" end of erase: writing to logs";
 		print();
 		#endif
-		log(batch);
-		PresentTask="done";		
+		log(batch);	
 		while(presence())
 		{
 		#ifdef _Debug
@@ -353,99 +355,44 @@ void HDD::hash_check(std::string* batch)
 		throw (std::string) path+"hash rw failure...";
 	}
 }
-void HDD::erase()
-{  
-	//* make this throw when fails if it doesn't already
-	PresentTask="Erasing With Nwipe...";
-	CmdString=std::string()
-		//"sudo xterm -hold -title "+path+" -e"
-		+" sudo ./nwipe --autonuke --nogui --method=zero " 
-		+this->path 
-		+" 2>&1 "
-		;
-	LastOutput="";
-	FILE * stream;
-	const int max_buffer = 256;
-	char buffer[max_buffer];
-	#ifdef _Debug
-	std::cout<< path <<" Present Task : "
-		<<PresentTask<<std::endl;
-	std::cout<<path<<" Last Command : "<<CmdString<<std::endl;
-	#endif
-	stream = popen(CmdString.c_str(), "r");
-	int i=0;
-	std::cout <<"stream= "<<stream<<std::endl;
-	if(stream) {
-		std::cout<<"in outer if"<<std::endl;
-		while(!feof(stream)){
-			
-			if (i%50==0)std::cout<<"in loop"<<std::endl;
-			i++;
-			if(fgets(buffer, max_buffer, stream) != NULL){
-				std::cout<<"in loop and if 1"<<std::endl;
-				#ifdef _Debug
-				std::cout<<"in loop and if 2 "<<std::endl;
-				
-				std::cout<<buffer;
-				for(int j=0;j<256;j++){	
-					std::cout<<(int) buffer[j]<<" , ";
-				}
-				std::cout<<std::endl;
-				#endif
-				LastOutput.append(buffer);
-			}
-		}
-	        if (pclose(stream)==-1)throw (std::string) "critical error stopping";
-	}
-	#ifdef _Debug
-	std::cout<<path<<" "<<PresentTask<<" done"<<std::endl;
-	std::cout<<path<<" final nwipe output : "
-		<<LastOutput<<std::endl;
-	#endif
-	/*/
-<<<<<<< HEAD
-
+void HDD::erase(std::string * method=new std::string("zero"))
+{  	
 	std::string TempName("");
 	TempName.append("Temp_");
 	TempName.append( this->path.substr(this->path.size()-1,1) );
 	TempName.append(".txt");
 	this->TempLogFileName=TempName;
+	#ifdef _Debug
 	std::cout<<"templogfilename : "<<TempLogFileName<<std::endl;
-	Command("sudo rm "+this->TempLogFileName, "erasing old temporay log file");
-	Command("sudo ./nwipe --autonuke --nogui --method=zero "
-		//+"-l"
-		//+this->TempLogFileName
-		//+ " "
-=======
-	TempLogFileName="Temp_"+path.substr(path.size()-1,1)+".txt";
-	std::cout<<"TempFile"<<TempLogFileName<<std::endl;
+	#endif
 	Command("sudo rm "+TempLogFileName, "erasing old temporay log file");
-	Command("sudo ./nwipe --autonuke --nogui --method=zero -l"
+	Command("sudo ./nwipe --autonuke --nogui --method="
+		+*method		
+		+"zero -l"
 		+TempLogFileName
 		+ " "
->>>>>>> d4e539b4eeb23fce37075e34c64a4bae3c1b41b7
 		+this->path	
-		+" | cat"
 		,"Erasing With Nwipe..."
 	);
-	//*/
 }
-void HDD::erase(std::string * method)
-{  
-
-	Command(
-	"sudo ./nwipe --autonuke --nogui --method="
-		+*method
-		+" "
-		+this->path
-		,"Erasing With Nwipe..."
-	);
-
+void HDD::erase()
+{
+	erase(new std::string("zero"));
 }
 void HDD::erase_debrief(){
-	Command("sudo cat "+TempLogFileName,"retreiving log file contents");
+	Command("sudo cat "+TempLogFileName,"debriefing, retreiving log file contents");
+	if(LastOutput.find("Failure"))
+	{
+		PresentTask= "Finished, Failed";
+		Status=FinishedFail;
 	}
-void HDD::print(std::ostream* textgohere){
+	else if(LastOutput.find("Success")||LastOutput.find("verifined")||LastOutput.find("Blanked Device")){
+		PresentTask="Finished, Success";
+		Status=FinishedSuccess;
+	}
+}
+//trouble with default pointer types; need to override function
+void HDD::print(std::ostream* textgohere=&std::cout){
 	UpdateRunTime();
 	//TODO add info on which client is running
 //extra \ns?
@@ -464,10 +411,12 @@ void HDD::print(std::ostream* textgohere){
 	*textgohere<<"End Time: "<<this->EndTime<<std::endl;
 	*textgohere<<"Run Time: "<<this->RunTime<<std::endl;
 	*textgohere<<"______________________________________________________"<<std::endl;
-}	
+}
+///*
 void HDD::print(){
 	print(&std::cout);
 }
+//*/
 void HDD::log(std::string * batch){
 	std::string filename="/home/hdd-test-server/HDD_logs"
 		+(*batch)+".log";
