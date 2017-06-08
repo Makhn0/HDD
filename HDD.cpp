@@ -22,7 +22,7 @@ void HDD::Command(std::string a,std::string b,bool err2out=true  ){
 	#ifdef _Debug
 	std::cout<<path<<" : "<<PresentTask<<std::endl;
 	#endif
-	if(err2out)a.append(" 2>&1");
+	//if(err2out)a.append(" 2>&1");
 	Command(a);
 }
 void HDD::Command(std::string a){
@@ -396,14 +396,21 @@ void HDD::erase()
 		<<LastOutput<<std::endl;
 	#endif
 	/*/
-	TempLogFileName="Temp_"+path[path.size()-1]+".txt";
-	Command("sudo rm "+TempLogFileName, "erasing old temporay log file");
-	Command("sudo ./nwipe --autonuke --nogui --method=zero -l"
-		+TempLogFileName
-		+ " "
+
+	std::string TempName("");
+	TempName.append("Temp_");
+	TempName.append( this->path.substr(this->path.size()-1,1) );
+	TempName.append(".txt");
+	this->TempLogFileName=TempName;
+	std::cout<<"templogfilename : "<<TempLogFileName<<std::endl;
+	Command("sudo rm "+this->TempLogFileName, "erasing old temporay log file");
+	Command("sudo ./nwipe --autonuke --nogui --method=zero "
+		//+"-l"
+		//+this->TempLogFileName
+		//+ " "
 		+this->path	
-		+" 2>&1"
-		,"Erasing With Nwipe Wrapper..."
+		+" | cat"
+		,"Erasing With Nwipe..."
 	);
 	//*/
 }

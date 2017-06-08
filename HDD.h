@@ -7,7 +7,7 @@
 
 class HDD{
 	public:
-		std::string path;
+		const std::string path;
 		static int instances;
 		
 		bool Present;
