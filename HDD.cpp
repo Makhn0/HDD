@@ -355,11 +355,13 @@ void HDD::hash_check(std::string* batch)
 }
 void HDD::erase()
 {  
-	/* make this throw when fails if it doesn't already
+	//* make this throw when fails if it doesn't already
 	PresentTask="Erasing With Nwipe...";
-	CmdString="sudo ./nwipe --autonuke --nogui --method=zero " 
+	CmdString=std::string()
+		//"sudo xterm -hold -title "+path+" -e"
+		+" sudo ./nwipe --autonuke --nogui --method=zero " 
 		+this->path 
-		+" | cat "
+		+" 2>&1 "
 		;
 	LastOutput="";
 	FILE * stream;
@@ -368,7 +370,7 @@ void HDD::erase()
 	#ifdef _Debug
 	std::cout<< path <<" Present Task : "
 		<<PresentTask<<std::endl;
-	std::cout<<path<<" Last Command : "<<CmdString.c_str()<<std::endl;
+	std::cout<<path<<" Last Command : "<<CmdString<<std::endl;
 	#endif
 	stream = popen(CmdString.c_str(), "r");
 	int i=0;
@@ -383,7 +385,12 @@ void HDD::erase()
 				std::cout<<"in loop and if 1"<<std::endl;
 				#ifdef _Debug
 				std::cout<<"in loop and if 2 "<<std::endl;
+				
 				std::cout<<buffer;
+				for(int j=0;j<256;j++){	
+					std::cout<<(int) buffer[j]<<" , ";
+				}
+				std::cout<<std::endl;
 				#endif
 				LastOutput.append(buffer);
 			}
@@ -392,7 +399,7 @@ void HDD::erase()
 	}
 	#ifdef _Debug
 	std::cout<<path<<" "<<PresentTask<<" done"<<std::endl;
-	std::cout<<path<<" final nwipe output "
+	std::cout<<path<<" final nwipe output : "
 		<<LastOutput<<std::endl;
 	#endif
 	/*/
