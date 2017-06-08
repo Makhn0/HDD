@@ -396,6 +396,7 @@ void HDD::erase()
 		<<LastOutput<<std::endl;
 	#endif
 	/*/
+<<<<<<< HEAD
 
 	std::string TempName("");
 	TempName.append("Temp_");
@@ -408,6 +409,14 @@ void HDD::erase()
 		//+"-l"
 		//+this->TempLogFileName
 		//+ " "
+=======
+	TempLogFileName="Temp_"+path.substr(path.size()-1,1)+".txt";
+	std::cout<<"TempFile"<<TempLogFileName<<std::endl;
+	Command("sudo rm "+TempLogFileName, "erasing old temporay log file");
+	Command("sudo ./nwipe --autonuke --nogui --method=zero -l"
+		+TempLogFileName
+		+ " "
+>>>>>>> d4e539b4eeb23fce37075e34c64a4bae3c1b41b7
 		+this->path	
 		+" | cat"
 		,"Erasing With Nwipe..."
@@ -420,6 +429,7 @@ void HDD::erase(std::string * method)
 	Command(
 	"sudo ./nwipe --autonuke --nogui --method="
 		+*method
+		+" "
 		+this->path
 		,"Erasing With Nwipe..."
 	);
