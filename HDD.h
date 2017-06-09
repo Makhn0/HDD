@@ -48,8 +48,8 @@ class HDD{
 		void UpdateRunTime(){
 			RunTime=time(0)-StartTime;
 		}
-		void Command(std::string a,std::string b,bool err2out);
-		void Command(std::string a);
+		void Command(std::string a,std::string b,bool throwing);
+		void Command(std::string a,bool throwing);
 		
 		bool presence();
 		void get_data();

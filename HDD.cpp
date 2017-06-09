@@ -30,7 +30,7 @@ std::string ResultTToString(Result_t a)
 	return "Unfinished";
 }
 #endif
-std::string StdOut(std::string cmd) {
+std::string StdOut(std::string cmd, int * LastExitStatus=new int(0),bool throwing=true) {
     std::string data;
     FILE * stream;
     const int max_buffer = 256;
@@ -39,8 +39,8 @@ std::string StdOut(std::string cmd) {
     if(stream) {
         while(!feof(stream))
             if(fgets(buffer, max_buffer, stream) != NULL) data.append(buffer);
-	int LastExitStatus=pclose(stream);
-        if (LastExitStatus==-1)throw (std::string) "critical error stopping";
+	*LastExitStatus=pclose(stream);
+        if (*LastExitStatus!=0&&throwing)throw (std::string) "Critical error stopping";
     }
     return data;
 }
@@ -57,22 +57,22 @@ long myStol(std::string a){
 	}
 	return output;
 }
-void HDD::Command(std::string a,std::string b,bool err2out=true  ){
+void HDD::Command(std::string a,std::string b,bool throwing=true){
 	PresentTask=b;
 	#ifdef _Debug
 	std::cout<<path<<" : "<<PresentTask<<std::endl;
 	#endif
-	if(err2out)a.append(" 2>&1");
-	Command(a);
+	a.append(" 2>&1");
+	Command(a,throwing);
 }
-void HDD::Command(std::string a){
+void HDD::Command(std::string a,bool throwing=true){
 	CmdString=a;
 	
 	#ifdef _Debug
 	std::cout<<path<<" : Last Command:"<<CmdString<<std::endl;
 	#endif
 	
-	this->LastOutput=StdOut(this->CmdString);
+	this->LastOutput=StdOut(this->CmdString,&this->LastExitStatus,throwing);
 	
 	#ifdef _Debug
 	std::cout<<this->path<<" : Last Output:"<<this->LastOutput
@@ -84,40 +84,62 @@ void HDD::Command(std::string a){
 
 //void HDD::run_body(std::string* batch);
 void HDD::run(std::string* batch){
-	while(Status==Unfinished){
+	while(1){
 		#ifdef _Debug
 		std::cout<<this->path<<" : beginning running loop... "<< std::endl;
 		//sleep(1);
 		#endif
+		PresentTask="reseting";
+		#ifdef _debug
+		std::cout<<this->path<<" : resetting... "<<std::endl;
+		#endif
+		reset();
+		PresentTask="waiting to detect...";
+		while(!presence()){
+			sleep(5);
+		}
 		try{
 			run_body(batch);
 		}
 		catch(std::string e){
 			this->Exception= e;
 			this->PresentTask = " Critical error, stopping. ";
+			this->Status=FinishedFail;
 			
 			#ifdef _Debug
-			std::cout<<this->path<<" : Exception thrown : "<<this->Exception<<std::endl;		
+			std::cout<<this->path<<"#####################WARNING#####################"<<std::endl;
+			std::cout<<this->path<<" : Exception thrown : "<<this->Exception<<std::endl;	
 			std::cout<<this->path<<" : PresentTask : "<<this->PresentTask<<std::endl;
+			std::cout<<this->path<<" : LastCommand : "<<this->CmdString<<std::endl;	
+			std::cout<<this->path<<" : LastOutput : "<<this->LastOutput<<std::endl;
+			std::cout<<this->path<<"#################################################"<<std::endl;
 			#endif
 		}
 		catch(std::exception e){
 			this->Exception=e.what();
 			this->PresentTask = "critical error, stopping. ";
+			this->Status=FinishedFail;
 			
 			#ifdef _Debug
+			std::cout<<this->path<<"#####################WARNING#####################"<<std::endl;
 			std::cout<<this->path<<" : Exception thrown : "<<this->Exception<<std::endl;	
 			std::cout<<this->path<<" : PresentTask : "<<this->PresentTask<<std::endl;
+			std::cout<<this->path<<" : LastCommand : "<<this->CmdString<<std::endl;	
+			std::cout<<this->path<<" : LastOutput : "<<this->LastOutput<<std::endl;
+			std::cout<<this->path<<"#################################################"<<std::endl;
 			#endif
 		}
-		/* just stop when finished for now uncomment when  making release
 		while(presence())
 		{
-			sleep(30);
+			#ifdef _Debug
+			std::cout<<this->path<<" : end of run, no pull out test"<<std::endl;
+			//break;
+			#endif
+			sleep(5);
 		}
-		/*/
-		break;
-		//*/
+		#ifdef _Debug
+		std::cout<<this->path<<" : past waiting"<<std::endl<<std::endl;
+		#endif
 	}
 	#ifdef _Debug
 	std::cout<<path;
@@ -125,73 +147,49 @@ void HDD::run(std::string* batch){
 	#endif
 }
 void HDD::run_body(std::string* batch){
-	while(1)
-	{
-		PresentTask="reseting";
-		#ifdef _debug
-		std::cout<<this->path<<" : resetting... "<<std::endl;
-		#endif
-		reset();
-		PresentTask="waiting to detect...";
-		while( !(presence()) ){
-			sleep(2);
+	get_data();
+	if(!presence()){return ;}
+	#ifndef _Skip_Smart
+	smartctl_run();
+	bool a=false;
+	while(smartctl_running()){
+		if(!presence()){
+			a=true;
+			break;
 		}
-		get_data();
-		if(!presence()){continue;}
-		#ifndef _Skip_Smart
-		smartctl_run();
-		bool a=false;
-		while(smartctl_running()){
-			if(!presence()){
-				a=true;
-				break;
-			}
-			sleep(10);		
-		}
-		if(a) continue;
-		#endif
-		#ifdef _Erase
-		///*
-		if(!this->presence()){continue;}
-		this->dd_write(batch);
-		if(!this->presence()){continue;}
-		this->dd_read(batch);
-		if(!this->presence()){continue;}
-		this->hash_check(batch);
-		if(!this->presence()){continue;}
-		//*/
-		//obviously needs more work
-		if(*batch=="random"){
-			this->erase(batch);
-		}
-		else{
-			this->erase();
-			this->erase_debrief();
-		}		
-		//break;
-		if(!this->presence()){continue;}
-
-		#endif
-		
-		this->EndTime=time(0);
-	
-		#ifdef _Debug	
-		std::cout<<this->path<<" : end of erase: writing to logs";
-		print();
-		#endif
-		log(batch);	
-		while(presence())
-		{
-		#ifdef _Debug
-		std::cout<<this->path<<" : end of run, no pull out test"<<std::endl;
-		//break;
-		#endif
-			sleep(100);
-		}
-		#ifdef _Debug
-		std::cout<<this->path<<" : past waiting"<<std::endl<<std::endl;
-		#endif
+		sleep(10);		
 	}
+	if(a) return;
+	#endif
+	#ifdef _Erase
+	///*
+	if(!this->presence()){return;}
+	this->dd_write(batch);
+	if(!this->presence()){return;}
+	this->dd_read(batch);
+	if(!this->presence()){return;}
+	this->hash_check(batch);
+	if(!this->presence()){return;}
+	//*/
+	//obviously needs more work for different methods
+	if(*batch=="random"){
+		this->erase(batch);
+	}
+	else{
+		this->erase();
+		this->erase_debrief();
+	}		
+	//break;
+	if(!this->presence()){return;}
+	#endif
+	
+	this->EndTime=time(0);
+	if(!this->presence()){return;}
+	#ifdef _Debug	
+	std::cout<<this->path<<" : end of erase: writing to logs";
+	print();
+	#endif
+	log(batch);	
 }
 void HDD::reset(){
 	this->SmartSupport=false;
@@ -204,6 +202,7 @@ void HDD::reset(){
 	this->StartTime=time(0);
 	this->RunTime=0;
 	this->size=0;
+	this->Status=Unfinished;
 }
 bool HDD::presence(){
 	#ifdef _Debug
@@ -387,7 +386,8 @@ void HDD::erase(std::string * method=new std::string("zero"))
 	#ifdef _Debug
 	std::cout<<"templogfilename : "<<TempLogFileName<<std::endl;
 	#endif
-	Command("sudo rm "+TempLogFileName, "erasing old temporay log file, if it exists");
+	Command("sudo rm "+TempLogFileName, "erasing old temporay log file, if it exists",false);
+	Command("sudo touch "+TempLogFileName, "touching new temporary log file");
 	Command("sudo ./nwipe --autonuke --nogui --method="
 		+*method		
 		+" -l"
@@ -405,11 +405,15 @@ void HDD::erase_debrief(){
 	Command("sudo cat "+TempLogFileName,"debriefing, retreiving log file contents");
 	if(LastOutput.find("Failure")!=std::string::npos)
 	{
-		PresentTask= "Finished, Failed";
+		PresentTask= "Finished Erasing, Failed";
 		Status=FinishedFail;
 	}
-	else if((LastOutput.find("Success")!=std::string::npos)||(LastOutput.find("verifined")!=std::string::npos)||(LastOutput.find("Blanked Device")!=std::string::npos)){
-		PresentTask="Finished, Success";
+	else if(
+		(LastOutput.find("Success")!=std::string::npos)
+		||(LastOutput.find("verifined")!=std::string::npos)
+		||(LastOutput.find("Blanked Device")!=std::string::npos)
+	){
+		PresentTask="Finished Erasing, Success";
 		Status=FinishedSuccess;
 	}
 	Command("sudo rm "+TempLogFileName, "erasing temporay log file,");
@@ -429,7 +433,8 @@ void HDD::print(std::ostream* textgohere=&std::cout){
 	*textgohere<<"Last Exception : "<<this->Exception<<std::endl;
 	*textgohere<<"Present Task: "<<this->PresentTask<<std::endl;
 	*textgohere<<"Last/Current Command :" << this->CmdString<<std::endl;
-	*textgohere<<"Last Output "<<this->LastOutput<<std::endl;
+	*textgohere<<"Last Output : "<<this->LastOutput<<std::endl;
+	*textgohere<<"Exit Status : "<<this->LastExitStatus<<std::endl;
 	*textgohere<<"Start Time: "<<this->StartTime<<std::endl;
 	*textgohere<<"End Time: "<<this->EndTime<<std::endl;
 	*textgohere<<"Run Time: "<<this->RunTime<<std::endl;
