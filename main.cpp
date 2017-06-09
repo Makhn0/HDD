@@ -1,3 +1,4 @@
+#include <ostream>
 #include <iostream>
 #include <thread>
 #include <stdlib.h>
@@ -10,6 +11,8 @@
 std::string EraseCmd="nwipe";
 std::string BatchName;
 std::string Method;
+std::ostream * printstream;
+std::ostream * debugstream;
 void print(HDD * HDDs[], int length)
 {
 	std::cout<<"Welcome to Eric's Wonderful Hard Drive Eraser !!! :D \n";
@@ -20,7 +23,7 @@ void print(HDD * HDDs[], int length)
 	for(int i=0;i<length;i++)	
 	{
 //		if(HDDs[i]->Present)
-			HDDs[i]->print();
+			HDDs[i]->print(printstream);
 	}
 }
 void contPrint(HDD * HDDs[], int length)
@@ -52,7 +55,8 @@ std::string month(int i){
 int main(int argc, char * argv[]){
 	//TODO test time is accurate on all clients
 	
-
+	debugstream=&std::cerr;
+	printstream=&std::cout;
 	if(argv[1])
 	{
 		BatchName=argv[1];
@@ -77,8 +81,9 @@ int main(int argc, char * argv[]){
 	const int DriveNum=1;
 	
 	#ifdef _Debug
-	std::cerr<<"cerr Debug"<<std::endl;
-	std::cout<<"Debug Mode"<<std::endl;
+	
+	*debugstream<<"cerr Debug"<<std::endl;
+	*printstream<<"Debug Mode"<<std::endl;
 	std::cout<< "making dev path prefix =";
 	#endif
 	std::string devPath="/dev/sd";

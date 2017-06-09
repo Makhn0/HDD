@@ -30,7 +30,7 @@ class HDD{
 		std::string LastOutput;
 		std::string TempLogFileName;
 		int LastExitStatus;
-
+		std::ostream * dstream=&std::cerr;
 
 		
 		long StartTime=0;

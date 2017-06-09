@@ -30,7 +30,7 @@ std::string ResultTToString(Result_t a)
 	return "Unfinished";
 }
 #endif
-std::string StdOut(std::string cmd, int * LastExitStatus=new int(0),bool throwing=true) {
+std::string StdOut(std::string cmd, int * LastExitStatusL=new int(0),bool throwing=true) {
     std::string data;
     FILE * stream;
     const int max_buffer = 256;
@@ -39,8 +39,8 @@ std::string StdOut(std::string cmd, int * LastExitStatus=new int(0),bool throwin
     if(stream) {
         while(!feof(stream))
             if(fgets(buffer, max_buffer, stream) != NULL) data.append(buffer);
-	*LastExitStatus=pclose(stream);
-        if (*LastExitStatus!=0&&throwing)throw (std::string) "Critical error stopping";
+	*LastExitStatusL=pclose(stream);
+        if ((*LastExitStatusL!=0)&&throwing)throw (std::string) "Critical error stopping";
     }
     return data;
 }
@@ -57,48 +57,37 @@ long myStol(std::string a){
 	}
 	return output;
 }
-void HDD::Command(std::string a,std::string b,bool throwing=true){
-	PresentTask=b;
-	#ifdef _Debug
-	std::cout<<path<<" : "<<PresentTask<<std::endl;
-	#endif
-	a.append(" 2>&1");
+void HDD::Command(std::string a,std::string task,bool throwing=true){
+	PresentTask=task;
+	*dstream<<path<<" : "<<PresentTask<<std::endl;
 	Command(a,throwing);
+	*dstream<<this->path<<" : "<<this->PresentTask<<" done "<<std::endl;
 }
 void HDD::Command(std::string a,bool throwing=true){
+	a.append(" 2>&1");
 	CmdString=a;
-	
-	#ifdef _Debug
-	std::cout<<path<<" : Last Command:"<<CmdString<<std::endl;
-	#endif
-	
+	*dstream<<path<<" : Last Command:"<<CmdString<<std::endl;
 	this->LastOutput=StdOut(this->CmdString,&this->LastExitStatus,throwing);
 	
-	#ifdef _Debug
-	std::cout<<this->path<<" : Last Output:"<<this->LastOutput
+	*dstream<<this->path<<" : Last Output:"<<this->LastOutput
 	<<"_::exit status :"<<LastExitStatus<<std::endl;	
-	std::cout<<this->path<<" : "<<this->PresentTask<<" done "<<std::endl;
-	#endif
 }
 
 
 //void HDD::run_body(std::string* batch);
 void HDD::run(std::string* batch){
 	while(1){
-		#ifdef _Debug
-		std::cout<<this->path<<" : beginning running loop... "<< std::endl;
+		*dstream<<this->path<<" : beginning running loop... "<< std::endl;
 		//sleep(1);
-		#endif
 		PresentTask="reseting";
-		#ifdef _debug
-		std::cout<<this->path<<" : resetting... "<<std::endl;
-		#endif
+		*dstream<<this->path<<" : resetting... "<<std::endl;
 		reset();
 		PresentTask="waiting to detect...";
 		while(!presence()){
 			sleep(5);
 		}
 		try{
+			
 			run_body(batch);
 		}
 		catch(std::string e){
@@ -106,45 +95,34 @@ void HDD::run(std::string* batch){
 			this->PresentTask = " Critical error, stopping. ";
 			this->Status=FinishedFail;
 			
-			#ifdef _Debug
-			std::cout<<this->path<<"#####################WARNING#####################"<<std::endl;
-			std::cout<<this->path<<" : Exception thrown : "<<this->Exception<<std::endl;	
-			std::cout<<this->path<<" : PresentTask : "<<this->PresentTask<<std::endl;
-			std::cout<<this->path<<" : LastCommand : "<<this->CmdString<<std::endl;	
-			std::cout<<this->path<<" : LastOutput : "<<this->LastOutput<<std::endl;
-			std::cout<<this->path<<"#################################################"<<std::endl;
-			#endif
+			*dstream<<this->path<<"#####################WARNING#####################"<<std::endl;
+			*dstream<<this->path<<" : Exception thrown : "<<this->Exception<<std::endl;	
+			*dstream<<this->path<<" : PresentTask : "<<this->PresentTask<<std::endl;
+			*dstream<<this->path<<" : LastCommand : "<<this->CmdString<<std::endl;	
+			*dstream<<this->path<<" : LastOutput : "<<this->LastOutput<<std::endl;
+			*dstream<<this->path<<"#################################################"<<std::endl;
 		}
 		catch(std::exception e){
 			this->Exception=e.what();
 			this->PresentTask = "critical error, stopping. ";
 			this->Status=FinishedFail;
 			
-			#ifdef _Debug
-			std::cout<<this->path<<"#####################WARNING#####################"<<std::endl;
-			std::cout<<this->path<<" : Exception thrown : "<<this->Exception<<std::endl;	
-			std::cout<<this->path<<" : PresentTask : "<<this->PresentTask<<std::endl;
-			std::cout<<this->path<<" : LastCommand : "<<this->CmdString<<std::endl;	
-			std::cout<<this->path<<" : LastOutput : "<<this->LastOutput<<std::endl;
-			std::cout<<this->path<<"#################################################"<<std::endl;
-			#endif
+			*dstream<<this->path<<"#####################WARNING#####################"<<std::endl;
+			*dstream<<this->path<<" : Exception thrown : "<<this->Exception<<std::endl;	
+			*dstream<<this->path<<" : PresentTask : "<<this->PresentTask<<std::endl;
+			*dstream<<this->path<<" : LastCommand : "<<this->CmdString<<std::endl;	
+			*dstream<<this->path<<" : LastOutput : "<<this->LastOutput<<std::endl;
+			*dstream<<this->path<<"#################################################"<<std::endl;
 		}
+		*dstream<<this->path<<" : end of run, no pull out test"<<std::endl;
+		
 		while(presence())
 		{
-			#ifdef _Debug
-			std::cout<<this->path<<" : end of run, no pull out test"<<std::endl;
-			//break;
-			#endif
-			sleep(5);
+				sleep(10);
 		}
-		#ifdef _Debug
-		std::cout<<this->path<<" : past waiting"<<std::endl<<std::endl;
-		#endif
+		*dstream<<this->path<<" : pulled out starting over..."<<std::endl<<std::endl;
 	}
-	#ifdef _Debug
-	std::cout<<path;
-	puts(" : we did it out of the loop");
-	#endif
+	*dstream<<path<<" : we did it out of the loop"<<std::endl;;
 }
 void HDD::run_body(std::string* batch){
 	get_data();
@@ -176,19 +154,29 @@ void HDD::run_body(std::string* batch){
 		this->erase(batch);
 	}
 	else{
-		this->erase();
-		this->erase_debrief();
+		try{
+			this->erase();
+			this->erase_debrief();
+		}
+		catch(std::string e){
+			*dstream<<path<<" : string thrown"<<std::endl;
+			this->erase_debrief();
+			throw e;
+		}
+		catch(std::exception e){
+
+			*dstream<<path<<" : exception thrown"<<std::endl;
+			this->erase_debrief();
+			throw e;
+		}
 	}		
-	//break;
 	if(!this->presence()){return;}
 	#endif
 	
 	this->EndTime=time(0);
 	if(!this->presence()){return;}
-	#ifdef _Debug	
-	std::cout<<this->path<<" : end of erase: writing to logs";
-	print();
-	#endif
+	*dstream<<this->path<<" : end of erase: writing to logs";
+	print(dstream);
 	log(batch);	
 }
 void HDD::reset(){
@@ -205,16 +193,12 @@ void HDD::reset(){
 	this->Status=Unfinished;
 }
 bool HDD::presence(){
-	#ifdef _Debug
-	std::cout<<this->path<<" : checking presence... "<<std::endl;
-	#endif
+	*dstream<<this->path<<" : checking presence... "<<std::endl;
 	
 	this->Present=
 		access( this->path.c_str(),0 )==0;
 		
-	#ifdef _Debug
-	std::cout<<this->path<<" : presence "<<((this->Present)?"detected":"not detected")<<std::endl;
-	#endif
+	*dstream<<this->path<<" : presence "<<((this->Present)?"detected":"not detected")<<std::endl;
 	
 	return this->Present;
 }
@@ -224,18 +208,16 @@ void HDD::get_data(){
 		"sudo smartctl -i "
 		+this->path
 		+" | awk '/SMART support is:/' | sed -n '1,1p'"
-		,"getting data..."
+		,"getting data...",true
 	);
 	std::string temp = LastOutput.substr(18,9);
 	this->SmartSupport=(temp=="Available");	
 	
-	#ifdef _Debug
-	std::cout<<this->path<<" : SmartSupport : "<<temp<<" : "<<this->SmartSupport<<std::endl; 
-	#endif	
+	*dstream<<this->path<<" : SmartSupport : "<<temp<<" : "<<this->SmartSupport<<std::endl; 
 	 Command(
 		"sudo smartctl -i "
 		+this->path
-		+" | awk '/Model Family:/'"
+		+" | awk '/Model Family:/'",true
 	);
 	//TODO unconfirmed substr parameters
 	if(LastOutput!=""){
@@ -260,14 +242,14 @@ void HDD::get_data(){
 	Command(
 		"sudo smartctl -i "
 		+this->path
-		+" | awk '/Serial Number:/'"
+		+" | awk '/Serial Number:/'",true
 	);	
 	this->SerialNumber =LastOutput.substr(18,35);
 
 	Command(
 		"sudo smartctl -i "
 		+this->path
-		+" | awk '/User Capacity:/'"
+		+" | awk '/User Capacity:/'",true
 	);
 	if(LastOutput!=""){
 		this->UserCapacity=LastOutput.substr(18,20);
@@ -280,10 +262,8 @@ void HDD::get_data(){
 		throw path+" no capacity detected";
 	}
 
-	#ifdef _Debug
-	puts("Data Extracted...");
-	print(&std::cout);
-	#endif
+	*dstream<<"Data Extracted..."<<std::endl;
+	print(dstream);
 }
 void HDD::smartctl_run()
 {	
@@ -292,7 +272,7 @@ void HDD::smartctl_run()
 		"sudo smartctl --device=auto --smart=on --saveauto=on --tolerance=normal --test=long "
 		//+" -C"// no longer need smartctl_running
 		+ this->path
-		,"Running Smart Control..."
+		,"Running Smart Control...",true
 	);
 }
 bool HDD::smartctl_running()
@@ -300,7 +280,7 @@ bool HDD::smartctl_running()
 	Command("sudo smartctl -a "
 		+this->path
 		+" | awk '/Self-test execution status:/' "
-		,"Checking Smart Control is still running..."
+		,"Checking Smart Control is still running...",true
 	);
 	//TODO add to class
 	std::string code=LastOutput.substr(34,4);
@@ -308,9 +288,7 @@ bool HDD::smartctl_running()
 	// it would return still running
 	if (code[0]==' '&&code[1]=='2'&& code[2]=='4') return true;
 	bool done=code=="   0";
-	#ifdef _Debug
-	std::cout<<this->path<<" : smartctl: "<<((!done)?"is running":" has stopped ")<<" code :"<<code<<std::endl;
-	#endif
+	*dstream<<this->path<<" : smartctl: "<<((!done)?"is running":" has stopped ")<<" code :"<<code<<std::endl;
 	if (done) return false;
 	throw (std::string) path+" smartctl error test runtime  "+code;
 }
@@ -318,30 +296,30 @@ void HDD::smartctl_kill()
 {
 	Command("sudo smartctl -X "
 		+this->path
-		,"Checking Smart Control..."
+		,"Checking Smart Control...",true
 	);
 }
 void HDD::dd_write(std::string* batch)
 {
 	std::string hashfile="/temp/"+*batch+"_File.dd";
 	if(access( hashfile.c_str(),0 )==0){
-		#ifdef _Debug
-		std::cout<<this->path<<" : old hash exists: "<<std::endl;
-		#endif
+		*dstream<<this->path<<" : old hash exists: "<<std::endl;
 		Command("sudo rm "
 			+hashfile
 			,"Erasing Old Hash File"
+			,true
 		);
 	}
 	Command("sudo dd if=/dev/urandom of=/tmp/"
 		+*batch
 		+"_File.dd count=100KB "
 		,"Making Input File..."
+		,true
 	);
 	Command("sudo dd if=/tmp/"+*batch+"_File.dd of="
 		+this->path
 		+" count=100KB "
-		,"Copying Input File to Disk.."
+		,std::string("Copying Input File to Disk.."),true
 	);
 }
 void HDD::dd_read(std::string* batch)
@@ -351,7 +329,7 @@ void HDD::dd_read(std::string* batch)
 		+" of=/tmp/"
 		+*batch
 		+"_FileRead.dd count=100KB "
-		,"Making Output File from Disk..."
+		,"Making Output File from Disk...",true
 	);
 }
 void HDD::hash_check(std::string* batch)
@@ -359,22 +337,20 @@ void HDD::hash_check(std::string* batch)
 	Command("md5sum /tmp/"
 		+*batch
 		+"_File.dd"
-		,"Hashing Input File..."
+		,"Hashing Input File...",true
 	);
 	std::string MainHash=LastOutput.substr(0,32);
 	Command(
 	"md5sum /tmp/"
 		+*batch 
 		+"_FileRead.dd"
-		,"Hashing Output File..."
+		,"Hashing Output File...",true
 	);
 	std::string ReadHash= LastOutput.substr(0,32);
 	if(MainHash!=ReadHash){
 		throw (std::string) path+"hash rw failure...";
 	}
-	#ifdef _Debug
-	else{std::cout<<path<<" : Hashes are the Same"<<std::endl;}
-	#endif
+	else{*dstream<<path<<" : Hashes are the Same"<<std::endl;}
 }
 void HDD::erase(std::string * method=new std::string("zero"))
 {  	
@@ -383,18 +359,16 @@ void HDD::erase(std::string * method=new std::string("zero"))
 	TempName.append( this->path.substr(this->path.size()-1,1) );
 	TempName.append(".txt");
 	this->TempLogFileName=TempName;
-	#ifdef _Debug
-	std::cout<<"templogfilename : "<<TempLogFileName<<std::endl;
-	#endif
+	*dstream<<"templogfilename : "<<TempLogFileName<<std::endl;
 	Command("sudo rm "+TempLogFileName, "erasing old temporay log file, if it exists",false);
-	Command("sudo touch "+TempLogFileName, "touching new temporary log file");
+	Command("sudo touch "+TempLogFileName, "touching new temporary log file",true);
 	Command("sudo ./nwipe --autonuke --nogui --method="
 		+*method		
 		+" -l"
 		+TempLogFileName
 		+ " "
 		+this->path	
-		,"Erasing With Nwipe..."
+		,"Erasing With Nwipe...",true
 	);
 }
 void HDD::erase()
@@ -402,7 +376,7 @@ void HDD::erase()
 	erase(new std::string("zero"));
 }
 void HDD::erase_debrief(){
-	Command("sudo cat "+TempLogFileName,"debriefing, retreiving log file contents");
+	Command("sudo cat "+TempLogFileName,"debriefing, retreiving log file contents",true);
 	if(LastOutput.find("Failure")!=std::string::npos)
 	{
 		PresentTask= "Finished Erasing, Failed";
@@ -410,13 +384,13 @@ void HDD::erase_debrief(){
 	}
 	else if(
 		(LastOutput.find("Success")!=std::string::npos)
-		||(LastOutput.find("verifined")!=std::string::npos)
+		||(LastOutput.find("verified")!=std::string::npos)
 		||(LastOutput.find("Blanked Device")!=std::string::npos)
 	){
 		PresentTask="Finished Erasing, Success";
 		Status=FinishedSuccess;
 	}
-	Command("sudo rm "+TempLogFileName, "erasing temporay log file,");
+	Command("sudo rm "+TempLogFileName, "erasing temporay log file...",false);
 }
 //trouble with default pointer types; need to override function
 void HDD::print(std::ostream* textgohere=&std::cout){
@@ -453,17 +427,15 @@ void HDD::log(std::string * batch){
 	this->PresentTask ="Writing to the log file:"+filename;	
 	std::fstream* LogFile
 		= new std::fstream(filename,std::ios::app);
-	#ifdef _Debug
-	std::cout<<this->path<<" :  "<<this->PresentTask<<std::endl;
-	std::cout<<this->path<<" : log file is open:"<<LogFile->is_open()<<std::endl;
-	print(&std::cout);
-	#endif
+	*dstream<<this->path<<" :  "<<this->PresentTask<<std::endl;
+	*dstream<<this->path<<" : log file is open:"<<LogFile->is_open()<<std::endl;
+	print(dstream);
 	print(LogFile);
 }
 void HDD::partition()
 {
 	Command(
 		"sudo smar...  wait I'm skipping you anyway"
-		,"Partitioning Drives..."
+		,"Partitioning Drives...",true
 	);
 }
