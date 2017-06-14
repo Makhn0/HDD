@@ -78,7 +78,7 @@ int main(int argc, char * argv[]){
 		//TODO add second parameter to HDD::run
 	}
 
-	const int DriveNum=1;
+	const int DriveNum=4;
 	
 	#ifdef _Debug
 	
