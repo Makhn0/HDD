@@ -125,6 +125,7 @@ void HDD::run(std::string* batch){
 	*dstream<<path<<" : we did it out of the loop"<<std::endl;;
 }
 void HDD::run_body(std::string* batch){
+	this->StartTime=time(0);
 	get_data();
 	if(!presence()){return ;}
 	#ifndef _Skip_Smart
@@ -187,9 +188,13 @@ void HDD::reset(){
 	this->Model="";
 	this->ModelFamily="";
 	this->UserCapacity="";
-	this->StartTime=time(0);
-	this->RunTime=0;
 	this->size=0;
+	this->StartTime=-1;//time(0);
+	this->EndTime=-1;
+	this->RunTime=0;
+	this->CmdString="";
+	this->LastOutput="";
+	this->LastExitStatus=0;
 	this->Status=Unfinished;
 }
 bool HDD::presence(){
@@ -252,7 +257,7 @@ void HDD::get_data(){
 		+" | awk '/User Capacity:/'",true
 	);
 	if(LastOutput!=""){
-		this->UserCapacity=LastOutput.substr(18,20);
+		this->UserCapacity=LastOutput.substr(18,25);
 		this->size= myStol(this->UserCapacity);
 	}
 	else
