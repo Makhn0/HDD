@@ -23,7 +23,7 @@ class HDD{
 		
 		long size=0;
 		
-		Result_t Status =Unfinished;
+		Result_t Status=Unfinished;
 		std::string PresentTask;
 		std::string Exception="none";
 		std::string CmdString;
@@ -48,8 +48,11 @@ class HDD{
 		void UpdateRunTime(){
 			RunTime=time(0)-StartTime;
 		}
-		void Command(std::string a,std::string b,bool throwing);
-		void Command(std::string a,bool throwing);
+
+		void PresenceDetector(bool );
+		std::string StdOut(std::string , bool);
+		void Command(std::string ,std::string ,bool );
+		void Command(std::string ,bool );
 		
 		bool presence();
 		void get_data();

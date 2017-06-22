@@ -30,17 +30,18 @@ std::string ResultTToString(Result_t a)
 	return "Unfinished";
 }
 #endif
-std::string StdOut(std::string cmd, int * LastExitStatusL=new int(0),bool throwing=true) {
+
+std::string HDD::StdOut(std::string cmd, bool throwing=true) {
     std::string data;
     FILE * stream;
     const int max_buffer = 256;
     char buffer[max_buffer];
     stream = popen(cmd.c_str(), "r");
     if(stream) {
-        while(!feof(stream))
+        while(!feof(stream)&& Present)
             if(fgets(buffer, max_buffer, stream) != NULL) data.append(buffer);
-	*LastExitStatusL=pclose(stream);
-        if ((*LastExitStatusL!=0)&&throwing)throw (std::string) "Critical error stopping";
+	LastExitStatus=pclose(stream);
+        if ((LastExitStatus!=0)&&throwing)throw (std::string) "Critical error stopping";
     }
     return data;
 }
@@ -67,7 +68,7 @@ void HDD::Command(std::string a,bool throwing=true){
 	a.append(" 2>&1");
 	CmdString=a;
 	*dstream<<path<<" : Last Command:"<<CmdString<<std::endl;
-	this->LastOutput=StdOut(this->CmdString,&this->LastExitStatus,throwing);
+	this->LastOutput=StdOut(this->CmdString,throwing);
 	
 	*dstream<<this->path<<" : Last Output:"<<this->LastOutput
 	<<"_::exit status :"<<LastExitStatus<<std::endl;	
@@ -86,8 +87,7 @@ void HDD::run(std::string* batch){
 		while(!presence()){
 			sleep(5);
 		}
-		try{
-			
+		try{	
 			run_body(batch);
 		}
 		catch(std::string e){
@@ -206,6 +206,12 @@ bool HDD::presence(){
 	*dstream<<this->path<<" : presence "<<((this->Present)?"detected":"not detected")<<std::endl;
 	
 	return this->Present;
+}
+void HDD::PresenceDetector(bool throwing=false){
+	while(1){
+		if (!presence()&&throwing )throw "Hard Drive Unplugged";
+		sleep(10);
+	}
 }
 void HDD::get_data(){
 	//very concerned that this needs work
