@@ -1,8 +1,6 @@
 CPFLAGS=--std=c++0x -pthread -Wall
 os=linux
 
-BinNameC:=$(BinName)_C
-
 ifeq ($(os),nt)
 BinName:=ewhde.exe
 Editor:=notepad++
@@ -29,15 +27,18 @@ edit :
 	$(Editor) HDD.h &
 edit-all:edit
 	$(Editor) makefile &
-clean: 
+clean-help:
 	$(del) HDD.o
 	$(del) main.o
 	$(del) $(BinName)
-run-all: 
-	make clean
-	make edit-all
-	make run
-	echo "all running"
+clean: 
+	
+	sudo make clean-help ||\
+	echo " already clean"
+all: 
+	sudo make clean
+	sudo make args="$(args)"
+	sudo make load 1>/dev/null
 install:
 	sudo cp ./$(BinName) /usr/bin/$(BinName)
 load:
@@ -45,7 +46,10 @@ load:
 	sudo cp ./$(BinName) ~/$(BinName)
 	sudo ~/homeupdate.zsh
 update:
-	sudo git pull
+	sudo make clean
+	sudo git add .
+	sudo git commit -m "$(commit)"
+	sudo git push
 test:
 	$(CXX) $(args) -o test.exe test.cpp
 open-test:

@@ -143,11 +143,7 @@ void HDD::run_body(std::string* batch){
 	#ifdef _Erase
 	///*
 	if(!this->presence()){return;}
-	this->dd_write(batch);
-	if(!this->presence()){return;}
-	this->dd_read(batch);
-	if(!this->presence()){return;}
-	this->hash_check(batch);
+	this->dd(batch);
 	if(!this->presence()){return;}
 	//*/
 	//obviously needs more work for different methods
@@ -155,21 +151,7 @@ void HDD::run_body(std::string* batch){
 		this->erase(batch);
 	}
 	else{
-		try{
-			this->erase();
-			this->erase_debrief();
-		}
-		catch(std::string e){
-			*dstream<<path<<" : string thrown"<<std::endl;
-			this->erase_debrief();
-			throw e;
-		}
-		catch(std::exception e){
-
-			*dstream<<path<<" : exception thrown"<<std::endl;
-			this->erase_debrief();
-			throw e;
-		}
+		erase();
 	}		
 	if(!this->presence()){return;}
 	#endif
@@ -310,9 +292,15 @@ void HDD::smartctl_kill()
 		,"Checking Smart Control...",true
 	);
 }
-void HDD::dd_write(std::string* batch)
+void HDD::dd(std::string * batch){
+	std::string hashfile="/tmp/"+*batch+"_"+path.substr(5,3)+"_File.dd";
+	std::string outputfile="/tmp/"+*batch+"_"+path.substr(5,3)+"_FileRead.dd";
+	dd_write(batch,hashfile);
+	dd_read(batch,outputfile);
+	hash_check(batch,hashfile,outputfile);
+}
+void HDD::dd_write(std::string* batch,std::string hashfile)
 {
-	std::string hashfile="/temp/"+*batch+"_File.dd";
 	if(access( hashfile.c_str(),0 )==0){
 		*dstream<<this->path<<" : old hash exists: "<<std::endl;
 		Command("sudo rm "
@@ -321,40 +309,39 @@ void HDD::dd_write(std::string* batch)
 			,true
 		);
 	}
-	Command("sudo dd if=/dev/urandom of=/tmp/"
-		+*batch
-		+"_File.dd count=100KB "
+	Command("sudo dd if=/dev/urandom of="
+		+hashfile
+		+" count=100KB "
 		,"Making Input File..."
 		,true
 	);
-	Command("sudo dd if=/tmp/"+*batch+"_File.dd of="
+	Command("sudo dd if="
+		+hashfile
+		+" of="
 		+this->path
 		+" count=100KB "
 		,std::string("Copying Input File to Disk.."),true
 	);
 }
-void HDD::dd_read(std::string* batch)
+void HDD::dd_read(std::string* batch,std::string outputfile)
 {
 	Command("sudo dd if="
 		+this->path
-		+" of=/tmp/"
-		+*batch
-		+"_FileRead.dd count=100KB "
+		+" of="
+		+outputfile
+		+" count=100KB "
 		,"Making Output File from Disk...",true
 	);
 }
-void HDD::hash_check(std::string* batch)
+void HDD::hash_check(std::string* batch,std::string hashfile,std::string outputfile)
 {
-	Command("md5sum /tmp/"
-		+*batch
-		+"_File.dd"
+	Command("md5sum "
+		+hashfile
 		,"Hashing Input File...",true
 	);
 	std::string MainHash=LastOutput.substr(0,32);
 	Command(
-	"md5sum /tmp/"
-		+*batch 
-		+"_FileRead.dd"
+	"md5sum "+outputfile
 		,"Hashing Output File...",true
 	);
 	std::string ReadHash= LastOutput.substr(0,32);
@@ -362,8 +349,9 @@ void HDD::hash_check(std::string* batch)
 		throw (std::string) path+"hash rw failure...";
 	}
 	else{*dstream<<path<<" : Hashes are the Same"<<std::endl;}
+	Command("sudo rm "+hashfile+" "+outputfile," Eraseing Output and Input files", true);
 }
-void HDD::erase(std::string * method=new std::string("zero"))
+void HDD::erase(std::string * method)
 {  	
 	std::string TempName("");
 	TempName.append("Temp_");
@@ -385,10 +373,26 @@ void HDD::erase(std::string * method=new std::string("zero"))
 void HDD::erase()
 {
 	erase_c();
+	/*
+	try{
+			erase(new std::string("zero");
+			this->erase_debrief();
+		}
+		catch(std::string e){
+			*dstream<<path<<" : string thrown"<<std::endl;
+			this->erase_debrief();
+			throw e;
+		}
+		catch(std::exception e){
 
-	//erase(new std::string("zero"));
+			*dstream<<path<<" : exception thrown"<<std::endl;
+			this->erase_debrief();
+			throw e;
+		}
+	//*/
 }
 void HDD::erase_c(){
+	//Working
 	PresentTask="Erasing Drive With ofstream";
 	std::ofstream drive(path.c_str(),std::ostream::out);
 	unsigned char pattern=0x00;
@@ -399,6 +403,19 @@ void HDD::erase_c(){
 		drive<<pattern;
 	}
 	drive.close();
+
+	std::ifstream idrive(path.c_str(),std::istream::in);
+	if(!drive) throw "cannot open HDD to read";
+	else *dstream<<path<<" : opened drive and reading"<<std::endl;
+	for(int i=0;i<1000&&Present;i++)
+	{
+		*dstream<<path
+		<<
+		idrive.read(1)	
+		//read(path.c_str(),1)
+		<<std::endl;
+	}
+	idrive.close();
 }
 void HDD::erase_debrief(){
 	Command("sudo cat "+TempLogFileName,"debriefing, retreiving log file contents",true);

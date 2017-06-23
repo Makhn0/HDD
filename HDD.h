@@ -59,9 +59,10 @@ class HDD{
 		void smartctl_run();
 		bool smartctl_running();
 		void smartctl_kill();
-		void dd_write(std::string*);
-		void dd_read(std::string*);
-		void hash_check(std::string*);
+		void dd(std::string*);
+		void dd_write(std::string*,std::string);
+		void dd_read(std::string*,std::string);
+		void hash_check(std::string*,std::string,std::string);
 		void erase(std::string*);
 		void erase();
 		void erase_debrief();

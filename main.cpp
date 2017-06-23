@@ -37,16 +37,16 @@ void contPrint(HDD * HDDs[], int length)
 }
 std::string month(int i){
 	switch(i){
-		case 1:return "Jan";
-		case 2:return "Feb";
-		case 3:return "Mar";
-		case 4:return "Apr";
-		case 5:return "May";
-		case 6:return "June";
-		case 7:return "July";
-		case 8:return "Aug";
-		case 9:return "Sep";
-		case 0:return "Oct";
+		case 0:return "Jan";
+		case 1:return "Feb";
+		case 2:return "Mar";
+		case 3:return "Apr";
+		case 4:return "May";
+		case 5:return "June";
+		case 6:return "July";
+		case 7:return "Aug";
+		case 8:return "Sep";
+		case 9:return "Oct";
 		case 10:return "Nov";
 		case 11:return "Dec";
 		default:return "Jan";
@@ -78,7 +78,7 @@ int main(int argc, char * argv[]){
 		//TODO add second parameter to HDD::run
 	}
 
-	const int DriveNum=4;
+	const int DriveNum=1;
 	
 	#ifdef _Debug
 	
