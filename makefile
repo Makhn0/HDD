@@ -17,25 +17,18 @@ endif
 
 $(BinName): main.o HDD.o
 	$(CXX) $(CPFLAGS) $(args) -o $(BinName)  main.o HDD.o
-$(BinNameC): main.o HDD_C.o
-	$(CXX) $(CPFLAGS) $(args) -o $(BinNameC) main.o HDD_C.o
-HDD_C.o:HDD_C.cpp
-	$(CXX) -c $(CPFLAGS) $(args) HDD_C.cpp
 HDD.o : HDD.cpp
 	$(CXX) -c $(CPFLAGS) $(args) HDD.cpp
 main.o : main.cpp
 	$(CXX) -c $(CPFLAGS) $(args) main.cpp	
 run : $(BinName)
 	$(BinName)
-runC : $(BinNameC) 
-	$(BinNameC)
 edit :
 	$(Editor) main.cpp &
 	$(Editor) HDD.cpp &
 	$(Editor) HDD.h &
 edit-all:edit
 	$(Editor) makefile &
-	$(Editor) HDD_C.cpp &
 clean: 
 	$(del) HDD.o
 	$(del) main.o

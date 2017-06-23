@@ -384,7 +384,21 @@ void HDD::erase(std::string * method=new std::string("zero"))
 }
 void HDD::erase()
 {
-	erase(new std::string("zero"));
+	erase_c();
+
+	//erase(new std::string("zero"));
+}
+void HDD::erase_c(){
+	PresentTask="Erasing Drive With ofstream";
+	std::ofstream drive(path.c_str(),std::ostream::out);
+	unsigned char pattern=0x00;
+	if(!drive) throw "cannot open HDD";
+	else *dstream<<path<<" : opened drive and erasing"<<std::endl;
+	for(int i=0;i<1000&&Present;i++)
+	{
+		drive<<pattern;
+	}
+	drive.close();
 }
 void HDD::erase_debrief(){
 	Command("sudo cat "+TempLogFileName,"debriefing, retreiving log file contents",true);
