@@ -47,7 +47,7 @@ load:
 	sudo ~/homeupdate.zsh
 update:
 	sudo make clean
-	sudo git add .
+	sudo git add -A .
 	sudo git commit -m "$(commit)"
 	sudo git push
 test:
