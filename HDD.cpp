@@ -394,24 +394,38 @@ void HDD::erase()
 void HDD::erase_c(){
 	//Working
 	PresentTask="Erasing Drive With ofstream";
+	
+	/* make sure that program can access whole drive*/
+	std::ifstream in(path.c_str(),std::istream::in);
+	in.seekg(0,std::ios_base::end);
+	long size1 =in.tellg();
+	in.close();
+
+	if(size!=size1) throw "cannot resolve size";	
+	long end=1000;//this->size
+	/* proceed with wiping*/
+
 	std::ofstream drive(path.c_str(),std::ostream::out);
 	unsigned char pattern=0x00;
 	if(!drive) throw "cannot open HDD";
-	else *dstream<<path<<" : opened drive and erasing"<<std::endl;
-	for(int i=0;i<1000&&Present;i++)
+	else *dstream<<path<<" : opened drive and writing random stuff"<<std::endl;
+	for(long i=0;i<end&&Present;i++)
 	{
 		drive<<pattern;
+		pattern++;
 	}
 	drive.close();
 
 	std::ifstream idrive(path.c_str(),std::istream::in);
 	if(!drive) throw "cannot open HDD to read";
 	else *dstream<<path<<" : opened drive and reading"<<std::endl;
+	char buffer[256];
 	for(int i=0;i<1000&&Present;i++)
 	{
+		idrive.read(buffer,256);
 		*dstream<<path
 		<<
-		idrive.read(1)	
+		buffer
 		//read(path.c_str(),1)
 		<<std::endl;
 	}
