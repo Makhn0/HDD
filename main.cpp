@@ -10,7 +10,7 @@
 
 std::string EraseCmd="nwipe";
 std::string BatchName;
-std::string Method;
+std::string argPath;
 std::ostream * printstream;
 std::ostream * debugstream;
 void print(HDD * HDDs[], int length)
@@ -59,9 +59,10 @@ int main(int argc, char * argv[]){
 	printstream=&std::cout;
 	if(argv[1])
 	{
+		std::cout<<"argv[1] :"<<argv[1]<<std::endl;
 		BatchName=argv[1];
 	}
-	else{
+	if(BatchName=="skip"){
 		//if time needed for other things take out of else
 		time_t now=time(0);
 		tm * date=localtime(&now);
@@ -73,16 +74,9 @@ int main(int argc, char * argv[]){
 				<<(1+date->tm_mday);	
 		BatchName=temp->str();
 	}
-	if(argv[2]){
-		Method=argv[2];
-		//TODO add second parameter to HDD::run
-	}
-
 	const int DriveNum=1;
 	
 	#ifdef _Debug
-	
-	*debugstream<<"cerr Debug"<<std::endl;
 	*printstream<<"Debug Mode"<<std::endl;
 	std::cout<< "making dev path prefix =";
 	#endif
@@ -94,13 +88,21 @@ int main(int argc, char * argv[]){
 
 	HDD * HDDs[DriveNum];
 	std::thread * runner[DriveNum];
-	for(int i =0;i<DriveNum;i++)
-	{
-		HDDs[i]= new HDD(devPath+(char)('a'+i));
-		runner[i]=new std::thread(&HDD::run, HDDs[i],&BatchName);
-		#ifdef _Debug
-		//sleep(1);
-		#endif
+	if(argv[2]){
+		argPath = argv[2];
+		*dstream<<path<<" argv[2] :"<<argv[2]<<std::endl;
+		HDDs[0]= new HDD(argPath);
+		runner[0]=new std::thread(&HDD::run, HDDs[0],&BatchName);
+	}
+	if(argPath=="skip"||argPath.find("HOME")!=std::string::npos||!argv[2]){
+		for(int i =0;i<DriveNum;i++)
+		{
+			HDDs[i]= new HDD(devPath+(char)('a'+i));
+			runner[i]=new std::thread(&HDD::run, HDDs[i],&BatchName);
+			#ifdef _Debug
+			//sleep(1);
+			#endif
+		}
 	}
 	#ifdef _Debug
 	puts("ended instantiating HDD objects");

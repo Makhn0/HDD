@@ -73,10 +73,28 @@ void HDD::Command(std::string a,bool throwing=true){
 	*dstream<<this->path<<" : Last Output:"<<this->LastOutput
 	<<"_::exit status :"<<LastExitStatus<<std::endl;	
 }
-
-
+void HDD::exception_catch(std::exception e){
+	exception_catch(e.what());
+}
+void HDD::exception_catch(const char *e){
+		//std::string * a= new std::string(*e);
+		*dstream<<path<<"const char thrown :"<<e<<std::endl;
+		exception_catch((std::string)e);
+}
+void HDD::exception_catch(std::string e){
+	this->Exception= e;
+	this->PresentTask = " Critical error, stopping. ";
+	this->Status=FinishedFail;		
+	*dstream<<this->path<<"#####################WARNING#####################"<<std::endl;
+	*dstream<<this->path<<" : Exception thrown : "<<this->Exception<<std::endl;	
+	*dstream<<this->path<<" : PresentTask : "<<this->PresentTask<<std::endl;
+	*dstream<<this->path<<" : LastCommand : "<<this->CmdString<<std::endl;	
+	*dstream<<this->path<<" : LastOutput : "<<this->LastOutput<<std::endl;
+	*dstream<<this->path<<"#################################################"<<std::endl;
+}
 //void HDD::run_body(std::string* batch);
 void HDD::run(std::string* batch){
+	//std::thread a(&HDD::presence_checker,this,false);
 	while(1){
 		*dstream<<this->path<<" : beginning running loop... "<< std::endl;
 		//sleep(1);
@@ -87,35 +105,21 @@ void HDD::run(std::string* batch){
 		while(!presence()){
 			sleep(5);
 		}
+		/*BEGIN TRY BLOCK*/
 		try{	
 			run_body(batch);
 		}
 		catch(std::string e){
-			this->Exception= e;
-			this->PresentTask = " Critical error, stopping. ";
-			this->Status=FinishedFail;
-			
-			*dstream<<this->path<<"#####################WARNING#####################"<<std::endl;
-			*dstream<<this->path<<" : Exception thrown : "<<this->Exception<<std::endl;	
-			*dstream<<this->path<<" : PresentTask : "<<this->PresentTask<<std::endl;
-			*dstream<<this->path<<" : LastCommand : "<<this->CmdString<<std::endl;	
-			*dstream<<this->path<<" : LastOutput : "<<this->LastOutput<<std::endl;
-			*dstream<<this->path<<"#################################################"<<std::endl;
+			exception_catch(e);
+		}
+		catch(const char * e){
+			exception_catch(e);
 		}
 		catch(std::exception e){
-			this->Exception=e.what();
-			this->PresentTask = "critical error, stopping. ";
-			this->Status=FinishedFail;
-			
-			*dstream<<this->path<<"#####################WARNING#####################"<<std::endl;
-			*dstream<<this->path<<" : Exception thrown : "<<this->Exception<<std::endl;	
-			*dstream<<this->path<<" : PresentTask : "<<this->PresentTask<<std::endl;
-			*dstream<<this->path<<" : LastCommand : "<<this->CmdString<<std::endl;	
-			*dstream<<this->path<<" : LastOutput : "<<this->LastOutput<<std::endl;
-			*dstream<<this->path<<"#################################################"<<std::endl;
+			exception_catch(e);
 		}
+		/*END TRY BLOCK*/
 		*dstream<<this->path<<" : end of run, no pull out test"<<std::endl;
-		
 		while(presence())
 		{
 				sleep(10);
@@ -179,17 +183,26 @@ void HDD::reset(){
 	this->LastExitStatus=0;
 	this->Status=Unfinished;
 }
+///*
 bool HDD::presence(){
-	*dstream<<this->path<<" : checking presence... "<<std::endl;
+	return presence(false);
+}
+//*/
+bool HDD::presence(bool print ){
+	//print for explicit
+	if(print) *dstream<<this->path<<" : checking presence... "<<std::endl;
 	
 	this->Present=
 		access( this->path.c_str(),0 )==0;
 		
-	*dstream<<this->path<<" : presence "<<((this->Present)?"detected":"not detected")<<std::endl;
+	if(print) *dstream<<this->path<<" : presence "<<((this->Present)?"detected":"not detected")<<std::endl;
 	
 	return this->Present;
 }
-void HDD::PresenceDetector(bool throwing=false){
+void HDD::Presence_checker(){
+	Presence_checker(false);
+}
+void HDD::Presence_checker(bool throwing){
 	while(1){
 		if (!presence()&&throwing )throw "Hard Drive Unplugged";
 		sleep(10);
@@ -349,7 +362,7 @@ void HDD::hash_check(std::string* batch,std::string hashfile,std::string outputf
 		throw (std::string) path+"hash rw failure...";
 	}
 	else{*dstream<<path<<" : Hashes are the Same"<<std::endl;}
-	Command("sudo rm "+hashfile+" "+outputfile," Eraseing Output and Input files", true);
+	Command("sudo rm "+hashfile+" "+outputfile," Erasing Output and Input files...", true);
 }
 void HDD::erase(std::string * method)
 {  	
@@ -372,11 +385,12 @@ void HDD::erase(std::string * method)
 }
 void HDD::erase()
 {
-	erase_c();
-	/*
+
+	///*
 	try{
-			erase(new std::string("zero");
-			this->erase_debrief();
+		erase_c();
+//			erase(new std::string("zero");
+		//	this->erase_debrief();
 		}
 		catch(std::string e){
 			*dstream<<path<<" : string thrown"<<std::endl;
@@ -403,6 +417,7 @@ void HDD::erase_c(){
 
 	if(size!=size1) throw "cannot resolve size";	
 	long end=this->size;
+	*dstream<<path <<" : sizes detected: "<<size<< " : "<<size1<<std::endl;
 	/* proceed with wiping*/
 	/**/
 	/* writes random crap to be changed to all zero*/
@@ -414,12 +429,13 @@ void HDD::erase_c(){
 	{
 		drive<<pattern;
 		pattern++;
+		if (i%250000000==0) *dstream<<path<< " : erasing : "<<i<<" /32,000,000,000"<<std::endl;
 	}
 	drive<<"Eric is a great guy whose programs always work:)"<<std::endl;
 	drive.close();
 	/* reads random crap; to be taken out*/
 	std::ifstream idrive(path.c_str(),std::istream::in);
-	if(!drive) throw "cannot open HDD to read";
+	if(!idrive) throw "cannot open HDD to read";
 	else *dstream<<path<<" : opened drive and reading"<<std::endl;
 	char buffer[20];
 	for(int i=0;i<1000&&Present;i++)

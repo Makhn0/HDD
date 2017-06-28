@@ -49,12 +49,17 @@ class HDD{
 			RunTime=time(0)-StartTime;
 		}
 
-		void PresenceDetector(bool );
 		std::string StdOut(std::string , bool);
 		void Command(std::string ,std::string ,bool );
 		void Command(std::string ,bool );
-		
+
+		/*why defaults no work?*/
+
 		bool presence();
+		bool presence(bool);
+		void Presence_checker();
+		void Presence_checker(bool);
+
 		void get_data();
 		void smartctl_run();
 		bool smartctl_running();
@@ -71,7 +76,9 @@ class HDD{
 		void partition();
 		void verify();
 
-		
+		void exception_catch(std::exception);
+		void exception_catch(std::string);
+		void exception_catch(const char *);
 		void log(std::string*);
 		void print(std::ostream *);
 		void print();
