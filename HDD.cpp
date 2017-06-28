@@ -408,12 +408,13 @@ void HDD::erase_c(){
 	std::ofstream drive(path.c_str(),std::ostream::out);
 	unsigned char pattern=0x00;
 	if(!drive) throw "cannot open HDD";
-	else *dstream<<path<<" : opened drive and writing random stuff"<<std::endl;
+	else *dstream<<path<<" : opened drive and writing random(not really) stuff"<<std::endl;
 	for(long i=0;i<end&&Present;i++)
 	{
 		drive<<pattern;
 		pattern++;
 	}
+	drive<<"Eric is a great guy whose programs always work"<<std::endl;
 	drive.close();
 
 	std::ifstream idrive(path.c_str(),std::istream::in);
