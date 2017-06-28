@@ -65,10 +65,12 @@ class HDD{
 		void hash_check(std::string*,std::string,std::string);
 		void erase(std::string*);
 		void erase();
+		void erase_c();
+		void erase_dd();
 		void erase_debrief();
 		void partition();
 		void verify();
-		void erase_c();
+
 		
 		void log(std::string*);
 		void print(std::ostream *);

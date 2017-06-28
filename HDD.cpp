@@ -402,28 +402,28 @@ void HDD::erase_c(){
 	in.close();
 
 	if(size!=size1) throw "cannot resolve size";	
-	long end=1000;//this->size
+	long end=this->size;
 	/* proceed with wiping*/
-
+	/* writes random crap to be changed to all zero*/
 	std::ofstream drive(path.c_str(),std::ostream::out);
 	unsigned char pattern=0x00;
 	if(!drive) throw "cannot open HDD";
 	else *dstream<<path<<" : opened drive and writing random(not really) stuff"<<std::endl;
-	for(long i=0;i<end&&Present;i++)
+	for(long i=0;i<end-48&&Present;i++)
 	{
 		drive<<pattern;
 		pattern++;
 	}
-	drive<<"Eric is a great guy whose programs always work"<<std::endl;
+	drive<<"Eric is a great guy whose programs always work:)"<<std::endl;
 	drive.close();
-
+	/* reads random crap; to be taken out*/
 	std::ifstream idrive(path.c_str(),std::istream::in);
 	if(!drive) throw "cannot open HDD to read";
 	else *dstream<<path<<" : opened drive and reading"<<std::endl;
-	char buffer[256];
+	char buffer[20];
 	for(int i=0;i<1000&&Present;i++)
 	{
-		idrive.read(buffer,256);
+		idrive.read(buffer,20);
 		*dstream<<path
 		<<
 		buffer
@@ -431,6 +431,12 @@ void HDD::erase_c(){
 		<<std::endl;
 	}
 	idrive.close();
+}
+void HDD::erase_dd(){
+	Command(
+	"sudo dd if=/dev/zero of="
+	+path
+	,"erasing with dd write and /dev/zero"	,true);
 }
 void HDD::erase_debrief(){
 	Command("sudo cat "+TempLogFileName,"debriefing, retreiving log file contents",true);
