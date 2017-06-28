@@ -404,6 +404,7 @@ void HDD::erase_c(){
 	if(size!=size1) throw "cannot resolve size";	
 	long end=this->size;
 	/* proceed with wiping*/
+	/**/
 	/* writes random crap to be changed to all zero*/
 	std::ofstream drive(path.c_str(),std::ostream::out);
 	unsigned char pattern=0x00;
@@ -427,7 +428,6 @@ void HDD::erase_c(){
 		*dstream<<path
 		<<
 		buffer
-		//read(path.c_str(),1)
 		<<std::endl;
 	}
 	idrive.close();
