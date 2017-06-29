@@ -22,7 +22,7 @@ class HDD{
 		std::string UserCapacity="";
 		
 		long size=0;
-		
+		long currentLBA=0;
 		Result_t Status=Unfinished;
 		std::string PresentTask;
 		std::string Exception="none";

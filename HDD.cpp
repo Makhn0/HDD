@@ -175,6 +175,7 @@ void HDD::reset(){
 	this->ModelFamily="";
 	this->UserCapacity="";
 	this->size=0;
+	this->currentLBA=0;
 	this->StartTime=-1;//time(0);
 	this->EndTime=-1;
 	this->RunTime=0;
@@ -425,11 +426,11 @@ void HDD::erase_c(){
 	unsigned char pattern=0x00;
 	if(!drive) throw "cannot open HDD";
 	else *dstream<<path<<" : opened drive and writing random(not really) stuff"<<std::endl;
-	for(long i=0;i<end-48&&Present;i++)
+	for(currentLBA=0;currentLBA<end-48&&Present;currentLBA++)
 	{
 		drive<<pattern;
 		pattern++;
-		if (i%250000000==0) *dstream<<path<< " : erasing : "<<i<<" /32,000,000,000"<<std::endl;
+		if (currentLBA%25000000==0) *dstream<<path<< " : erasing : "<<currentLBA<<" /32,000,000,000 : "<<currentLBA/size<<std::endl;
 	}
 	drive<<"Eric is a great guy whose programs always work:)"<<std::endl;
 	drive.close();
@@ -438,13 +439,14 @@ void HDD::erase_c(){
 	if(!idrive) throw "cannot open HDD to read";
 	else *dstream<<path<<" : opened drive and reading"<<std::endl;
 	char buffer[20];
-	for(int i=0;i<1000&&Present;i++)
+	for(int i=0;i<20&&Present;i++)
 	{
 		idrive.read(buffer,20);
 		*dstream<<path
 		<<
 		buffer
-		<<std::endl;
+		<<
+		std::endl;
 	}
 	idrive.close();
 }
@@ -491,6 +493,7 @@ void HDD::print(std::ostream* textgohere=&std::cout){
 	*textgohere<<"Start Time: "<<this->StartTime<<std::endl;
 	*textgohere<<"End Time: "<<this->EndTime<<std::endl;
 	*textgohere<<"Run Time: "<<this->RunTime<<std::endl;
+	*textgohere<<":Erasing "<<(currentLBA/size)*100<<"% Complete"<<std::endl;
 	*textgohere<<"Result: "
 		<<ResultTToString(this->Status)
 		<<std::endl;	*textgohere<<"______________________________________________________"<<std::endl;
