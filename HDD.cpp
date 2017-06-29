@@ -417,37 +417,52 @@ void HDD::erase_c(){
 	in.close();
 
 	if(size!=size1) throw "cannot resolve size";	
-	long end=this->size;
+
 	*dstream<<path <<" : sizes detected: "<<size<< " : "<<size1<<std::endl;
 	/* proceed with wiping*/
 	/**/
 	/* writes random crap to be changed to all zero*/
+	Write_All(97);
+	Write_All(0x00);
+	Long_Verify(0x00);
+}
+void HDD::Write_All(unsigned char pattern =0x00){
 	std::ofstream drive(path.c_str(),std::ostream::out);
-	unsigned char pattern=0x00;
 	if(!drive) throw "cannot open HDD";
-	else *dstream<<path<<" : opened drive and writing random(not really) stuff"<<std::endl;
-	for(currentLBA=0;currentLBA<end-48&&Present;currentLBA++)
+	else *dstream<<path<<" : opened drive and writing zeroes "<<std::endl;
+	for(currentLBA=size//*3199/3200
+		;currentLBA<size&&Present
+		;currentLBA++)
 	{
+		drive.seekp(currentLBA);
 		drive<<pattern;
-		pattern++;
-		if (currentLBA%25000000==0) *dstream<<path<< " : erasing : "<<currentLBA<<" /32,000,000,000 : "<<currentLBA/size<<std::endl;
+		if(currentLBA%10000000==0) *dstream<<path<< " : erasing : "<<currentLBA/1000000<<"MB /32,000 MB : "<<((currentLBA+1)*1.0/(size+1))*100<<std::endl;
 	}
-	drive<<"Eric is a great guy whose programs always work:)"<<std::endl;
+	*dstream<<path<< " : erasing : "<<currentLBA/1000000<<" MB /32,000 MB : "<<((currentLBA+1)*1.0/(size+1))*100<<std::endl;
+	*dstream<<"finished erasing... obstensibly... closing file"<<std::endl;
 	drive.close();
-	/* reads random crap; to be taken out*/
+	*dstream<<"closed"<<std::endl;
+}
+void HDD::Long_Verify(unsigned char pattern =0x00){
 	std::ifstream idrive(path.c_str(),std::istream::in);
 	if(!idrive) throw "cannot open HDD to read";
-	else *dstream<<path<<" : opened drive and reading"<<std::endl;
-	char buffer[20];
-	for(int i=0;i<20&&Present;i++)
+	else *dstream<<path<<" : opened drive and verifying all  "<<pattern<<std::endl;
+	char buffer[1];
+	bool fail;
+	for(long i=size//*3199/3200
+		;i<size&&Present
+		;i++)
 	{
-		idrive.read(buffer,20);
-		*dstream<<path
-		<<
-		buffer
-		<<
-		std::endl;
+		idrive.seekg(i);
+		idrive.read(buffer,1);
+
+		if(i%10000000==0) *dstream<<path<< " : checking : "<<i/1000000<<" MB /32,000 MB : "<<((i+1)*1.0/(size+1))*100<<" char :"<<buffer<<":"<<std::endl;
+		if(buffer[0]!=pattern) {
+			fail= true;
+			break;
+		}
 	}
+	if(fail) throw " shit ain't all right oops D: ";
 	idrive.close();
 }
 void HDD::erase_dd(){

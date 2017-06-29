@@ -92,7 +92,7 @@ int main(int argc, char * argv[]){
 	if(argv[2])
 	{
 		argPath = argv[2];
-		*dstream<<path<<" argv[2] :"<<argv[2]<<std::endl;
+		*debugstream<<" argv[2] :"<<argv[2]<<std::endl;
 		HDDs[0]= new HDD(argPath);
 		runner[0]=new std::thread(&HDD::run, HDDs[0],&BatchName);
 	}
