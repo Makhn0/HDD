@@ -21,7 +21,7 @@ class HDD{
 		std::string SerialNumber;
 		std::string UserCapacity="";
 		
-		long size=0;
+		long size;//=0;
 		long currentLBA=0;
 		Result_t Status=Unfinished;
 		std::string PresentTask;
@@ -71,10 +71,10 @@ class HDD{
 		void erase(std::string*);
 		void erase();
 		void erase_c();
-		void Write_All(unsigned char pattern);
+		void Write_All(unsigned char pattern,long,long);
 		void erase_dd();
 		void erase_debrief();	
-		bool Long_Verify(unsigned char pattern);
+		bool Long_Verify(unsigned char pattern,long,long);
 
 		void exception_catch(std::exception);
 		void exception_catch(std::string);

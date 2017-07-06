@@ -120,6 +120,7 @@ void HDD::run(std::string* batch){
 		}
 		/*END TRY BLOCK*/
 		*dstream<<this->path<<" : end of run, no pull out test"<<std::endl;
+		break;
 		while(presence())
 		{
 				sleep(10);
@@ -164,7 +165,7 @@ void HDD::run_body(std::string* batch){
 	if(!this->presence()){return;}
 	*dstream<<this->path<<" : end of erase: writing to logs";
 	print(dstream);
-	log(batch);	
+	//log(batch);	
 }
 void HDD::reset(){
 	this->SmartSupport=false;
@@ -404,39 +405,44 @@ void HDD::erase()
 	}
 	//*/
 }
-void HDD::Write_All(unsigned char pattern =0x00){
+void HDD::Write_All(unsigned char pattern =0x00,long begin=0,long end=0){
+	if(!end)end=size;
 	std::ofstream drive(path.c_str(),std::ostream::out);
 	if(!drive) throw "cannot open HDD";
-	else *dstream<<path<<" : opened drive and writing zeroes "<<std::endl;
-	for(currentLBA=size//*3199/3200
+	//watch out for this line
+	else *dstream<<path<<" : opened drive and writing "<<(pattern!=0?(const char *)&pattern:"zero")<<"s from "<<begin<<" to "<<end<<std::endl;
+	for(currentLBA=begin//size//*3199/3200
 		;
-		currentLBA<size&&Present;
+		currentLBA<end&&Present;
 		currentLBA++
 	    )
 	{
 		drive.seekp(currentLBA);
 		drive<<pattern;
-		if(currentLBA%10000000==0) *dstream<<path<< " : erasing : "<<currentLBA/1000000<<"MB /32,000 MB : "<<((currentLBA+1)*1.0/(size+1))*100<<std::endl;
+		if(currentLBA%50000000==0) *dstream<<path<< " : erasing : "<<(currentLBA/1000000)<<"MB /"<<(end-begin)/1000000<<" MB : "<<((currentLBA-begin)*1.0/(end-begin))*100<<std::endl;
 	}
-	*dstream<<path<< " : erasing : "<<currentLBA/1000000<<" MB /32,000 MB : "<<((currentLBA+1)*1.0/(size+1))*100<<std::endl;
+	*dstream<<path<< " : erasing : "<<currentLBA/1000000<<" MB /32,000 MB : "<<((currentLBA-begin)*1.0/(end-begin))*100<<std::endl;
 	*dstream<<"finished erasing... obstensibly... closing file"<<std::endl;
 	drive.close();
 	*dstream<<"closed"<<std::endl;
 }
-bool HDD::Long_Verify(unsigned char pattern =0x00){
+bool HDD::Long_Verify(unsigned char pattern =0x00,long begin=0, long end=0){
+	if(!end)end=size;
 	std::ifstream idrive(path.c_str(),std::istream::in);
 	if(!idrive) throw "cannot open HDD to read";
-	else *dstream<<path<<" : opened drive and verifying all  "<<pattern<<std::endl;
+	else *dstream<<path<<" : opened drive and verifying all  "<<pattern<<"from "<<begin <<" to "<<end<<std::endl;
 	char buffer[1];
 	bool fail;
-	for(long i=size//*3199/3200
-		;i<size&&Present
+	for(long i=begin//*3199/3200
+		;i<end&&Present
 		;i++)
 	{
 		idrive.seekg(i);
 		idrive.read(buffer,1);
 
-		if(i%10000000==0) *dstream<<path<< " : checking : "<<i/1000000<<" MB /32,000 MB : "<<((i+1)*1.0/(size+1))*100<<" char :"<<buffer<<":"<<std::endl;
+		if(i%50000000==0) {
+	
+*dstream<<\r<<path<< " : checking : "<<(i-begin)/1000000<<" MB "<<"/"<<(end-begin)/1000000<<" MB : "<<((i-begin+1)*1.0/(end+1))*100<<" char :"<<buffer<<":";}
 		if(buffer[0]!=pattern) {
 			fail= true;
 			break;
@@ -461,7 +467,7 @@ void HDD::erase_c(){
 	*dstream<<path <<" : sizes detected: "<<size<< " : "<<size1<<std::endl;
 	/* proceed with wiping*/
 	/**/
-	/* writes random crap to be changed to all zero*/
+	/* writes all a's to be changed to all zero*/
 	this->Write_All(97);
 	*dstream<<path<< " verified "<<(char)97<<" was written: "<<Long_Verify(97)<<std::endl;
 	this->Write_All();
