@@ -74,8 +74,7 @@ class HDD{
 		void Write_All(unsigned char pattern);
 		void erase_dd();
 		void erase_debrief();	
-		void Long_Verify(unsigned char pattern);
-		void partition();
+		bool Long_Verify(unsigned char pattern);
 
 		void exception_catch(std::exception);
 		void exception_catch(std::string);

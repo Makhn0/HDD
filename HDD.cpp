@@ -22,9 +22,9 @@ std::string ResultTToString(Result_t a)
 {
 	switch(a)
 	{
-		case Unfinished: return "Unfinished";
-		case FinishedSuccess: return "Finished , Success";
-		case FinishedFail: return "Finished , Failure";
+		case Unfinished: return "Unfinished :|";
+		case FinishedSuccess: return "Finished, Success :)";
+		case FinishedFail: return "Finished, Failure :(";
 		default: return "Unfinished";
 	}
 	return "Unfinished";
@@ -49,7 +49,7 @@ long myStol(std::string a){
 	long output=0;
 	const char * data =a.c_str();
 	for(unsigned int i=0;i<a.length();i++)
-	{// unisigned to avoid warning. i guess its bad.
+	{// unsigned to avoid warning. i guess its bad.
 		if (data[i]>47 && data[i]<58){
 			output*=10;
 			output += (long)(data[i]-48);
@@ -386,53 +386,33 @@ void HDD::erase(std::string * method)
 }
 void HDD::erase()
 {
-
 	///*
 	try{
 		erase_c();
-//			erase(new std::string("zero");
+//		erase(new std::string("zero");
 		//	this->erase_debrief();
-		}
-		catch(std::string e){
-			*dstream<<path<<" : string thrown"<<std::endl;
-			this->erase_debrief();
-			throw e;
-		}
-		catch(std::exception e){
-
-			*dstream<<path<<" : exception thrown"<<std::endl;
-			this->erase_debrief();
-			throw e;
-		}
+	}
+	catch(std::string e){
+		*dstream<<path<<" : string thrown"<<std::endl;
+		this->erase_debrief();
+		throw e;
+	}
+	catch(std::exception e){
+		*dstream<<path<<" : exception thrown"<<std::endl;
+		this->erase_debrief();
+		throw e;
+	}
 	//*/
-}
-void HDD::erase_c(){
-	//Working
-	PresentTask="Erasing Drive With ofstream";
-	
-	/* make sure that program can access whole drive*/
-	std::ifstream in(path.c_str(),std::istream::in);
-	in.seekg(0,std::ios_base::end);
-	long size1 =in.tellg();
-	in.close();
-
-	if(size!=size1) throw "cannot resolve size";	
-
-	*dstream<<path <<" : sizes detected: "<<size<< " : "<<size1<<std::endl;
-	/* proceed with wiping*/
-	/**/
-	/* writes random crap to be changed to all zero*/
-	Write_All(97);
-	Write_All(0x00);
-	Long_Verify(0x00);
 }
 void HDD::Write_All(unsigned char pattern =0x00){
 	std::ofstream drive(path.c_str(),std::ostream::out);
 	if(!drive) throw "cannot open HDD";
 	else *dstream<<path<<" : opened drive and writing zeroes "<<std::endl;
 	for(currentLBA=size//*3199/3200
-		;currentLBA<size&&Present
-		;currentLBA++)
+		;
+		currentLBA<size&&Present;
+		currentLBA++
+	    )
 	{
 		drive.seekp(currentLBA);
 		drive<<pattern;
@@ -443,7 +423,7 @@ void HDD::Write_All(unsigned char pattern =0x00){
 	drive.close();
 	*dstream<<"closed"<<std::endl;
 }
-void HDD::Long_Verify(unsigned char pattern =0x00){
+bool HDD::Long_Verify(unsigned char pattern =0x00){
 	std::ifstream idrive(path.c_str(),std::istream::in);
 	if(!idrive) throw "cannot open HDD to read";
 	else *dstream<<path<<" : opened drive and verifying all  "<<pattern<<std::endl;
@@ -462,9 +442,33 @@ void HDD::Long_Verify(unsigned char pattern =0x00){
 			break;
 		}
 	}
-	if(fail) throw " shit ain't all right oops D: ";
+	//if(fail) // throw " shit ain't all right oops D: ";
 	idrive.close();
+	return !fail;//TODO change to return in for loop;
 }
+void HDD::erase_c(){
+	//Working
+	PresentTask="Erasing Drive With ofstream";
+	
+	/* make sure that program can access whole drive*/
+	std::ifstream in(path.c_str(),std::istream::in);
+	in.seekg(0,std::ios_base::end);
+	long size1 =in.tellg();
+	in.close();
+
+	if(size!=size1) throw "cannot resolve size";	
+
+	*dstream<<path <<" : sizes detected: "<<size<< " : "<<size1<<std::endl;
+	/* proceed with wiping*/
+	/**/
+	/* writes random crap to be changed to all zero*/
+	this->Write_All(97);
+	*dstream<<path<< " verified "<<(char)97<<" was written: "<<Long_Verify(97)<<std::endl;
+	this->Write_All();
+	*dstream<<path<< " verified "<<(char)0x00<<" was written: "<<Long_Verify()<<std::endl;
+}
+
+
 void HDD::erase_dd(){
 	Command(
 	"sudo dd if=/dev/zero of="
@@ -515,6 +519,7 @@ void HDD::print(std::ostream* textgohere=&std::cout){
 }
 ///*
 void HDD::print(){
+	//TODO move base function so defaults work
 	print(&std::cout);
 }
 //*/
@@ -528,11 +533,4 @@ void HDD::log(std::string * batch){
 	*dstream<<this->path<<" : log file is open:"<<LogFile->is_open()<<std::endl;
 	print(dstream);
 	print(LogFile);
-}
-void HDD::partition()
-{
-	Command(
-		"sudo smar...  wait I'm skipping you anyway"
-		,"Partitioning Drives...",true
-	);
 }
