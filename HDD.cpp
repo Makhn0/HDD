@@ -406,18 +406,6 @@ void HDD::erase(std::string * method)
 void HDD::erase()
 {
 	///*
-	time_t begin=time(0);
-	tm * date=localtime(&begin);
-	*dstream<<path<<" :start erasing:  "
-		<<(1900+ date->tm_year)
-		<<"/"
-		<<month(date->tm_mon)
-		<<"/"
-		<<(1+date->tm_mday)<<"  | "	
-		<<date->tm_hour<<":"
-		<<date->tm_min<<":"
-		<<date->tm_sec<<std::endl;
-
 	try{
 		erase_c();
 //		erase(new std::string("zero");
@@ -433,9 +421,23 @@ void HDD::erase()
 		this->erase_debrief();
 		throw e;
 	}
-	time_t end=time(0);
-	date=localtime(&end);
-	*dstream<<path<<" :end erasing:  "
+
+	
+	//*/
+}
+
+void HDD::Write_All(unsigned char pattern =0x00,long begin=0,long end=0){
+	if(!end)end=size;
+
+
+	if(!drive) throw "cannot open HDD";
+	//watch out for this line
+	else *dstream<<path<<" : opened drive and writing "<<(pattern!=0?(const char *)&pattern:"zero")<<"s from "<<begin<<" to "<<end<<std::endl;
+	std::ofstream drive(path.c_str(),std::ostream::out);
+
+	time_t begin_t=time(0);
+	tm * date=localtime(&begin);
+	*dstream<<path<<" :start erasing:  "
 		<<(1900+ date->tm_year)
 		<<"/"
 		<<month(date->tm_mon)
@@ -444,21 +446,10 @@ void HDD::erase()
 		<<date->tm_hour<<":"
 		<<date->tm_min<<":"
 		<<date->tm_sec<<std::endl;
-	time_t diff=end-begin;
-	date=localtime(&diff);
-	*dstream<<path<<" :time elapsed:  "	
-		<<date->tm_hour<<":"
-		<<date->tm_min<<":"
-		<<date->tm_sec<<std::endl;
-	
-	//*/
-}
-void HDD::Write_All(unsigned char pattern =0x00,long begin=0,long end=0){
-	if(!end)end=size;
-	std::ofstream drive(path.c_str(),std::ostream::out);
-	if(!drive) throw "cannot open HDD";
-	//watch out for this line
-	else *dstream<<path<<" : opened drive and writing "<<(pattern!=0?(const char *)&pattern:"zero")<<"s from "<<begin<<" to "<<end<<std::endl;
+	time_t current_t=time(0);
+	time_t Last_t=time(0);
+	time_t delta;
+	long check=50000000;
 	for(currentLBA=begin//size//*3199/3200
 		;
 		currentLBA<end&&Present;
@@ -467,12 +458,42 @@ void HDD::Write_All(unsigned char pattern =0x00,long begin=0,long end=0){
 	{
 		drive.seekp(currentLBA);
 		drive<<pattern;
-		if(currentLBA%50000000==0) *dstream<<path<< " : erasing : "<<(currentLBA/1000000)<<"MB /"<<(end-begin)/1000000<<" MB : "<<((currentLBA-begin)*1.0/(end-begin))*100<<std::endl;
+		if(currentLBA%check==0)
+		{	
+			current_t=time(0);					
+			delta=current_t-Last_t; 
+			
+			*dstream<<path<< " : erasing : "<<(currentLBA/1000000)<<"MB /"<<(end-begin)/1000000<<" MB : "<<((currentLBA-begin)*1.0/(end-begin))*100<<std::endl;
+			*dstream<<path<< " :ave speed : "<<(currentLBA/current_t-begin_t))<<"lba/ms : inst. speed "<<(check/delta)<<"lba/ms  inst. based eta : "<<(size-currentLBA)*delta/check/60000<<" mins"<<std::endl;
+			
+			<<std::endl;
+			Last_t=current_t;
+			
+		}
 	}
+
 	*dstream<<path<< " : erasing : "<<currentLBA/1000000<<" MB /32,000 MB : "<<((currentLBA-begin)*1.0/(end-begin))*100<<std::endl;
 	*dstream<<"finished erasing... obstensibly... closing file"<<std::endl;
 	drive.close();
 	*dstream<<"closed"<<std::endl;
+	time_t end_t=time(0);
+	tm * date=localtime(&begin);
+	*dstream<<path<<" :start erasing:  "
+		<<(1900+ date->tm_year)
+		<<"/"
+		<<month(date->tm_mon)
+		<<"/"
+		<<(1+date->tm_mday)<<"  | "	
+		<<date->tm_hour<<":"
+		<<date->tm_min<<":"
+		<<date->tm_sec<<std::endl;
+
+	time_t diff=end-begin;
+	date=localtime(&diff);
+	*dstream<<path<<" :time elapsed:  "	
+		<<date->tm_hour<<":"
+		<<date->tm_min<<":"
+		<<date->tm_sec<<std::endl;
 }
 bool HDD::Long_Verify(unsigned char pattern =0x00,long begin=0, long end=0){
 	if(!end)end=size;
