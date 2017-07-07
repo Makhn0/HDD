@@ -35,7 +35,7 @@ void contPrint(HDD * HDDs[], int length)
 		std::this_thread::sleep_for(std::chrono::milliseconds(5000));
 	}
 }
-std::string month(int i){
+extern std::string month(int i);/*{
 	switch(i){
 		case 0:return "Jan";
 		case 1:return "Feb";
@@ -51,7 +51,7 @@ std::string month(int i){
 		case 11:return "Dec";
 		default:return "Jan";
 	}
-}
+}*/
 int main(int argc, char * argv[]){
 	//TODO test time is accurate on all clients
 	

@@ -34,6 +34,8 @@ class HDD{
 
 		
 		long StartTime=0;
+		long EraseStart=0;
+		long EraseEnd=0;
 		long EndTime=0;
 		long RunTime;
 		

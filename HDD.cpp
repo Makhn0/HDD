@@ -7,6 +7,7 @@
 #include <exception>
 #include <string>
 #include <unistd.h>
+#include <time.h>
 
 int HDD::instances;
 /* // might be more usefull than throwing strings
@@ -16,6 +17,23 @@ struct Exception : public exception{
 	}
 }
 */
+std::string month(int i){
+	switch(i){
+		case 0:return "Jan";
+		case 1:return "Feb";
+		case 2:return "Mar";
+		case 3:return "Apr";
+		case 4:return "May";
+		case 5:return "June";
+		case 6:return "July";
+		case 7:return "Aug";
+		case 8:return "Sep";
+		case 9:return "Oct";
+		case 10:return "Nov";
+		case 11:return "Dec";
+		default:return "Jan";
+	}
+}
 #ifndef Result_To_String
 #define Result_To_String
 std::string ResultTToString(Result_t a)
@@ -388,6 +406,18 @@ void HDD::erase(std::string * method)
 void HDD::erase()
 {
 	///*
+	time_t begin=time(0);
+	tm * date=localtime(&begin);
+	*dstream<<path<<" :start erasing:  "
+		<<(1900+ date->tm_year)
+		<<"/"
+		<<month(date->tm_mon)
+		<<"/"
+		<<(1+date->tm_mday)<<"  | "	
+		<<date->tm_hour<<":"
+		<<date->tm_min<<":"
+		<<date->tm_sec<<std::endl;
+
 	try{
 		erase_c();
 //		erase(new std::string("zero");
@@ -403,6 +433,24 @@ void HDD::erase()
 		this->erase_debrief();
 		throw e;
 	}
+	time_t end=time(0);
+	date=localtime(&end);
+	*dstream<<path<<" :end erasing:  "
+		<<(1900+ date->tm_year)
+		<<"/"
+		<<month(date->tm_mon)
+		<<"/"
+		<<(1+date->tm_mday)<<"  | "	
+		<<date->tm_hour<<":"
+		<<date->tm_min<<":"
+		<<date->tm_sec<<std::endl;
+	time_t diff=end-begin;
+	date=localtime(&diff);
+	*dstream<<path<<" :time elapsed:  "	
+		<<date->tm_hour<<":"
+		<<date->tm_min<<":"
+		<<date->tm_sec<<std::endl;
+	
 	//*/
 }
 void HDD::Write_All(unsigned char pattern =0x00,long begin=0,long end=0){
@@ -442,7 +490,7 @@ bool HDD::Long_Verify(unsigned char pattern =0x00,long begin=0, long end=0){
 
 		if(i%50000000==0) {
 	
-*dstream<<\r<<path<< " : checking : "<<(i-begin)/1000000<<" MB "<<"/"<<(end-begin)/1000000<<" MB : "<<((i-begin+1)*1.0/(end+1))*100<<" char :"<<buffer<<":";}
+*dstream<<path<< " : checking : "<<(i-begin)/1000000<<" MB "<<"/"<<(end-begin)/1000000<<" MB : "<<((i-begin+1)*1.0/(end+1))*100<<" char :"<<buffer<<":";}
 		if(buffer[0]!=pattern) {
 			fail= true;
 			break;
@@ -468,13 +516,14 @@ void HDD::erase_c(){
 	/* proceed with wiping*/
 	/**/
 	/* writes all a's to be changed to all zero*/
-	this->Write_All(97);
-	*dstream<<path<< " verified "<<(char)97<<" was written: "<<Long_Verify(97)<<std::endl;
+	//this->Write_All(97);
+	//*dstream<<path<< " verified "<<(char)97<<" was written: "<<Long_Verify(97)<<std::endl;
 	this->Write_All();
-	*dstream<<path<< " verified "<<(char)0x00<<" was written: "<<Long_Verify()<<std::endl;
+	//*dstream<<path<< " verified "<<(char)0x00<<" was written: "<<Long_Verify()<<std::endl;
+	/*Long_Verify took ~ .1%/2.5 minutes 2day verify time... too long skipping*/
+	/*verified that write_all(97) succeeded w/ akill disk*/
+	/*doing now: testing write 0 */
 }
-
-
 void HDD::erase_dd(){
 	Command(
 	"sudo dd if=/dev/zero of="
