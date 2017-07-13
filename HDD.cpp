@@ -439,8 +439,9 @@ void HDD::Write_All(unsigned char pattern =0x00,long begin=0,long end=0){
 	int bs=512;
 	unsigned char block[bs];
 	for(int i=0;i<bs;i++) block[i]=pattern;
+	*dstream<<"block declared"<<std::endl;
 	time_t begin_t=time(0);
-	tm * date=localtime(&begin);
+	tm * date=localtime(&begin_t);
 	*dstream<<path<<" :start erasing:  "
 		<<(1900+ date->tm_year)
 		<<"/"
@@ -450,9 +451,12 @@ void HDD::Write_All(unsigned char pattern =0x00,long begin=0,long end=0){
 		<<date->tm_hour<<":"
 		<<date->tm_min<<":"
 		<<date->tm_sec<<std::endl;
+	long lastLBA=-1;
 	time_t current_t=time(0);
-	time_t Last_t=time(0);
-	time_t delta;
+	time_t Last_t=time(0)+1;
+	time_t delta_t;
+	time_t elapsed_t=time(0);
+	int v=1;
 	long check=50000000;
 	for(currentLBA=begin//size//*3199/3200
 		;
@@ -464,14 +468,29 @@ void HDD::Write_All(unsigned char pattern =0x00,long begin=0,long end=0){
 		drive<<block;
 		if(currentLBA%check==0)
 		{	
-			current_t=time(0);					
-			delta=current_t-Last_t; 
 			
-			*dstream<<path<< " : erasing : "<<(currentLBA/1000000)<<"MB /"<<(end-begin)/1000000<<" MB : "<<((currentLBA-begin)*1.0/(end-begin))*100<<std::endl;
-			*dstream<<path<< " :ave speed : "<<(currentLBA/current_t-begin_t)<<"lba/ms : inst. speed "<<(check/delta)<<"lba/ms  inst. based eta : "<<((size-currentLBA)*delta/check/60000)<<" mins"<<std::endl;
+			current_t=time(0);	
+			delta_t=current_t-Last_t; 
+			elapsed_t=current_t-begin_t;
+			if(!elapsed_t)elapsed_t++;
+			v=(currentLBA-lastLBA)/delta_t;
+			*dstream<<path;
+			*dstream<< " : erasing : ";
+			*dstream<<(currentLBA/1000000)
+				<<"MB /"<<(end-begin)/1000000
+				<<" MB : "
+				<<((currentLBA-begin)*1.0/(end-begin))*100
+				<<" percent done"<<std::endl;
+			*dstream<<path<< " : Ave speed : ";
+			*dstream<<((currentLBA-begin)/elapsed_t)
+				<<"lba/ms : inst. speed "
+				<<v;
+				*dstream<<"lba/ms  inst. based eta : "	
+				<<((end-currentLBA)/v/60000)
+				<<" mins"<<std::endl;
 			
-			*dstream<<std::endl;
 			Last_t=current_t;
+			lastLBA=currentLBA;
 			
 		}
 	}
@@ -487,25 +506,40 @@ void HDD::Write_All(unsigned char pattern =0x00,long begin=0,long end=0){
 		drive<<pattern;
 		if(currentLBA%check==0)
 		{	
-			current_t=time(0);					
-			delta=current_t-Last_t; 
 			
-			*dstream<<path<< " : erasing : "<<(currentLBA/1000000)<<"MB /"<<(end-begin)/1000000<<" MB : "<<((currentLBA-begin)*1.0/(end-begin))*100<<std::endl;
-			*dstream<<path<< " :ave speed : "<<(currentLBA/current_t-begin_t)<<"lba/ms : inst. speed "<<(check/delta)<<"lba/ms  inst. based eta : "<<((size-currentLBA)*delta/check/60000)<<" mins"<<std::endl;
+			current_t=time(0);	
+			delta_t=current_t-Last_t; 
+			v=(currentLBA-lastLBA)/delta_t;
+			*dstream<<path<< " : erasing : "
+				<<(currentLBA/1000000)
+				<<"MB /"<<(end-begin)/1000000
+				<<" MB : "
+				<<((currentLBA-begin)*1.0/(end-begin))*100
+				<<"percent done"<<std::endl;
+			*dstream<<path<< " : Ave speed : "
+				<<((currentLBA-begin)/(current_t-begin_t))
+				<<"lba/ms : inst. speed "
+				<<(v*1.0)
+				<<"lba/ms  inst. based eta : "	
+				<<((end-currentLBA)/v/60000)
+				<<" mins"<<std::endl;
 			
-			*dstream<<std::endl;
 			Last_t=current_t;
+			lastLBA=currentLBA;
 			
 		}
 	}
 
-	*dstream<<path<< " : erasing : "<<currentLBA/1000000<<" MB /32,000 MB : "<<((currentLBA-begin)*1.0/(end-begin))*100<<std::endl;
-	*dstream<<"finished erasing... obstensibly... closing file"<<std::endl;
+	*dstream<<path<< " : erasing : "
+		<<currentLBA/1000000<<" MB /32,000 MB : "
+		<<((currentLBA-begin)*1.0/(end-begin))*100<<std::endl;
+	*dstream<<"finished erasing... obstensibly... closing file"
+		<<std::endl;
 	drive.close();
 	*dstream<<"closed"<<std::endl;
 	time_t end_t=time(0);
-	date=localtime(&begin);
-	*dstream<<path<<" :start erasing:  "
+	date=localtime(&begin_t);
+	*dstream<<path<<" :started erasing:  "
 		<<(1900+ date->tm_year)
 		<<"/"
 		<<month(date->tm_mon)
@@ -514,9 +548,18 @@ void HDD::Write_All(unsigned char pattern =0x00,long begin=0,long end=0){
 		<<date->tm_hour<<":"
 		<<date->tm_min<<":"
 		<<date->tm_sec<<std::endl;
-
-	time_t diff=end_t-begin_t;
-	date=localtime(&diff);
+	date=localtime(&end_t);
+	*dstream<<path<<" :ended erasing:  "
+		<<(1900+ date->tm_year)
+		<<"/"
+		<<month(date->tm_mon)
+		<<"/"
+		<<(1+date->tm_mday)<<"  | "	
+		<<date->tm_hour<<":"
+		<<date->tm_min<<":"
+		<<date->tm_sec<<std::endl;
+	time_t diff_t=end_t-begin_t;
+	date=localtime(&diff_t);
 	*dstream<<path<<" erased"<<(begin-end)<<" bytes in... :time elapsed:  "	
 		<<date->tm_hour<<":"
 		<<date->tm_min<<":"
@@ -565,7 +608,7 @@ void HDD::erase_c(){
 	/**/
 	/* writes all single character*/
 	//97=a currently b
-	this->Write_All(98);
+	this->Write_All(0,0,size);
 
 }
 void HDD::erase_dd(){
