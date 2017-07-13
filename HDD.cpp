@@ -126,6 +126,9 @@ void HDD::run(std::string* batch){
 		/*BEGIN TRY BLOCK*/
 		try{	
 			run_body(batch);
+			this->Status=FinishedSuccess;
+			print(dstream);
+			//log(batch);	
 		}
 		catch(std::string e){
 			exception_catch(e);
@@ -138,6 +141,7 @@ void HDD::run(std::string* batch){
 		}
 		/*END TRY BLOCK*/
 		*dstream<<this->path<<" : end of run, no pull out test"<<std::endl;
+
 		break;
 		while(presence())
 		{
@@ -182,8 +186,7 @@ void HDD::run_body(std::string* batch){
 	this->EndTime=time(0);
 	if(!this->presence()){return;}
 	*dstream<<this->path<<" : end of erase: writing to logs";
-	print(dstream);
-	//log(batch);	
+
 }
 void HDD::reset(){
 	this->SmartSupport=false;
@@ -428,13 +431,14 @@ void HDD::erase()
 
 void HDD::Write_All(unsigned char pattern =0x00,long begin=0,long end=0){
 	if(!end)end=size;
-
-
+	std::ofstream drive(path.c_str(),std::ostream::out);
 	if(!drive) throw "cannot open HDD";
 	//watch out for this line
-	else *dstream<<path<<" : opened drive and writing "<<(pattern!=0?(const char *)&pattern:"zero")<<"s from "<<begin<<" to "<<end<<std::endl;
-	std::ofstream drive(path.c_str(),std::ostream::out);
-
+	else *dstream<<path<<" : opened drive and writing "
+		<<(pattern!=0?(const char *)&pattern:"zero")<<"s from "<<begin<<" to "<<end<<std::endl;
+	int bs=512;
+	unsigned char block[bs];
+	for(int i=0;i<bs;i++) block[i]=pattern;
 	time_t begin_t=time(0);
 	tm * date=localtime(&begin);
 	*dstream<<path<<" :start erasing:  "
@@ -453,6 +457,29 @@ void HDD::Write_All(unsigned char pattern =0x00,long begin=0,long end=0){
 	for(currentLBA=begin//size//*3199/3200
 		;
 		currentLBA<end&&Present;
+		currentLBA+=bs
+	    )
+	{
+		drive.seekp(currentLBA);
+		drive<<block;
+		if(currentLBA%check==0)
+		{	
+			current_t=time(0);					
+			delta=current_t-Last_t; 
+			
+			*dstream<<path<< " : erasing : "<<(currentLBA/1000000)<<"MB /"<<(end-begin)/1000000<<" MB : "<<((currentLBA-begin)*1.0/(end-begin))*100<<std::endl;
+			*dstream<<path<< " :ave speed : "<<(currentLBA/current_t-begin_t)<<"lba/ms : inst. speed "<<(check/delta)<<"lba/ms  inst. based eta : "<<((size-currentLBA)*delta/check/60000)<<" mins"<<std::endl;
+			
+			*dstream<<std::endl;
+			Last_t=current_t;
+			
+		}
+	}
+	/*get end LBA's just in case remainder modulo bs*/
+	currentLBA-=bs;
+	for(
+		;
+		currentLBA<end&&Present;
 		currentLBA++
 	    )
 	{
@@ -464,9 +491,9 @@ void HDD::Write_All(unsigned char pattern =0x00,long begin=0,long end=0){
 			delta=current_t-Last_t; 
 			
 			*dstream<<path<< " : erasing : "<<(currentLBA/1000000)<<"MB /"<<(end-begin)/1000000<<" MB : "<<((currentLBA-begin)*1.0/(end-begin))*100<<std::endl;
-			*dstream<<path<< " :ave speed : "<<(currentLBA/current_t-begin_t))<<"lba/ms : inst. speed "<<(check/delta)<<"lba/ms  inst. based eta : "<<(size-currentLBA)*delta/check/60000<<" mins"<<std::endl;
+			*dstream<<path<< " :ave speed : "<<(currentLBA/current_t-begin_t)<<"lba/ms : inst. speed "<<(check/delta)<<"lba/ms  inst. based eta : "<<((size-currentLBA)*delta/check/60000)<<" mins"<<std::endl;
 			
-			<<std::endl;
+			*dstream<<std::endl;
 			Last_t=current_t;
 			
 		}
@@ -477,7 +504,7 @@ void HDD::Write_All(unsigned char pattern =0x00,long begin=0,long end=0){
 	drive.close();
 	*dstream<<"closed"<<std::endl;
 	time_t end_t=time(0);
-	tm * date=localtime(&begin);
+	date=localtime(&begin);
 	*dstream<<path<<" :start erasing:  "
 		<<(1900+ date->tm_year)
 		<<"/"
@@ -488,9 +515,9 @@ void HDD::Write_All(unsigned char pattern =0x00,long begin=0,long end=0){
 		<<date->tm_min<<":"
 		<<date->tm_sec<<std::endl;
 
-	time_t diff=end-begin;
+	time_t diff=end_t-begin_t;
 	date=localtime(&diff);
-	*dstream<<path<<" :time elapsed:  "	
+	*dstream<<path<<" erased"<<(begin-end)<<" bytes in... :time elapsed:  "	
 		<<date->tm_hour<<":"
 		<<date->tm_min<<":"
 		<<date->tm_sec<<std::endl;
@@ -536,14 +563,10 @@ void HDD::erase_c(){
 	*dstream<<path <<" : sizes detected: "<<size<< " : "<<size1<<std::endl;
 	/* proceed with wiping*/
 	/**/
-	/* writes all a's to be changed to all zero*/
-	//this->Write_All(97);
-	//*dstream<<path<< " verified "<<(char)97<<" was written: "<<Long_Verify(97)<<std::endl;
-	this->Write_All();
-	//*dstream<<path<< " verified "<<(char)0x00<<" was written: "<<Long_Verify()<<std::endl;
-	/*Long_Verify took ~ .1%/2.5 minutes 2day verify time... too long skipping*/
-	/*verified that write_all(97) succeeded w/ akill disk*/
-	/*doing now: testing write 0 */
+	/* writes all single character*/
+	//97=a currently b
+	this->Write_All(98);
+
 }
 void HDD::erase_dd(){
 	Command(
