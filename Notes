@@ -9,4 +9,13 @@ b:
 begins erase, but stops... fixed.
 erased, much quicker, quicker than time displayed;
 akil checking... done success!
-
+b0:
+stops at LBA=8milllion for no apparent reason... divide by zero errors
+other drive was insanely quick will try that one later swiched drives, 
+crazy quick with old drive also 
+testing w/ akil ... utterly failed.
+	first 100,000 sectors random data, the rest was all still b's
+	last sector of 512 bytes was zero
+	`wtf???
+tryin again... failed again
+debugging from home..

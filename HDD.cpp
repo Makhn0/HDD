@@ -170,7 +170,7 @@ void HDD::run_body(std::string* batch){
 	#ifdef _Erase
 	///*
 	if(!this->presence()){return;}
-	this->dd(batch);
+	//this->dd(batch); //TODO add back in
 	if(!this->presence()){return;}
 	//*/
 	//obviously needs more work for different methods
@@ -436,7 +436,7 @@ void HDD::Write_All(unsigned char pattern =0x00,long begin=0,long end=0){
 	//watch out for this line
 	else *dstream<<path<<" : opened drive and writing "
 		<<(pattern!=0?(const char *)&pattern:"zero")<<"s from "<<begin<<" to "<<end<<std::endl;
-	int bs=512;
+	const long bs=512;
 	unsigned char block[bs];
 	for(int i=0;i<bs;i++) block[i]=pattern;
 	*dstream<<"block declared"<<std::endl;
@@ -452,29 +452,35 @@ void HDD::Write_All(unsigned char pattern =0x00,long begin=0,long end=0){
 		<<date->tm_min<<":"
 		<<date->tm_sec<<std::endl;
 	long lastLBA=-1;
+	time_t Last_t=time(0)-1;
 	time_t current_t=time(0);
-	time_t Last_t=time(0)+1;
-	time_t delta_t;
-	time_t elapsed_t=time(0);
-	int v=1;
-	long check=50000000;
+
+	time_t delta_t=current_t-Last_t;
+	time_t elapsed_t=current_t-begin_t;
+	if(!elapsed_t)elapsed_t++;
+	int v=1;       //1234567890 //10^10=10 mb
+	const long check=1000000000;
 	for(currentLBA=begin//size//*3199/3200
 		;
 		currentLBA<end&&Present;
 		currentLBA+=bs
 	    )
 	{
-		//*dstream<<"begin"<<std::endl;
+
+		//*dstream<<"beginL"<<std::endl;
 		drive.seekp(currentLBA);
 		drive<<block;
-		if(currentLBA%check==0)
+		if(currentLBA%check==0||currentLBA/bs<9)
 		{	
-			
+		if(currentLBA/bs<9)std::cout<<"beggining bit :"<<currentLBA<<" tellp "<<drive.tellp()<<std::endl;
+			std::cout<<"tellg = "<<((long)drive.tellp())<<std::endl;
 			current_t=time(0);	
 			delta_t=current_t-Last_t; 
 			elapsed_t=current_t-begin_t;
 			if(!elapsed_t)elapsed_t++;
-			v=(currentLBA-lastLBA)/delta_t;
+			if(delta_t>0)v=(currentLBA-lastLBA)/delta_t;
+			if(!v)v++;
+			//dividing by: elapsed_t,v and constants
 			*dstream<<path;
 			*dstream<< " : erasing : ";
 			*dstream<<(currentLBA/1000000)
@@ -492,10 +498,12 @@ void HDD::Write_All(unsigned char pattern =0x00,long begin=0,long end=0){
 			
 			Last_t=current_t;
 			lastLBA=currentLBA;
-			
+			//*dstream<<"end of if"<<std::endl;
 		}
+		//*dstream<<"endL :"<<currentLBA<<std::endl;
 	}
-	/*get end LBA's just in case remainder modulo bs*/
+	*dstream<<"out"<<std::endl;
+	/*get end LBA's just in case remainder modulo bs!=0*/
 	currentLBA-=bs;
 	for(
 		;
@@ -507,21 +515,26 @@ void HDD::Write_All(unsigned char pattern =0x00,long begin=0,long end=0){
 		drive<<pattern;
 		if(currentLBA%check==0)
 		{	
-			
+			std::cout<<"tellg = "<<drive.tellp()<<std::endl;
 			current_t=time(0);	
 			delta_t=current_t-Last_t; 
-			v=(currentLBA-lastLBA)/delta_t;
-			*dstream<<path<< " : erasing : "
-				<<(currentLBA/1000000)
+			elapsed_t=current_t-begin_t;
+			if(!elapsed_t)elapsed_t++;
+			if(delta_t>0)v=(currentLBA-lastLBA)/delta_t;
+			if(!v)v++;
+			//dividing by: elapsed_t,v and constants
+			*dstream<<path;
+			*dstream<< " : erasing : ";
+			*dstream<<(currentLBA/1000000)
 				<<"MB /"<<(end-begin)/1000000
 				<<" MB : "
 				<<((currentLBA-begin)*1.0/(end-begin))*100
-				<<"percent done"<<std::endl;
-			*dstream<<path<< " : Ave speed : "
-				<<((currentLBA-begin)/(current_t-begin_t))
+				<<" percent done"<<std::endl;
+			*dstream<<path<< " : Ave speed : ";
+			*dstream<<((currentLBA-begin)/elapsed_t)
 				<<"lba/ms : inst. speed "
-				<<(v*1.0)
-				<<"lba/ms  inst. based eta : "	
+				<<v;
+				*dstream<<"lba/ms  inst. based eta : "	
 				<<((end-currentLBA)/v/60000)
 				<<" mins"<<std::endl;
 			
@@ -608,7 +621,7 @@ void HDD::erase_c(){
 	/* proceed with wiping*/
 	/**/
 	/* writes all single character*/
-	//97=a currently b
+	//97=a currently b0
 	this->Write_All(0,0,size);
 
 }
