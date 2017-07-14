@@ -464,6 +464,7 @@ void HDD::Write_All(unsigned char pattern =0x00,long begin=0,long end=0){
 		currentLBA+=bs
 	    )
 	{
+		//*dstream<<"begin"<<std::endl;
 		drive.seekp(currentLBA);
 		drive<<block;
 		if(currentLBA%check==0)
