@@ -110,7 +110,6 @@ void HDD::exception_catch(std::string e){
 	*dstream<<this->path<<" : LastOutput : "<<this->LastOutput<<std::endl;
 	*dstream<<this->path<<"#################################################"<<std::endl;
 }
-//void HDD::run_body(std::string* batch);
 void HDD::run(std::string* batch){
 	//std::thread a(&HDD::presence_checker,this,false);
 	while(1){
@@ -140,7 +139,7 @@ void HDD::run(std::string* batch){
 			exception_catch(e);
 		}
 		/*END TRY BLOCK*/
-		*dstream<<this->path<<" : end of run, no pull out test"<<std::endl;
+		*dstream<<this->path<<" : end of run_body"<<std::endl;
 
 		break;
 		while(presence())
@@ -303,6 +302,7 @@ void HDD::smartctl_run()
 		+ this->path
 		,"Running Smart Control...",true
 	);
+	sleep(2);
 }
 bool HDD::smartctl_running()
 {
@@ -439,9 +439,9 @@ void HDD::Write_All(unsigned char pattern =0x00,long begin=0,long end=0){
 	const long bs=512;
 	char block[bs];
 	for(int i=0;i<bs;i++) block[i]=pattern;
-	*dstream<<"block declared:"<<std::endl	
-		<<block
-		<<":end"
+	*dstream<<"block declared:"<<std::endl	;
+	dstream->write(block,bs);
+	*dstream<<":end"
 		<<std::endl;
 	time_t begin_t=time(0);
 	tm * date=localtime(&begin_t);
@@ -460,8 +460,10 @@ void HDD::Write_All(unsigned char pattern =0x00,long begin=0,long end=0){
 
 	time_t delta_t=current_t-Last_t;
 	time_t elapsed_t=current_t-begin_t;
+	
 	if(!elapsed_t)elapsed_t++;
 	int v=1;       //1234567890 //10^10=10 mb
+	eta=(end-currentLBA)/v;
 	const long check=1000000000;
 	for(currentLBA=begin//size//*3199/3200
 		;
@@ -484,6 +486,7 @@ void HDD::Write_All(unsigned char pattern =0x00,long begin=0,long end=0){
 			if(!elapsed_t)elapsed_t++;
 			if(delta_t>0)v=(currentLBA-lastLBA)/delta_t;
 			if(!v)v++;
+			eta=(end-currentLBA)/v;
 			//dividing by: elapsed_t,v and constants
 			*dstream<<path;
 			*dstream<< " : erasing : ";
@@ -494,11 +497,11 @@ void HDD::Write_All(unsigned char pattern =0x00,long begin=0,long end=0){
 				<<" percent done"<<std::endl;
 			*dstream<<path<< " : Ave speed : ";
 			*dstream<<((currentLBA-begin)/elapsed_t)
-				<<"lba/ms : inst. speed "
+				<<"LBA/sec : inst. speed "
 				<<v;
-				*dstream<<"lba/ms  inst. based eta : "	
-				<<((end-currentLBA)/v/60000)
-				<<" mins"<<std::endl;
+			*dstream<<"LBA/sec  inst. based eta : "	
+				<<(eta/60)
+				<<" min(s)"<<(eta%60)<<" sec "<<std::endl;
 			
 			Last_t=current_t;
 			lastLBA=currentLBA;
@@ -517,7 +520,8 @@ void HDD::Write_All(unsigned char pattern =0x00,long begin=0,long end=0){
 	    )
 	{
 		drive.seekp(currentLBA);
-		drive<<pattern;
+		drive.write(block,1);
+		#ifdef _Debug
 		if(currentLBA%check==0)
 		{	
 			std::cout<<"tellg = "<<drive.tellp()<<std::endl;
@@ -527,6 +531,7 @@ void HDD::Write_All(unsigned char pattern =0x00,long begin=0,long end=0){
 			if(!elapsed_t)elapsed_t++;
 			if(delta_t>0)v=(currentLBA-lastLBA)/delta_t;
 			if(!v)v++;
+			
 			//dividing by: elapsed_t,v and constants
 			*dstream<<path;
 			*dstream<< " : erasing : ";
@@ -535,19 +540,21 @@ void HDD::Write_All(unsigned char pattern =0x00,long begin=0,long end=0){
 				<<" MB : "
 				<<((currentLBA-begin)*1.0/(end-begin))*100
 				<<" percent done"<<std::endl;
-			*dstream<<path<< " : Ave speed : ";
+			*dstream<<path<<" delta_t: "<<delta_t<< "s : Ave speed : ";
 			*dstream<<((currentLBA-begin)/elapsed_t)
-				<<"lba/ms : inst. speed "
+				<<"LBA/sec : inst. speed "
 				<<v;
-				*dstream<<"lba/ms  inst. based eta : "	
-				<<((end-currentLBA)/v/60000)
-				<<" mins"<<std::endl;
+			*dstream<<"LBA/sec  inst. based eta : "	
+				<<(eta/60)<<" min"
+				<<(eta%60)<<" sec"<<std::endl;
 			
 			Last_t=current_t;
 			lastLBA=currentLBA;
 			
 		}
+		#endif
 	}
+	*dstream<<path<<" out coda"<<std::endl;
 
 	*dstream<<path<< " : erasing : "
 		<<currentLBA/1000000<<" MB /32,000 MB : "
@@ -612,7 +619,7 @@ bool HDD::Long_Verify(unsigned char pattern =0x00,long begin=0, long end=0){
 }
 void HDD::erase_c(){
 	//Working
-	PresentTask="Erasing Drive With ofstream";
+	PresentTask="Resolving sizes...";
 	
 	/* make sure that program can access whole drive*/
 	std::ifstream in(path.c_str(),std::istream::in);
@@ -626,8 +633,9 @@ void HDD::erase_c(){
 	/* proceed with wiping*/
 	/**/
 	/* writes all single character*/
-	//97=a currently b0
-	this->Write_All(99,0,size);
+	//97=a currently d0
+	PresentTask="Erasing ....";
+	this->Write_All(0,0,size);
 
 }
 void HDD::erase_dd(){
@@ -673,7 +681,8 @@ void HDD::print(std::ostream* textgohere=&std::cout){
 	*textgohere<<"Start Time: "<<this->StartTime<<std::endl;
 	*textgohere<<"End Time: "<<this->EndTime<<std::endl;
 	*textgohere<<"Run Time: "<<this->RunTime<<std::endl;
-	*textgohere<<":Erasing "<<(currentLBA/size)*100<<"% Complete"<<std::endl;
+	*textgohere<<"Erasing "<<(currentLBA/size)*100<<"% Complete"<<std::endl;
+	*textgohere<<"ETA: "<<(eta/60)<<" min(s) "<<eta%60<<"second(s)"<<std::endl;
 	*textgohere<<"Result: "
 		<<ResultTToString(this->Status)
 		<<std::endl;	*textgohere<<"______________________________________________________"<<std::endl;

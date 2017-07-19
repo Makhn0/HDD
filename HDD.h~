@@ -37,7 +37,6 @@ class HDD{
 		long EraseStart=0;
 		long EraseEnd=0;
 		long EndTime=0;
-		time_t eta;
 		long RunTime;
 		
 		///* learn how to make constructor in src*/

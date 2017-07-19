@@ -22,7 +22,7 @@ void print(HDD * HDDs[], int length)
 	std::cout<<"########################################################\n\n";
 	for(int i=0;i<length;i++)	
 	{
-		if(HDDs[i]->Present)
+//		if(HDDs[i]->Present)
 			HDDs[i]->print(printstream);
 	}
 }
