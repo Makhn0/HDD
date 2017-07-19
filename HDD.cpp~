@@ -474,7 +474,6 @@ void HDD::Write_All(unsigned char pattern =0x00,long begin=0,long end=0){
 		drive.seekp(currentLBA);
 		//drive<<block;
 		drive.write(block,bs);
-		#ifdef _Debug
 		if(currentLBA%check==0||currentLBA/bs<9)
 		{	
 		if(currentLBA/bs<9)std::cout<<"beggining blocks :"<<currentLBA<<" tellp "<<drive.tellp()<<std::endl;
@@ -504,7 +503,6 @@ void HDD::Write_All(unsigned char pattern =0x00,long begin=0,long end=0){
 			lastLBA=currentLBA;
 			//*dstream<<"end of if"<<std::endl;
 		}
-		#endif
 		//*dstream<<"endL :"<<currentLBA<<std::endl;
 	}
 	*dstream<<"out"<<std::endl;

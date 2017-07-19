@@ -21,5 +21,3 @@ tryin again... failed again
 debugging from home.. no I'm not
 tryin "patriot" ssd, checking if erased (akill)... is random
 moving on to writing c on "patriot"...
-appears to be working as normal
-THEORY: the <<operator is interpreting the block char array filled with zeros as a null pointer which is why it doesn't write anything.
