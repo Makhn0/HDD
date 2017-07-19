@@ -464,7 +464,7 @@ void HDD::Write_All(unsigned char pattern =0x00,long begin=0,long end=0){
 	if(!elapsed_t)elapsed_t++;
 	long v=1;       //1234567890 //10^10=10 mb
 	eta=(end-currentLBA)/v;
-	const long check=10000000;//10mb
+	const long check=100000000;//100mb
 	for(currentLBA=begin//size//*3199/3200
 		;
 		currentLBA<end&&Present;

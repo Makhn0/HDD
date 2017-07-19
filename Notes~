@@ -31,4 +31,4 @@ c0: filling patriot with zeros w/ .write... done, confirmed
 if I find error again, I will adjust begin time and try to catch the errors
 e: test intel w/ smart
 
-getting rid of -D_Debug and having adding print etc. makes a ~10 min erase time ~370 min!!!
+getting rid of -D_Debug and having adding print etc. makes a ~10 min erase time ~250 min!!!
