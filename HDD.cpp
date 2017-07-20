@@ -114,7 +114,7 @@ void HDD::exception_catch(std::string e){
 	*dstream<<this->path<<" : LastOutput : "<<this->LastOutput<<std::endl;
 	*dstream<<this->path<<"#################################################"<<std::endl;
 }
-void HDD::run(std::string* batch){
+void HDD::run(std::string* batch,char pattern){
 	//std::thread a(&HDD::presence_checker,this,false);
 	while(1){
 		*dstream<<this->path<<" : beginning running loop... "<< std::endl;
@@ -128,7 +128,7 @@ void HDD::run(std::string* batch){
 		}
 		/*BEGIN TRY BLOCK*/
 		try{	
-			run_body(batch);
+			run_body(batch,pattern);
 			this->Status=FinishedSuccess;
 			print(dstream);
 			//log(batch);	
@@ -154,7 +154,7 @@ void HDD::run(std::string* batch){
 	}
 	*dstream<<path<<" : we did it out of the loop"<<std::endl;;
 }
-void HDD::run_body(std::string* batch){
+void HDD::run_body(std::string* batch,char pattern){
 	this->StartTime=time(0);
 	get_data();
 	if(!presence()){return ;}
@@ -181,7 +181,7 @@ void HDD::run_body(std::string* batch){
 		this->erase(batch);
 	}
 	else{
-		erase();
+		erase(pattern);
 	}		
 	if(!this->presence()){return;}
 	#endif
@@ -420,11 +420,11 @@ void HDD::erase(std::string * method)
 		,"Erasing With Nwipe...",true
 	);
 }
-void HDD::erase()
+void HDD::erase(char pattern)
 {
 	///*
 	try{
-		erase_c();
+		erase_c(pattern);
 //		erase(new std::string("zero");
 		//	this->erase_debrief();
 	}
@@ -443,7 +443,7 @@ void HDD::erase()
 	//*/
 }
 
-void HDD::Write_All(unsigned char pattern =0x00,long begin=0,long end=0){
+void HDD::Write_All( char pattern =0x00,long begin=0,long end=0){
 	if(!end)end=size;
 	std::ofstream drive(path.c_str(),std::ostream::out);
 	if(!drive) throw "cannot open HDD";
@@ -477,7 +477,10 @@ void HDD::Write_All(unsigned char pattern =0x00,long begin=0,long end=0){
 	
 	if(!elapsed_t)elapsed_t++;
 	long v=1;       //1234567890 //10^10=10 mb
-	eta=(end-currentLBA)/v;
+	long aV=1;       //1234567890 //10^10=10 mb
+	eta=-1;//(end-currentLBA)/aV;
+	long ieta=-1;
+	long aeta=-1;
 	const long check=10000000;//10mb
 	for(currentLBA=begin//size//*3199/3200
 		;
@@ -493,6 +496,7 @@ void HDD::Write_All(unsigned char pattern =0x00,long begin=0,long end=0){
 		
 		if(currentLBA%check==0||currentLBA/bs<9)
 		{	
+			if(!presence())throw "pulled out while erasing";
 			if(currentLBA/bs<9)*dstream<<"beggining blocks :"<<currentLBA<<" tellp "<<drive.tellp()<<std::endl;
 			current_t=time(0);	
 			delta_t=current_t-Last_t; 
@@ -500,7 +504,10 @@ void HDD::Write_All(unsigned char pattern =0x00,long begin=0,long end=0){
 			if(!elapsed_t)elapsed_t++;
 			if(delta_t>0)v=(currentLBA-lastLBA)/delta_t;
 			if(!v)v++;
-			eta=(end-currentLBA)/v;
+			aV=(currentLBA-begin)/elapsed_t;
+			if(!aV)aV++;
+			ieta=(end-currentLBA)/v;
+			aeta=(end-currentLBA)/aV;
 			//dividing by: elapsed_t,v and constants
 			*dstream<<path;
 			*dstream<< " : erasing : ";
@@ -510,13 +517,16 @@ void HDD::Write_All(unsigned char pattern =0x00,long begin=0,long end=0){
 				<<((currentLBA-begin)*1.0/(end-begin))*100
 				<<" percent done"<<std::endl;
 			*dstream<<path<< " : Ave speed : ";
-			*dstream<<((currentLBA-begin)/elapsed_t)
+			*dstream<<aV
 				<<"LBA/sec : inst. speed "
 				<<v;
 			*dstream<<"LBA/sec  inst. based eta : "	
-				<<(eta/60)
-				<<" min(s)"<<(eta%60)<<" sec "<<std::endl;
-			
+				<<(ieta/60)
+				<<" min(s)"<<(ieta%60)<<" sec ";
+			*dstream<<" avbased eta: "
+				<<(aeta/60)
+				<<" min(s)"<<(aeta%60)<<" sec ";
+			eta=aeta;
 			Last_t=current_t;
 			lastLBA=currentLBA;
 			//*dstream<<"end of if"<<std::endl;
@@ -631,7 +641,7 @@ bool HDD::Long_Verify(unsigned char pattern =0x00,long begin=0, long end=0){
 	idrive.close();
 	return !fail;//TODO change to return in for loop;
 }
-void HDD::erase_c(){
+void HDD::erase_c(char pattern){
 	//Working
 	PresentTask="Resolving sizes...";
 	
@@ -649,7 +659,7 @@ void HDD::erase_c(){
 	/* writes all single character*/
 	//97=a currently d0
 	PresentTask="Erasing ....";
-	this->Write_All(0,0,size);
+	this->Write_All(pattern,0,size);
 
 }
 void HDD::erase_dd(){
@@ -688,7 +698,7 @@ void HDD::print(std::ostream* textgohere=&std::cout){
 	*textgohere<<"User Capacity: "<<this->UserCapacity<<std::endl;
 	*textgohere<<"Present Task: "<<this->PresentTask<<std::endl;
 
-	*textgohere<<"Start Time: "<<this->StartTime<<std::endl;
+	*textgohere<<"Start Time: "<<(ctime(&StartTime));//<<std::endl;
 	if(EndTime>0)*textgohere<<"End Time: "<<this->EndTime<<std::endl;
 	*textgohere<<"Run Time: "<<this->RunTime<<std::endl;
 	*textgohere<<"Erasing "<<(currentLBA*1.0/size)*100<<"% Complete"<<std::endl;

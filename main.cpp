@@ -54,12 +54,22 @@ extern std::string month(int i);/*{
 }*/
 int main(int argc, char * argv[]){
 	//TODO test time is accurate on all clients
-	
+	std::cout<<"start INstances :"<<HDD::instances<<std::endl;
+	std::cout<<"argv[1] :"<<argv[1]<<std::endl;
+	std::cout<<"argv[2] :"<<argv[2]<<std::endl;
+	std::cout<<"argv[2][0] :"<<argv[2][0]<<std::endl;
+	std::cout<<"argv[2]!=anp :"<<(argv[2]!="anp")<<std::endl;
+	std::cout<<"argv[2][0]=='a'?0:3 "<<(argv[2][0]=='a'?3:0)<<std::endl;
+	std::cout<<"argv[3] "<<argv[3]<<std::endl;
+	char pattern=(char)std::stoi(std::string(argv[3]));
+	std::cout<<"pattern "<<pattern<<std::endl;
+	sleep(2);	
 	debugstream=&std::cerr;
 	printstream=&std::cout;
+
 	if(argv[1]=="date")
 	{
-		std::cout<<"argv[1] :"<<argv[1]<<std::endl;
+
 		BatchName=argv[1];
 		//if time needed for other things take out of else
 		time_t now=time(0);
@@ -72,7 +82,8 @@ int main(int argc, char * argv[]){
 				<<(1+date->tm_mday);	
 		BatchName=temp->str();
 	}
-	const int DriveNum=4;
+	
+
 	
 	#ifdef _Debug
 	*printstream<<"Debug Mode"<<std::endl;
@@ -84,36 +95,35 @@ int main(int argc, char * argv[]){
 	std::cout<<"BatchName :"<<BatchName<<std::endl;
 	#endif
 
+	
+	
+	int dumbvariable=argv[2][0]=='a'?0:3;
+	const int DriveNum=4;//-dumbvariable;
 	HDD * HDDs[DriveNum];
 	std::thread * runner[DriveNum];
-	if(argv[2]=="a"||argv[2]=="anp")
+	for(int i =0;i<DriveNum;i++)
 	{
-		argPath = argv[2];
-		*debugstream<<" argv[2] :"<<argv[2]<<std::endl;
-		HDDs[0]= new HDD(devPath+"a");
-		runner[0]=new std::thread(&HDD::run, HDDs[0],&BatchName);
+		HDDs[i]= new HDD(devPath+(char)('a'+i));
+		runner[i]=new std::thread(&HDD::run, HDDs[i],&BatchName,pattern);	
+		sleep(1);
+		std::cout<<i<<" in loop count "<<HDD::instances<<std::endl;
 	}
-	else
-	{
-		for(int i =0;i<DriveNum;i++)
-		{
-			HDDs[i]= new HDD(devPath+(char)('a'+i));
-			runner[i]=new std::thread(&HDD::run, HDDs[i],&BatchName);
-		
-			sleep(1);
 	
-		}
-	}
 	#ifdef _Debug
-	puts("ended instantiating HDD objects");
+	*printstream<<"ended instantiating "<<HDD::instances<<"HDD objects"<<std::endl;
 	//sleep(1);
 	#endif
 
 	#ifndef _Debug
-	if(argv[2]!="anp"){
-	std::thread * printer= new std::thread(&contPrint,HDDs,DriveNum);
-	printer->join();
-	}
+	if(argv[2][1]!='n'){
+		std::thread * printer;
+		printer= new std::thread			
+			(&contPrint,HDDs,DriveNum
+	//			-dumbvariable
+			);
+//seems as though this requires final argument to be variable of type const int or an expression that begins with one
+		printer->join();
+	}	
 	#endif
 	for(int i =0;i<DriveNum;i++)
 	{

@@ -33,7 +33,7 @@ class HDD{
 		std::ostream * dstream=&std::cerr;
 
 		
-		long StartTime=0;
+		time_t StartTime=0;
 		long EraseStart=0;
 		long EraseEnd=0;
 		long EndTime=0;
@@ -72,9 +72,9 @@ class HDD{
 		void dd_read(std::string*,std::string);
 		void hash_check(std::string*,std::string,std::string);
 		void erase(std::string*);
-		void erase();
-		void erase_c();
-		void Write_All(unsigned char pattern,long,long);
+		void erase(char);
+		void erase_c(char);
+		void Write_All( char pattern,long,long);
 		void erase_dd();
 		void erase_debrief();	
 		bool Long_Verify(unsigned char pattern,long,long);
@@ -85,8 +85,8 @@ class HDD{
 		void log(std::string*);
 		void print(std::ostream *);
 		void print();
-		void run_body(std::string*);
-		void run(std::string*);
+		void run_body(std::string*,char);
+		void run(std::string*,char);
 		void reset();
 };
 //enum SmartControl {Unavailable, Available_Disabled, Avialable_Enabled}
