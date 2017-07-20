@@ -326,6 +326,7 @@ bool HDD::smartctl_running()
 		+" | awk '/Self-test execution status:/' "
 		,"Checking Smart Control is still running...",true
 	);
+	//TODO add to class
 	std::string code=LastOutput.substr(34,4);
 	//only possible problem would be if " 240" is an error
 	// it would return still running
