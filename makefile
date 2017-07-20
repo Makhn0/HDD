@@ -31,6 +31,7 @@ clean-help:
 	$(del) HDD.o
 	$(del) main.o
 	$(del) $(BinName)
+	$(del) *~
 clean: 
 	
 	sudo make clean-help ||\
