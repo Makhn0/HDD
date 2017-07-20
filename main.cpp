@@ -86,7 +86,7 @@ int main(int argc, char * argv[]){
 
 	HDD * HDDs[DriveNum];
 	std::thread * runner[DriveNum];
-	if(argv[2]=="a")
+	if(argv[2]=="a"||argv[2]=="anp")
 	{
 		argPath = argv[2];
 		*debugstream<<" argv[2] :"<<argv[2]<<std::endl;
@@ -110,8 +110,10 @@ int main(int argc, char * argv[]){
 	#endif
 
 	#ifndef _Debug
+	if(argv[2]!="anp"){
 	std::thread * printer= new std::thread(&contPrint,HDDs,DriveNum);
 	printer->join();
+	}
 	#endif
 	for(int i =0;i<DriveNum;i++)
 	{
