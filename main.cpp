@@ -83,8 +83,6 @@ int main(int argc, char * argv[]){
 		BatchName=temp->str();
 	}
 	
-
-	
 	#ifdef _Debug
 	*printstream<<"Debug Mode"<<std::endl;
 	std::cout<< "making dev path prefix =";
@@ -95,8 +93,6 @@ int main(int argc, char * argv[]){
 	std::cout<<"BatchName :"<<BatchName<<std::endl;
 	#endif
 
-	
-	
 	int dumbvariable=argv[2][0]=='a'?0:3;
 	const int DriveNum=4;//-dumbvariable;
 	HDD * HDDs[DriveNum];
@@ -111,6 +107,7 @@ int main(int argc, char * argv[]){
 	
 	#ifdef _Debug
 	*printstream<<"ended instantiating "<<HDD::instances<<"HDD objects"<<std::endl;
+	don't compile I'll end u
 	//sleep(1);
 	#endif
 

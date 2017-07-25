@@ -89,6 +89,4 @@ class HDD{
 		void run(std::string*,char);
 		void reset();
 };
-//enum SmartControl {Unavailable, Available_Disabled, Avialable_Enabled}
-
 #endif
