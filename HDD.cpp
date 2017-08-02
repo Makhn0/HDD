@@ -6,7 +6,11 @@
 #include <thread>
 #include <exception>
 #include <string>
-#include <unistd.h>
+#include <unistd.h> //write()
+#include <sys/stat.h>//O_RDWR?
+#include <sys/types.h>//open();
+#include <stdint.h>//u64 in nwipe_static_pass?
+#include <fcntl.h>
 #include <time.h>
 
 int HDD::instances;
@@ -194,6 +198,7 @@ void HDD::run_body(std::string* batch,char pattern){
 void HDD::reset(){
 	this->SmartSupport=false;
 	this->Present=false;
+	if(Present) this->fd=open(path.c_str(),O_RDWR);//std::open?
 	this->Exception="none";
 	this->SerialNumber="";
 	this->Model="";
@@ -425,6 +430,7 @@ void HDD::erase(char pattern)
 	///*
 	try{
 		erase_c(pattern);
+		erase_n(pattern);
 //		erase(new std::string("zero");
 		//	this->erase_debrief();
 	}
@@ -660,6 +666,183 @@ void HDD::erase_c(char pattern){
 	//97=a currently d0
 	PresentTask="Erasing ....";
 	this->Write_All(pattern,0,size);
+
+}
+void HDD::erase_n(char pattern){
+/* The result holder. */
+	int r;
+
+	/* The IO size. */
+	size_t blocksize;
+
+	/* The result buffer for calls to lseek. */
+	off64_t offset;
+
+	/* The output buffer. */
+	char* b;
+
+	/* A pointer into the output buffer. */
+	char* p;
+
+	/* The output buffer window offset. */
+	int w = 0;
+
+	/* The number of bytes remaining in the pass. */
+	unsigned long z = c->device_size;
+
+//* tottaly copy pasted from nwipe's github
+if( pattern == NULL )
+	{
+		//* Caught insanity. 
+		*dstream<<"null pattern pointer"<<std::endl;
+		return -1;
+	}
+
+	if( pattern->length <= 0 )
+	{
+		//* Caught insanity. 
+		*dstream<<"__FUNCTION__: The pattern length member is "<<, pattern->length<<std::endl ;
+		return -1;
+	}
+
+	//* Create the output buffer. 
+	b = malloc( c->device_stat.st_blksize  + pattern->length * 2 );
+
+	//* Check the memory allocation. 
+	if( ! b )
+	{
+		*dstream<<"unable to create buffer"<<std::endl;
+		return -1;
+	}
+
+	for( p = b ; p < b + 512  + 1 ; p += 1 )
+	{
+		//* Fill the output buffer with the pattern.
+		memcpy( p, pattern->s, pattern->length ); 
+	}
+///
+	//* Reset the file pointer. 
+	offset = lseek( c->device_fd, 0, SEEK_SET );
+
+	//* Reset the pass byte counter. 
+	c->pass_done = 0;
+
+	if( offset == (off64_t)-1 )
+	{
+		nwipe_perror( errno, __FUNCTION__, "lseek" );
+		nwipe_log( NWIPE_LOG_FATAL, "Unable to reset the '%s' file offset.", c->device_name );
+		return -1;
+	}
+
+	if( offset != 0 )
+	{
+		//* This is system insanity. 
+		nwipe_log( NWIPE_LOG_SANITY, "__FUNCTION__: lseek() returned a bogus offset on '%s'.", c->device_name );
+		return -1;
+	}
+
+
+	while( z > 0 )
+	{
+		if( 512 <= z )
+		{
+			blocksize = 512 ;
+		}
+		else
+		{
+			//* This is a seatbelt for buggy drivers and programming errors because 
+			//* the device size should always be an even multiple of its blocksize. 
+			blocksize = z;
+			*dstream<<"the size of "<< path<< " is not a multiple of block size "<<blocksize<<std::endl;
+			//nwipe_log( NWIPE_LOG_WARNING,
+			//  "%s: The size of '%s' is not a multiple of its block size %i.",
+		//	  __FUNCTION__, c->device_name, c->device_stat.st_blksize );
+		}
+
+		//* Fill the output buffer with the random pattern. 
+		//* Write the next block out to the device. 
+		r = write( c->device_fd, &b[w], blocksize );
+
+		//* Check the result for a fatal error. 
+		if( r < 0 )
+		{
+			//nwipe_perror( errno, __FUNCTION__, "write" );
+			//nwipe_log( NWIPE_LOG_FATAL, "Unable to write to '%s'.", c->device_name );
+			*dstream<<" unable to write fully to"<<path<<std::endl;
+			return -1;
+		}
+
+		//* Check for a partial write. 
+		if( r != blocksize )
+		{
+			//* TODO: Handle a partial write. 
+
+			//* The number of bytes that were not written. 
+			int s = blocksize - r;
+			
+			//* Increment the error count. 
+			c->pass_errors += s;
+
+			nwipe_log( NWIPE_LOG_WARNING, "Partial write on '%s', %i bytes short.", c->device_name, s );
+
+			//* Bump the file pointer to the next block. 
+			offset = lseek( c->device_fd, s, SEEK_CUR );
+
+			if( offset == (off64_t)-1 )
+			{
+				nwipe_perror( errno, __FUNCTION__, "lseek" );
+				nwipe_log( NWIPE_LOG_ERROR, "Unable to bump the '%s' file offset after a partial write.", c->device_name );
+				return -1;
+			}
+
+		} //* partial write 
+
+
+		//* Adjust the window. 
+		w = ( c->device_stat.st_blksize  + w ) % pattern->length;
+
+		/* Intuition check: 
+		 *
+		 *   If the pattern length evenly divides the block size
+		 *   then ( w == 0 ) always.
+		 */
+		///*
+
+		//* Decrement the bytes remaining in this pass. 
+		z -= r;
+
+		//* Increment the total progress counterr. 
+		c->pass_done += r;
+		c->round_done += r;
+
+		pthread_testcancel();
+
+	} //* remaining bytes 
+
+	//* Tell our parent that we are syncing the device. 
+	c->sync_status = 1;
+
+	//* Sync the device. 
+	r = fdatasync( c->device_fd );
+
+	//* Tell our parent that we have finished syncing the device. 
+	c->sync_status = 0;
+
+	if( r != 0 )
+	{
+		//* FIXME: Is there a better way to handle this? 
+		nwipe_perror( errno, __FUNCTION__, "fdatasync" );
+		nwipe_log( NWIPE_LOG_WARNING, "Buffer flush failure on '%s'.", c->device_name );
+	}
+
+	//* Release the output buffer. 
+	free( b );
+	
+	//* We're done. 
+return 0; 
+
+//*/
+
 
 }
 void HDD::erase_dd(){

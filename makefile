@@ -1,6 +1,7 @@
 CPFLAGS=--std=c++0x -pthread -Wall
 os=linux
 
+src=main.cpp HDD.cpp Exceptions.h
 ifeq ($(os),nt)
 BinName:=ewhde.exe
 Editor:=notepad++
@@ -21,6 +22,10 @@ main.o : main.cpp
 	$(CXX) -c $(CPFLAGS) $(args) main.cpp	
 run : $(BinName)
 	$(BinName)
+nwipetest : nwipetest.o
+	$(CXX) $(CPFLAGS) $(args) -o nwipetest nwipetest.o
+nwipetest.o: nwipetest.cpp
+	$(CXX) -c $(CPFLAGS) $(args) nwipetest.cpp	
 edit :
 	$(Editor) main.cpp &
 	$(Editor) HDD.cpp &

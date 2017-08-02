@@ -10,6 +10,7 @@ enum Result_t{Unfinished,FinishedSuccess,FinishedFail};
 class HDD{
 	public:
 		const std::string path;
+		int fd;
 		static int instances;
 		
 		bool Present;
@@ -74,6 +75,8 @@ class HDD{
 		void erase(std::string*);
 		void erase(char);
 		void erase_c(char);
+		void erase_n(char);
+		
 		void Write_All( char pattern,long,long);
 		void erase_dd();
 		void erase_debrief();	
