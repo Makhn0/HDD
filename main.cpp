@@ -91,10 +91,12 @@ int main(int argc, char * argv[]){
 	#ifdef _Debug
 	std::cout<<devPath<<std::endl;
 	std::cout<<"BatchName :"<<BatchName<<std::endl;
+	const int DriveNum=1;
 	#endif
 
-	int dumbvariable=argv[2][0]=='a'?0:3;
-	const int DriveNum=4;//-dumbvariable;
+	#ifndef _Debug
+	const int DriveNum=4;
+	#endif
 	HDD * HDDs[DriveNum];
 	std::thread * runner[DriveNum];
 	for(int i =0;i<DriveNum;i++)
@@ -107,7 +109,7 @@ int main(int argc, char * argv[]){
 	
 	#ifdef _Debug
 	*printstream<<"ended instantiating "<<HDD::instances<<"HDD objects"<<std::endl;
-	don't compile I'll end u
+	//don't compile I'll end u
 	//sleep(1);
 	#endif
 

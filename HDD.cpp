@@ -432,7 +432,7 @@ void HDD::erase(char pattern)
 	///*
 	try{
 		erase_c(pattern);
-		erase_n(pattern);
+		erase_n('N');
 //		erase(new std::string("zero");
 		//	this->erase_debrief();
 	}
@@ -496,7 +496,7 @@ void HDD::Write_All( char pattern =0x00,long begin=0,long end=0){
 		currentLBA+=bs
 	    )
 	{
-
+		//ERASE HERE TODO uncomment to erase
 		//*dstream<<"beginL"<<std::endl;
 		drive.seekp(currentLBA);
 		//drive<<block;
@@ -528,12 +528,15 @@ void HDD::Write_All( char pattern =0x00,long begin=0,long end=0){
 			*dstream<<aV
 				<<"LBA/sec : inst. speed "
 				<<v;
-			*dstream<<"LBA/sec  inst. based eta : "	
-				<<(ieta/60)
+			*dstream<<"LBA/sec  inst. based eta : "	;
+			if(int a=(ieta/3600))
+				*dstream<<(a)
+					<<" hours ";
+			*dstream<<(ieta/60)
 				<<" min(s)"<<(ieta%60)<<" sec ";
 			*dstream<<" avbased eta: "
 				<<(aeta/60)
-				<<" min(s)"<<(aeta%60)<<" sec ";
+				<<" min(s)"<<(aeta%60)<<" sec "<<std::endl;
 			eta=aeta;
 			Last_t=current_t;
 			lastLBA=currentLBA;
@@ -551,8 +554,8 @@ void HDD::Write_All( char pattern =0x00,long begin=0,long end=0){
 		currentLBA++
 	    )
 	{
-		drive.seekp(currentLBA);
-		drive.write(block,1);
+		//drive.seekp(currentLBA);
+		//drive.write(block,1);
 		
 		if(currentLBA%check==0)
 		{	
@@ -596,7 +599,9 @@ void HDD::Write_All( char pattern =0x00,long begin=0,long end=0){
 	drive.close();
 	*dstream<<"closed"<<std::endl;
 	time_t end_t=time(0);
+	*dstream<<"time(0);"<<std::endl;
 	date=localtime(&begin_t);
+	*dstream<<"date=local..;"<<std::endl;
 	*dstream<<path<<" :started erasing:  "
 		<<(1900+ date->tm_year)
 		<<"/"
@@ -674,7 +679,7 @@ void HDD::erase_n(char pattern){
 
 	time_t begin_t=time(0);
 	tm * date=localtime(&begin_t);
-	*dstream<<path<<" :start erasing:  "
+	*dstream<<path<<" :start erasing w/erase_n:  "
 		<<(1900+ date->tm_year)
 		<<"/"
 		<<month(date->tm_mon)
@@ -704,7 +709,7 @@ void HDD::erase_n(char pattern){
 	/* The number of bytes remaining in the pass. */
 	unsigned long z =size; //originally unsigned long long in nwipe
 	int errors=0; 		//should use long long for size everywhere?
-
+	this->fd=open(path.c_str(),O_RDWR);//just incase reset didn't get it because of no presence or somethign
 //* tottaly copy pasted from nwipe's github
 	
 	/*if( pattern == NULL )
@@ -739,6 +744,7 @@ void HDD::erase_n(char pattern){
 	}
 ///
 	// Reset the file pointer. 
+	*dstream<<"filedescriptor int fd = "<<fd<<std::endl;
 	offset = lseek( fd, 0, SEEK_SET );
 
 	// Reset the pass byte counter. 
@@ -760,7 +766,7 @@ void HDD::erase_n(char pattern){
 		return ;//return -1;
 	}
 
-
+	*dstream<<"actually erasing part"<<std::endl;
 	while( z > 0 )
 	{
 		if( 512 <= z )
@@ -886,7 +892,7 @@ void HDD::erase_n(char pattern){
 		<<date->tm_sec<<std::endl;
 	time_t diff_t=end_t-begin_t;
 	date=localtime(&diff_t);
-	*dstream<<path<<" erased"<<(size)<<" bytes in... :time elapsed:  "	
+	*dstream<<path<<" erased"<<(size)<<" bytes w/erase_n in... :time elapsed:  "	
 		<<date->tm_hour<<":"
 		<<date->tm_min<<":"
 		<<date->tm_sec<<std::endl;
