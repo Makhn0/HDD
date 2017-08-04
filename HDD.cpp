@@ -666,14 +666,26 @@ void HDD::erase_c(char pattern){
 	//97=a currently d0
 	PresentTask="Erasing ....";
 	this->Write_All(pattern,0,size);
-
+	
 }
 void HDD::erase_n(char pattern){
+
+	time_t begin_t=time(0);
+	tm * date=localtime(&begin_t);
+	*dstream<<path<<" :start erasing:  "
+		<<(1900+ date->tm_year)
+		<<"/"
+		<<month(date->tm_mon)
+		<<"/"
+		<<(1+date->tm_mday)<<"  | "	
+		<<date->tm_hour<<":"
+		<<date->tm_min<<":"
+		<<date->tm_sec<<std::endl;
 /* The result holder. */
 	int r;
 
 	/* The IO size. */
-	size_t blocksize;
+	size_t blocksize=512;
 
 	/* The result buffer for calls to lseek. */
 	off64_t offset;
@@ -688,46 +700,46 @@ void HDD::erase_n(char pattern){
 	int w = 0;
 
 	/* The number of bytes remaining in the pass. */
-	unsigned long long z = c->device_size;
-	int errors=0;
+	unsigned long z =size; //originally unsigned long long in nwipe
+	int errors=0; 		//should use long long for size everywhere?
 
 //* tottaly copy pasted from nwipe's github
 	
 	/*if( pattern == NULL )
 	{
-		//* Caught insanity. 
+		// Caught insanity. 
 		*dstream<<"null pattern pointer"<<std::endl;
 		return -1;
 	}
 	*///will never happen pattern not pointer in this code
 	/*if( pattern->length <= 0 )
 	{
-		//* Caught insanity. 
+		// Caught insanity. 
 		*dstream<<"__FUNCTION__: The pattern length member is "<<, pattern->length<<std::endl ;
 		return -1;
 	}*///will never happen
 
-	//* Create the output buffer. 
-	b = malloc( blocksize  +2 );
+	// Create the output buffer. 
+	b = (char *) malloc( blocksize  +2 );
 
-	//* Check the memory allocation. 
+	// Check the memory allocation. 
 	if( ! b )
 	{
 		*dstream<<"unable to create buffer"<<std::endl;
-		return -1;
+		return;//return -1;
 	}
 
 	for( p = b ; p < b + 512  + 1 ; p += 1 )
 	{
-		//* Fill the output buffer with the pattern.
+		// Fill the output buffer with the pattern.
 		//memcpy( p, pattern, 1 ); 
 		*p=pattern;
 	}
 ///
-	//* Reset the file pointer. 
+	// Reset the file pointer. 
 	offset = lseek( fd, 0, SEEK_SET );
 
-	//* Reset the pass byte counter. 
+	// Reset the pass byte counter. 
 	//c->pass_done = 0; don't need for copy
 
 	if( offset == (off64_t)-1 )
@@ -735,7 +747,7 @@ void HDD::erase_n(char pattern){
 		//nwipe_perror( errno, __FUNCTION__, "lseek" );
 		//nwipe_log( NWIPE_LOG_FATAL, "Unable to reset the '%s' file offset.", c->device_name );
 		*dstream<<"unable to reset offset"<<std::endl;
-		return -1;
+		return ;//return -1;
 	}
 
 	if( offset != 0 )
@@ -743,7 +755,7 @@ void HDD::erase_n(char pattern){
 		//* This is system insanity. 
 		//nwipe_log( NWIPE_LOG_SANITY, "__FUNCTION__: lseek() returned a bogus offset on '%s'.", c->device_name );
 		*dstream<<"lseek returned bad offset"<<std::endl;
-		return -1;
+		return ;//return -1;
 	}
 
 
@@ -775,7 +787,7 @@ void HDD::erase_n(char pattern){
 			//nwipe_perror( errno, __FUNCTION__, "write" );
 			//nwipe_log( NWIPE_LOG_FATAL, "Unable to write to '%s'.", c->device_name );
 			*dstream<<" unable to write fully to"<<path<<std::endl;
-			return -1;
+			return ; //return -1;
 		}
 
 		//* Check for a partial write. 
@@ -799,7 +811,7 @@ void HDD::erase_n(char pattern){
 				//nwipe_perror( errno, __FUNCTION__, "lseek" );
 				//nwipe_log( NWIPE_LOG_ERROR, "Unable to bump the '%s' file offset after a partial write.", c->device_name );
 				*dstream<<"unable to bump the file offset after a partial write"<<std::endl;
-				return -1;
+				return ;//return -1;
 			}
 
 		} //* partial write 
@@ -846,10 +858,36 @@ void HDD::erase_n(char pattern){
 	free( b );
 	
 	//* We're done. 
-return 0; 
+ //return 0; 
 
 //*/
-
+	time_t end_t=time(0);
+	date=localtime(&begin_t);
+	*dstream<<path<<" :started erasing:  "
+		<<(1900+ date->tm_year)
+		<<"/"
+		<<month(date->tm_mon)
+		<<"/"
+		<<(1+date->tm_mday)<<"  | "	
+		<<date->tm_hour<<":"
+		<<date->tm_min<<":"
+		<<date->tm_sec<<std::endl;
+	date=localtime(&end_t);
+	*dstream<<path<<" :ended erasing:  "
+		<<(1900+ date->tm_year)
+		<<"/"
+		<<month(date->tm_mon)
+		<<"/"
+		<<(1+date->tm_mday)<<"  | "	
+		<<date->tm_hour<<":"
+		<<date->tm_min<<":"
+		<<date->tm_sec<<std::endl;
+	time_t diff_t=end_t-begin_t;
+	date=localtime(&diff_t);
+	*dstream<<path<<" erased"<<(size)<<" bytes in... :time elapsed:  "	
+		<<date->tm_hour<<":"
+		<<date->tm_min<<":"
+		<<date->tm_sec<<std::endl;
 
 }
 void HDD::erase_dd(){
@@ -892,7 +930,7 @@ void HDD::print(std::ostream* textgohere=&std::cout){
 	if(EndTime>0)*textgohere<<"End Time: "<<this->EndTime<<std::endl;
 	*textgohere<<"Run Time: "<<this->RunTime<<std::endl;
 	*textgohere<<"Erasing "<<(currentLBA*1.0/size)*100<<"% Complete"<<std::endl;
-	*textgohere<<"ETA: "<<(eta/60)<<" min(s) "<<(eta%60)<<"second(s)"<<std::endl;
+	*textgohere<<"ETA: "<<(eta/3600)<<"hours "<<((eta%3600)/60)<<" min(s) "<<(eta%60)<<"second(s)"<<std::endl;
 	if(this->Exception!="none"){
 		*textgohere<<"Last Exception : "<<this->Exception<<std::endl;
 		*textgohere<<"Last/Current Command :" << this->CmdString<<std::endl;
