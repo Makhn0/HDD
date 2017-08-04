@@ -1,4 +1,6 @@
 #include "HDD.h"
+#include "Exceptions.h"
+
 #include <stdio.h>
 #include <fstream>
 #include <ostream>
