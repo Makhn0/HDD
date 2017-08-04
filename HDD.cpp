@@ -688,25 +688,27 @@ void HDD::erase_n(char pattern){
 	int w = 0;
 
 	/* The number of bytes remaining in the pass. */
-	unsigned long z = c->device_size;
+	unsigned long long z = c->device_size;
+	int errors=0;
 
 //* tottaly copy pasted from nwipe's github
-if( pattern == NULL )
+	
+	/*if( pattern == NULL )
 	{
 		//* Caught insanity. 
 		*dstream<<"null pattern pointer"<<std::endl;
 		return -1;
 	}
-
-	if( pattern->length <= 0 )
+	*///will never happen pattern not pointer in this code
+	/*if( pattern->length <= 0 )
 	{
 		//* Caught insanity. 
 		*dstream<<"__FUNCTION__: The pattern length member is "<<, pattern->length<<std::endl ;
 		return -1;
-	}
+	}*///will never happen
 
 	//* Create the output buffer. 
-	b = malloc( c->device_stat.st_blksize  + pattern->length * 2 );
+	b = malloc( blocksize  +2 );
 
 	//* Check the memory allocation. 
 	if( ! b )
@@ -718,26 +720,29 @@ if( pattern == NULL )
 	for( p = b ; p < b + 512  + 1 ; p += 1 )
 	{
 		//* Fill the output buffer with the pattern.
-		memcpy( p, pattern->s, pattern->length ); 
+		//memcpy( p, pattern, 1 ); 
+		*p=pattern;
 	}
 ///
 	//* Reset the file pointer. 
-	offset = lseek( c->device_fd, 0, SEEK_SET );
+	offset = lseek( fd, 0, SEEK_SET );
 
 	//* Reset the pass byte counter. 
-	c->pass_done = 0;
+	//c->pass_done = 0; don't need for copy
 
 	if( offset == (off64_t)-1 )
 	{
-		nwipe_perror( errno, __FUNCTION__, "lseek" );
-		nwipe_log( NWIPE_LOG_FATAL, "Unable to reset the '%s' file offset.", c->device_name );
+		//nwipe_perror( errno, __FUNCTION__, "lseek" );
+		//nwipe_log( NWIPE_LOG_FATAL, "Unable to reset the '%s' file offset.", c->device_name );
+		*dstream<<"unable to reset offset"<<std::endl;
 		return -1;
 	}
 
 	if( offset != 0 )
 	{
 		//* This is system insanity. 
-		nwipe_log( NWIPE_LOG_SANITY, "__FUNCTION__: lseek() returned a bogus offset on '%s'.", c->device_name );
+		//nwipe_log( NWIPE_LOG_SANITY, "__FUNCTION__: lseek() returned a bogus offset on '%s'.", c->device_name );
+		*dstream<<"lseek returned bad offset"<<std::endl;
 		return -1;
 	}
 
@@ -761,7 +766,8 @@ if( pattern == NULL )
 
 		//* Fill the output buffer with the random pattern. 
 		//* Write the next block out to the device. 
-		r = write( c->device_fd, &b[w], blocksize );
+		//
+		r = write( fd, &b[w], blocksize );
 
 		//* Check the result for a fatal error. 
 		if( r < 0 )
@@ -781,17 +787,18 @@ if( pattern == NULL )
 			int s = blocksize - r;
 			
 			//* Increment the error count. 
-			c->pass_errors += s;
+			errors += s;
 
-			nwipe_log( NWIPE_LOG_WARNING, "Partial write on '%s', %i bytes short.", c->device_name, s );
+			*dstream <<"partial write errors = "<<errors<<std::endl;
 
 			//* Bump the file pointer to the next block. 
-			offset = lseek( c->device_fd, s, SEEK_CUR );
+			offset = lseek( fd, s, SEEK_CUR );
 
 			if( offset == (off64_t)-1 )
 			{
-				nwipe_perror( errno, __FUNCTION__, "lseek" );
-				nwipe_log( NWIPE_LOG_ERROR, "Unable to bump the '%s' file offset after a partial write.", c->device_name );
+				//nwipe_perror( errno, __FUNCTION__, "lseek" );
+				//nwipe_log( NWIPE_LOG_ERROR, "Unable to bump the '%s' file offset after a partial write.", c->device_name );
+				*dstream<<"unable to bump the file offset after a partial write"<<std::endl;
 				return -1;
 			}
 
@@ -799,7 +806,7 @@ if( pattern == NULL )
 
 
 		//* Adjust the window. 
-		w = ( c->device_stat.st_blksize  + w ) % pattern->length;
+		//w = ( c->device_stat.st_blksize  + w ) % pattern->length;
 
 		/* Intuition check: 
 		 *
@@ -812,28 +819,28 @@ if( pattern == NULL )
 		z -= r;
 
 		//* Increment the total progress counterr. 
-		c->pass_done += r;
-		c->round_done += r;
+		//c->pass_done += r;
+		//c->round_done += r;
 
-		pthread_testcancel();
+		//pthread_testcancel();
 
 	} //* remaining bytes 
 
 	//* Tell our parent that we are syncing the device. 
-	c->sync_status = 1;
+	//c->sync_status = 1;
 
 	//* Sync the device. 
-	r = fdatasync( c->device_fd );
+	//r = fdatasync( c->device_fd );
 
 	//* Tell our parent that we have finished syncing the device. 
-	c->sync_status = 0;
+	//c->sync_status = 0;
 
-	if( r != 0 )
-	{
+	//if( r != 0 )
+	//{
 		//* FIXME: Is there a better way to handle this? 
-		nwipe_perror( errno, __FUNCTION__, "fdatasync" );
-		nwipe_log( NWIPE_LOG_WARNING, "Buffer flush failure on '%s'.", c->device_name );
-	}
+	//	nwipe_perror( errno, __FUNCTION__, "fdatasync" );
+	//	nwipe_log( NWIPE_LOG_WARNING, "Buffer flush failure on '%s'.", c->device_name );
+	//}
 
 	//* Release the output buffer. 
 	free( b );
