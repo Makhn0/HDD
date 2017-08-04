@@ -23,16 +23,15 @@ class Smartctl_Exception : HDD_Exception{
 
 };
 class Pull_Out_Exception : HDD_Exception{
-	error="pulled out exception";
 	public:
 		Pull_Out_Exception(HDD* a) : HDD_Exception(a){
 			error=" pulled out exception";
 		}
 		std::string what() {return hdd->path;}
 };
-class DD_Exception_Exception : HDD_Exception{
+class DD_Exception : HDD_Exception{
 	public:
-		Pull_Out_Exception(HDD* a) : HDD_Exception(a){
+		DD_Exception(HDD* a) : HDD_Exception(a){
 			std::cerr<<hdd->path
 				<<"DD WRITE/READ ERROR"<<std::endl;
 		}
