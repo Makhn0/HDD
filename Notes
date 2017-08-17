@@ -32,3 +32,18 @@ if I find error again, I will adjust begin time and try to catch the errors
 e: test intel w/ smart
 
 getting rid of -D_Debug and having adding print etc. makes a ~10 min erase time ~370 min!!!
+
+
+long time since last entry. Where am I now?
+method copied from nwipe 100/9% faster on one drive, will use that for now on, can change later
+not 
+
+need to:
+
+- test bb_test
+- try out the whole thing, adjust as go, think its ready for field testing
+
+
+
+-eventually change update home to put bin in /bin/
+-add log output
