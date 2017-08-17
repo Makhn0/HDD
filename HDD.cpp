@@ -137,7 +137,7 @@ void HDD::run(std::string* batch,char pattern){
 			run_body(batch,pattern);
 			this->Status=FinishedSuccess;
 			print(dstream);
-			//log(batch);	
+			//log(batch);
 		}
 		catch(std::string e){
 			exception_catch(e);
@@ -175,11 +175,12 @@ void HDD::run_body(std::string* batch,char pattern){
 		sleep(10);		
 	}
 	if(a) return;
+	if(bb_test()) throw " >0 of smart 5,187,188,197,198 is >0  : drive likely to fail soon";
 	#endif
 	#ifdef _Erase
 	///*
 	if(!this->presence()){return;}
-	//this->dd(batch); //TODO add back in
+		this->dd(batch); //TODO add back in
 	if(!this->presence()){return;}
 	//*/
 	//obviously needs more work for different methods
@@ -191,7 +192,7 @@ void HDD::run_body(std::string* batch,char pattern){
 	}		
 	if(!this->presence()){return;}
 	#endif
-	
+
 	this->EndTime=time(0);
 	if(!this->presence()){return;}
 	*dstream<<this->path<<" : end of erase: writing to logs";
@@ -326,6 +327,7 @@ void HDD::smartctl_run()
 	);
 	sleep(2);
 }
+
 bool HDD::smartctl_running()
 {
 	Command("sudo smartctl -a "
@@ -348,6 +350,39 @@ void HDD::smartctl_kill()
 		+this->path
 		,"Checking Smart Control...",true
 	);
+}
+
+bool HDD::bb_test(){
+	Command(
+		"sudo smartctl -A "+this->path+" | awk '/5 Reallocated_Sector_Ct/' ","checking smart variables 5,187,188,197,198",true
+	);
+	int smart_5 =stoi(LastOutput.substr(85,6));
+	Command(
+		"sudo smartctl -A "+this->path+" | awk '/187 Reported_Uncorrect/' ",true
+	);
+	int smart_187 =stoi(LastOutput.substr(85,6));
+	Command(
+		"sudo smartctl -A "+this->path+" | awk '/188 Command_Timeout/' ",true
+	);
+	int smart_188 =stoi(LastOutput.substr(85,6));
+	Command(
+		"sudo smartctl -A "+this->path+" | awk '/197 Current_Pending_Sector/' ",true
+	);
+	int smart_197 =stoi(LastOutput.substr(85,6));
+	Command(
+		"sudo smartctl -A "+this->path+" | awk '/198 Offline_Uncorrectable/' ",true
+	);
+	int smart_198 =stoi(LastOutput.substr(85,6));
+
+	return smart_5 || smart_187 || smart_188 || smart_197 || smart_198;
+
+/*
+	local bb_5="$(sudo smartctl -A /dev/${1} | awk '/5 Reallocated_Sector_Ct/' | awk '{print substr($0,85,6)}')";
+	local bb_187="$(sudo smartctl -A /dev/${1} | awk '/187 Reported_Uncorrect/' | awk '{print substr($0,85,6)}')";
+	local bb_188="$(sudo smartctl -A /dev/${1} | awk '/188 Command_Timeout/'| awk '{ print substr($0,85,6)}')";
+	local bb_197="$(sudo smartctl -A /dev/${1} | awk '/197 Current_Pending_Sector/'| awk '{ print substr($0,85,6)}')";
+	local bb_198="$(sudo smartctl -A /dev/${1} | awk '/198 Offline_Uncorrectable/' | awk '{ print substr($0,85,6)}')";
+*/
 }
 void HDD::dd(std::string * batch){
 	std::string hashfile="/tmp/"+*batch+"_"+path.substr(5,3)+"_File.dd";
@@ -431,8 +466,8 @@ void HDD::erase(char pattern)
 {
 	///*
 	try{
-		erase_c(pattern);
-		erase_n('N');
+		//erase_c(pattern);
+		erase_n(0x00);
 //		erase(new std::string("zero");
 		//	this->erase_debrief();
 	}
@@ -505,7 +540,8 @@ void HDD::Write_All( char pattern =0x00,long begin=0,long end=0){
 		if(currentLBA%check==0||currentLBA/bs<9)
 		{	
 			if(!presence())throw "pulled out while erasing";
-			if(currentLBA/bs<9)*dstream<<"beggining blocks :"<<currentLBA<<" tellp "<<drive.tellp()<<std::endl;
+			if(currentLBA/bs<9)	
+				*dstream<<"beggining blocks :"<<currentLBA<<" tellp "<<drive.tellp()<<std::endl;
 			current_t=time(0);	
 			delta_t=current_t-Last_t; 
 			elapsed_t=current_t-begin_t;

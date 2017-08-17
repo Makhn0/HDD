@@ -529,6 +529,7 @@ function BB_test(){
 		#echo $bb_197;
 		#echo $bb_198;
 		#echo pass;
+		Queue+=(${1} 4);
 	else
 		#fail
 		Error+=(${1} 21);
@@ -593,7 +594,8 @@ function queue_job_control(){
 		#check_smartctl_status has updated the queue to here or the error queue code, so we must pass it along the line.
 		#E or we could add in another test designed by a later contributor
 		bb_test $1;
-		Queue+=(${1} 4);
+		#Queue+=(${1} 4);
+		#bb_test will update queue when its complete so commented old code
 	elif (( $Queue[$1] == 4 )); then
 		#4 Queued for dd write
 		#dd_write will update the queue when it's complete, so until then we will just set the queue to 5.

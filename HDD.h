@@ -67,6 +67,7 @@ class HDD{
 		void get_data();
 		void smartctl_run();
 		bool smartctl_running();
+		bool bb_test();
 		void smartctl_kill();
 		void dd(std::string*);
 		void dd_write(std::string*,std::string);
