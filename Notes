@@ -43,7 +43,5 @@ need to:
 - test bb_test
 - try out the whole thing, adjust as go, think its ready for field testing
 
-
-
 -eventually change update home to put bin in /bin/
 -add log output
