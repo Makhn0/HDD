@@ -593,8 +593,9 @@ function queue_job_control(){
 		#3 Smart testing complete
 		#check_smartctl_status has updated the queue to here or the error queue code, so we must pass it along the line.
 		#E or we could add in another test designed by a later contributor
-		bb_test $1;
-		#Queue+=(${1} 4);
+		#hdd_test_smart0.zsh
+		#bb_test $1;
+		Queue+=(${1} 4);
 		#bb_test will update queue when its complete so commented old code
 	elif (( $Queue[$1] == 4 )); then
 		#4 Queued for dd write
