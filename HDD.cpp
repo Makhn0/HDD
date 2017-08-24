@@ -353,6 +353,7 @@ void HDD::smartctl_kill()
 }
 
 bool HDD::bb_test(){
+	/*back blaze test*/
 	Command(
 		"sudo smartctl -A "+this->path+" | awk '/5 Reallocated_Sector_Ct/' ","checking smart variables 5,187,188,197,198",true
 	);

@@ -15,7 +15,7 @@ del:=sudo rm
 endif
 
 $(BinName): main.o HDD.o
-	$(CXX) $(CPFLAGS) $(args) -o $(BinName)  main.o HDD.o
+	$(CXX) $(CPFLAGS) $(args) -o $(BinName) main.o HDD.o
 HDD.o : HDD.cpp
 	$(CXX) -c $(CPFLAGS) $(args) HDD.cpp
 main.o : main.cpp
@@ -38,7 +38,6 @@ clean-help:
 	$(del) $(BinName)
 	$(del) *~
 clean: 
-	
 	sudo make clean-help ||\
 	echo " already clean"
 all: 

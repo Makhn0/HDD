@@ -18,11 +18,10 @@ void print(HDD * HDDs[], int length)
 	std::cout<<"Welcome to Eric's Wonderful Hard Drive Eraser !!! :D \n";
 	std::cout<<"BatchName : "<<BatchName<<std::endl;
 	std::cout<<"EraseCmd: "<<EraseCmd<<std::endl;
-	std::cout<<"total HDDs  : "<<HDD::instances<<std::endl;
-	std::cout<<"########################################################\n\n";
+	std::cout<<"total HDDs  : "<<HDD::instances<<std::endl;	std::cout<<"########################################################\n\n";
 	for(int i=0;i<length;i++)	
 	{
-		if(HDDs[i]->Present||1)
+		if(HDDs[i]->Present)
 			HDDs[i]->print(printstream);
 	}
 }
@@ -35,26 +34,15 @@ void contPrint(HDD * HDDs[], int length)
 		std::this_thread::sleep_for(std::chrono::milliseconds(5000));
 	}
 }
-extern std::string month(int i);/*{
-	switch(i){
-		case 0:return "Jan";
-		case 1:return "Feb";
-		case 2:return "Mar";
-		case 3:return "Apr";
-		case 4:return "May";
-		case 5:return "June";
-		case 6:return "July";
-		case 7:return "Aug";
-		case 8:return "Sep";
-		case 9:return "Oct";
-		case 10:return "Nov";
-		case 11:return "Dec";
-		default:return "Jan";
-	}
-}*/
+extern std::string month(int i);
 int main(int argc, char * argv[]){
 	//TODO test time is accurate on all clients
-	std::cout<<"start INstances :"<<HDD::instances<<std::endl;
+	std::cout<<"Start Instances :"<<HDD::instances<<std::endl;
+	/*
+	argv 1 is batchname
+	argv 2 is whether to run printer
+	argv 3 is pattern
+	*/
 	/*
 	std::cout<<"argv[1] :"<<argv[1]<<std::endl;
 	std::cout<<"argv[2] :"<<argv[2]<<std::endl;
@@ -64,16 +52,17 @@ int main(int argc, char * argv[]){
 	std::cout<<"argv[3] "<<argv[3]<<std::endl;
 	char pattern=(char)std::stoi(std::string(argv[3]));
 	std::cout<<"pattern "<<pattern<<std::endl;
-	*/
-	pattern
-	sleep(2);	
+	/*/
+	char pattern = 0x00;
+	//*/
+	sleep(1);	
 	debugstream=&std::cerr;
 	printstream=&std::cout;
 
-	if(argv[1]=="date")
+	if(
+		1//argv[1]=="date"
+		)
 	{
-
-		BatchName=argv[1];
 		//if time needed for other things take out of else
 		time_t now=time(0);
 		tm * date=localtime(&now);
@@ -85,14 +74,19 @@ int main(int argc, char * argv[]){
 				<<(1+date->tm_mday);	
 		BatchName=temp->str();
 	}
-	
+	else{
+		BatchName="default";
+	}
+		
+
+
 	#ifdef _Debug
 	*printstream<<"Debug Mode"<<std::endl;
-	std::cout<< "making dev path prefix =";
+	*debugstream<< "making dev path prefix =";
 	#endif
 	std::string devPath="/dev/sd";
 	#ifdef _Debug
-	std::cout<<devPath<<std::endl;
+	*debugstream<<devPath<<std::endl;
 	std::cout<<"BatchName :"<<BatchName<<std::endl;
 	const int DriveNum=1;
 	#endif
@@ -112,20 +106,19 @@ int main(int argc, char * argv[]){
 	
 	#ifdef _Debug
 	*printstream<<"ended instantiating "<<HDD::instances<<"HDD objects"<<std::endl;
-	//don't compile I'll end u
-	//sleep(1);
 	#endif
 
 	#ifndef _Debug
-	if(argv[2][1]!='n'){
-		std::thread * printer;
-		printer= new std::thread			
-			(&contPrint,HDDs,DriveNum
-	//			-dumbvariable
+//A/	if(argv[2][1]!='n'){
+	std::cout<<"Beginng Printer..."<<std::endl;
+	std::thread * printer;
+	printer= new std::thread			
+		(&contPrint,HDDs,DriveNum
+	//		-dumbvariable
 			);
 //seems as though this requires final argument to be variable of type const int or an expression that begins with one
-		printer->join();
-	}	
+	printer->join();
+	//A/ }	
 	#endif
 	for(int i =0;i<DriveNum;i++)
 	{
