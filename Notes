@@ -46,6 +46,9 @@ need to:
 2. run ..smart0.zsh
 3. run smartctl ...
 make sure those that pass 0, but would fail bb, do fail new _smart.zsh
+skipping smartctl test, bb_test seemed to work, but ran into trouble when it was part of whole process
+
+now running smart0.zsh on all trying over
 
 - try out the whole thing, adjust as go, think its ready for field testing
 
