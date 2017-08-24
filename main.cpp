@@ -55,6 +55,7 @@ extern std::string month(int i);/*{
 int main(int argc, char * argv[]){
 	//TODO test time is accurate on all clients
 	std::cout<<"start INstances :"<<HDD::instances<<std::endl;
+	/*
 	std::cout<<"argv[1] :"<<argv[1]<<std::endl;
 	std::cout<<"argv[2] :"<<argv[2]<<std::endl;
 	std::cout<<"argv[2][0] :"<<argv[2][0]<<std::endl;
@@ -63,6 +64,8 @@ int main(int argc, char * argv[]){
 	std::cout<<"argv[3] "<<argv[3]<<std::endl;
 	char pattern=(char)std::stoi(std::string(argv[3]));
 	std::cout<<"pattern "<<pattern<<std::endl;
+	*/
+	pattern
 	sleep(2);	
 	debugstream=&std::cerr;
 	printstream=&std::cout;

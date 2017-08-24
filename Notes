@@ -40,8 +40,13 @@ afraid some of my modifications to the nwipe algorithm won't catch certain probl
 
 need to:
 
-- check difference between _smart and _bb.zsh make sure whatever is being used is right
-- test bb_test
+- test bb_test 
+
+1. run ..._smart.zsh
+2. run ..smart0.zsh
+3. run smartctl ...
+make sure those that pass 0, but would fail bb, do fail new _smart.zsh
+
 - try out the whole thing, adjust as go, think its ready for field testing
 
 -eventually change update home to put bin in /bin/
