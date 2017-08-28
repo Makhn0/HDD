@@ -54,7 +54,7 @@ typeset -A SmartctlScsiPid
 #(16 queued for formatting) (17 formatting running) (18 formatting complete)
 typeset -A Queue
 typeset -A QueueStateString
-QueueStateString=( 0 "Not Connected / Scheduled" 1 "Queued for Smart test" 2 "Smart test in progress" 3 "Smart test complete" 4 "Queued for dd write" 5 "dd write in progress" 6 "dd write complete" 7 "Queued for dd read" 8 "dd read in progress" 9 "dd read complete" 10 "Queued for Hash compare" 11 "Hash compare in progress" 12 "Hash compare complete" 13 "Queued for 0 out" 14 "0 out running" 15 "0 out complete" 16 "Queued for formatting" 17 "formatting running" 18 "formatting complete" 19 "Finished, passed" 20 "Finished, failed / error" 21 "Smart Variables >0" )
+QueueStateString=( 0 "Not Connected / Scheduled" 1 "Queued for Smart test" 2 "Smart test in progress" 3 "Smart test complete" 4 "Queued for dd write" 5 "dd write in progress" 6 "dd write complete" 7 "Queued for dd read" 8 "dd read in progress" 9 "dd read complete" 10 "Queued for Hash compare" 11 "Hash compare in progress" 12 "Hash compare complete" 13 "Queued for 0 out" 14 "0 out running" 15 "0 out complete" 16 "Queued for formatting" 17 "formatting running" 18 "formatting complete" 19 "Finished, passed" 20 "Finished, failed / error" )
 
 #error codes are set: (0 no error) (1 smart testing error) (2 dd write error) (3 dd read error) (4 0 out error) (5 hash compare error) (6 formatting error) (7 logic broke and there are more than one errors)
 typeset -A Error
@@ -513,9 +513,10 @@ function get_smartctl_test_percentage(){
 	SmartPercentComplete+=(${1} ${PercentComplete});
 	SmartPercentLeft="$(sudo smartctl -a /dev/${1} | awk '/% of test remaining./' | awk '{print substr($0,3,6)}')";
 }
+#checks that the relevant SMART variables are all zero
 function bb_test(){
 	#local count=0; for more or less
-	local bb_5="$(sudo smartctl -A /dev/${1} | awk '/5 Reallocated_Sector_Ct/' | awk '{print substr($0,85,6)}')";
+	local   bb_5="$(sudo smartctl -A /dev/${1} | awk '/5 Reallocated_Sector_Ct/' | awk '{print substr($0,85,6)}')";
 	local bb_187="$(sudo smartctl -A /dev/${1} | awk '/187 Reported_Uncorrect/' | awk '{print substr($0,85,6)}')";
 	local bb_188="$(sudo smartctl -A /dev/${1} | awk '/188 Command_Timeout/'| awk '{ print substr($0,85,6)}')";
 	local bb_197="$(sudo smartctl -A /dev/${1} | awk '/197 Current_Pending_Sector/'| awk '{ print substr($0,85,6)}')";
@@ -529,12 +530,12 @@ function bb_test(){
 		#echo $bb_197;
 		#echo $bb_198;
 		#echo pass;
-		Queue+=(${1} 4);
+		Queue+=(${1} 5);
+		dd_write_file $1;
 	else
 		#fail
-		Error+=(${1} 21);
 		Queue+=(${1} 20);
-		echo fail;
+		#echo fail;
 	fi
 }
 #This gets the data for $SmartSupport, $ModelFamily, $Model, $SerialNumber.
@@ -592,16 +593,15 @@ function queue_job_control(){
 	elif (( $Queue[$1] == 3 )); then
 		#3 Smart testing complete
 		#check_smartctl_status has updated the queue to here or the error queue code, so we must pass it along the line.
-		#E or we could add in another test designed by a later contributor
 		#different in hdd_test_smart0.zsh
-		bb_test $1;
-		#Queue+=(${1} 4);
-		#bb_test will update queue when its complete so commented old code
+	
+		Queue+=(${1} 4);
 	elif (( $Queue[$1] == 4 )); then
 		#4 Queued for dd write
 		#dd_write will update the queue when it's complete, so until then we will just set the queue to 5.
-		Queue+=(${1} 5);
-		dd_write_file $1;
+		bb_test $1;
+		#E bb_test sets queue to 5 and calls dd_write_file, if it passes, sets queue to 21 otherwise
+		
 	elif (( $Queue[$1] == 5 )); then
 		#5 dd write in progress
 		#This is just a placeholder so that we don't do anything at this time.
