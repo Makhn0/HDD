@@ -132,6 +132,9 @@ void HDD::run(std::string* batch,char pattern){
 		while(!presence()){
 			sleep(5);
 		}
+		//PresentTask="reseting";
+		//*dstream<<this->path<<" : resetting... "<<std::endl;
+		//reset();
 		/*BEGIN TRY BLOCK*/
 		try{	
 			run_body(batch,pattern);
@@ -175,8 +178,9 @@ void HDD::run_body(std::string* batch,char pattern){
 		sleep(10);		
 	}
 	if(a) return;
-	if(bb_test()) throw " >0 of smart 5,187,188,197,198 is >0  : drive likely to fail soon";
+
 	#endif
+	if(bb_test()) throw " >0 of smart 5;187;188;197;198 is >0  : drive likely to fail soon";
 	#ifdef _Erase
 	///*
 	if(!this->presence()){return;}
@@ -352,31 +356,39 @@ void HDD::smartctl_kill()
 	);
 }
 
+
+int smart_var( int & var,std::string name,HDD * a){
+	std::string output;
+	a->Command(
+		"sudo smartctl -A "+a->path+" | awk '/"+name+"/' ","checking smart variable "+name,true
+	);
+	if(a->LastOutput!=""){
+		output=a->LastOutput.substr(85,6);	
+		*(a->dstream)<<"output"<<output<<std::endl;
+		try{
+			var=stoi(output);
+		}
+		catch(std::exception e){ var=0;return 0;}
+		return 1;
+	}
+	var=0;return 0;
+}
 bool HDD::bb_test(){
 	/*back blaze test*/
-	Command(
-		"sudo smartctl -A "+this->path+" | awk '/5 Reallocated_Sector_Ct/' ","checking smart variables 5,187,188,197,198",true
-	);
-	int smart_5 =stoi(LastOutput.substr(85,6));
-	Command(
-		"sudo smartctl -A "+this->path+" | awk '/187 Reported_Uncorrect/' ",true
-	);
-	int smart_187 =stoi(LastOutput.substr(85,6));
-	Command(
-		"sudo smartctl -A "+this->path+" | awk '/188 Command_Timeout/' ",true
-	);
-	int smart_188 =stoi(LastOutput.substr(85,6));
-	Command(
-		"sudo smartctl -A "+this->path+" | awk '/197 Current_Pending_Sector/' ",true
-	);
-	int smart_197 =stoi(LastOutput.substr(85,6));
-	Command(
-		"sudo smartctl -A "+this->path+" | awk '/198 Offline_Uncorrectable/' ",true
-	);
-	int smart_198 =stoi(LastOutput.substr(85,6));
-
+	int smart_5;
+	int smart_187;
+	int smart_188;
+	int smart_197;
+	int smart_198;
+	if(!smart_var(smart_5,"5 Reallocated_Sector_Ct",this))
+		smart_var(smart_5,"5 Retired_Block_Count",this);
+	smart_var(smart_187,"187 Reported_Uncorrect",this);	
+	smart_var(smart_188,"188 Command_Timeout",this);
+	smart_var(smart_197,"197 Current_Pending_Sector",this);
+	smart_var(smart_198,"198 Offline_Uncorrectable",this);
+	/*jsut for testing*/return 1;
 	return smart_5 || smart_187 || smart_188 || smart_197 || smart_198;
-
+	//returns 0 if passed 1 if failed
 /*
 	local bb_5="$(sudo smartctl -A /dev/${1} | awk '/5 Reallocated_Sector_Ct/' | awk '{print substr($0,85,6)}')";
 	local bb_187="$(sudo smartctl -A /dev/${1} | awk '/187 Reported_Uncorrect/' | awk '{print substr($0,85,6)}')";

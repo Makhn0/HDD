@@ -8,7 +8,7 @@
 #include <sstream>
 #include <ctime>
 
-std::string EraseCmd="nwipe";
+
 std::string BatchName;
 std::string argPath;
 std::ostream * printstream;
@@ -17,7 +17,7 @@ void print(HDD * HDDs[], int length)
 {
 	std::cout<<"Welcome to Eric's Wonderful Hard Drive Eraser !!! :D \n";
 	std::cout<<"BatchName : "<<BatchName<<std::endl;
-	std::cout<<"EraseCmd: "<<EraseCmd<<std::endl;
+	//std::cout<<"EraseCmd: "<<EraseCmd<<std::endl;
 	std::cout<<"total HDDs  : "<<HDD::instances<<std::endl;	std::cout<<"########################################################\n\n";
 	for(int i=0;i<length;i++)	
 	{
