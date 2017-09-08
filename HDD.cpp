@@ -74,11 +74,11 @@ long myStol(std::string a){
 	const char * data =a.c_str();
 	for(unsigned int i=0;i<a.length();i++)
 	{// unsigned to avoid warning. i guess its bad.
-		if (data[i]>47 && data[i]<58){
+		if (47<data[i] && data[i]<58){
 			output*=10;
 			output += (long)(data[i]-48);
 		}
-		if (data[i]=='[') break; //just in case we make substring in HDD::get_data() to big or small
+		if (data[i]=='[') break; //just in case we make substring in HDD::get_data() too big or small
 	}
 	return output;
 }
@@ -386,7 +386,7 @@ bool HDD::bb_test(){
 	smart_var(smart_188,"188 Command_Timeout",this);
 	smart_var(smart_197,"197 Current_Pending_Sector",this);
 	smart_var(smart_198,"198 Offline_Uncorrectable",this);
-	/*jsut for testing*/return 1;
+	/*jsut for testing*///return 1;
 	return smart_5 || smart_187 || smart_188 || smart_197 || smart_198;
 	//returns 0 if passed 1 if failed
 /*

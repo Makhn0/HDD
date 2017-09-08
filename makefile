@@ -2,6 +2,7 @@ CPFLAGS=--std=c++0x -pthread -Wall
 os=linux
 
 src=main.cpp HDD.cpp Exceptions.h
+Rargs="-D_Erase"
 ifeq ($(os),nt)
 BinName:=ewhde.exe
 Editor:=notepad++
@@ -16,6 +17,7 @@ endif
 
 $(BinName): main.o HDD.o
 	$(CXX) $(CPFLAGS) $(args) -o $(BinName) main.o HDD.o
+	$(CXX) $(CPFLAGS) $(args) -D_Test -o $(BinName)_test main.o HDD.o
 HDD.o : HDD.cpp
 	$(CXX) -c $(CPFLAGS) $(args) HDD.cpp
 main.o : main.cpp
@@ -40,6 +42,9 @@ clean-help:
 clean: 
 	sudo make clean-help ||\
 	echo " already clean"
+release:
+	sudo git pull
+	sudo make all args=$(Rargs)
 all: 
 	sudo make clean
 	sudo make args="$(args)"

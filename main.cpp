@@ -110,7 +110,7 @@ int main(int argc, char * argv[]){
 
 	#ifndef _Debug
 //A/	if(argv[2][1]!='n'){
-	std::cout<<"Beginng Printer..."<<std::endl;
+	std::cout<<"Begining Printer..."<<std::endl;
 	std::thread * printer;
 	printer= new std::thread			
 		(&contPrint,HDDs,DriveNum
