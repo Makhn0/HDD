@@ -9,20 +9,23 @@ enum Result_t{Unfinished,FinishedSuccess,FinishedFail};
 
 class HDD{
 	public:
+		//port properties
+		const std::string client;
 		const std::string path;
 		int fd;
 		static int instances;
-		
 		bool Present;
 		bool Running;		
-		
+		//hdd properties
 		bool SmartSupport=false;
 		std::string Model;
 		std::string ModelFamily;
 		std::string SerialNumber;
 		std::string UserCapacity="";
-		
+		//TODO get rid of UserCapacity?
 		long size;//=0;
+	
+		//run properties
 		long currentLBA=0;
 		Result_t Status=Unfinished;
 		std::string PresentTask;
@@ -43,6 +46,11 @@ class HDD{
 		
 		///* learn how to make constructor in src*/
 		HDD(std::string path) : path(path),StartTime(time(0)){
+			//TODO define client
+			/*
+			Command("ls /home | grep ");
+			client=lastOutput;
+			//*/
 			instances++;
 		}
 		//*/
@@ -89,6 +97,7 @@ class HDD{
 		void log(std::string*);
 		void print(std::ostream *);
 		void print();
+		void print_csv(std::fstream* );
 		void run_body(std::string*,char);
 		void run(std::string*,char);
 		void reset();

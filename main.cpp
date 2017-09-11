@@ -8,7 +8,6 @@
 #include <sstream>
 #include <ctime>
 
-
 std::string BatchName;
 std::string argPath;
 std::ostream * printstream;

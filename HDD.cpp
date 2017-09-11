@@ -170,6 +170,7 @@ void HDD::run_body(std::string* batch,char pattern){
 	#ifndef _Skip_Smart
 	smartctl_run();
 	bool a=false;
+	/* smart ctl*/
 	while(smartctl_running()){
 		if(!presence()){
 			a=true;
@@ -180,26 +181,24 @@ void HDD::run_body(std::string* batch,char pattern){
 	if(a) return;
 
 	#endif
+	/* back blaze test*/
 	if(bb_test()) throw " >0 of smart 5;187;188;197;198 is >0  : drive likely to fail soon";
-	#ifdef _Erase
-	///*
+
+	///* confirm read write
 	if(!this->presence()){return;}
 		this->dd(batch); //TODO add back in
 	if(!this->presence()){return;}
 	//*/
-	//obviously needs more work for different methods
-	if(*batch=="random"){
-		this->erase(batch);
-	}
-	else{
-		erase(pattern);
-	}		
+	//erase
+	#ifdef _Erase
+	erase(pattern);		
 	if(!this->presence()){return;}
 	#endif
 
 	this->EndTime=time(0);
 	if(!this->presence()){return;}
 	*dstream<<this->path<<" : end of erase: writing to logs";
+	log(batch);
 
 }
 void HDD::reset(){
@@ -254,6 +253,8 @@ void HDD::get_data(){
 	Serial #
 	Capacity
 		*/
+	//fd is in reset() as well, this is just in case it changes;
+	if(Present) this->fd=open(path.c_str(),O_RDWR);//std::open?
 	Command(
 		"sudo smartctl -i "
 		+this->path
@@ -1002,15 +1003,47 @@ void HDD::print(std::ostream* textgohere=&std::cout){
 void HDD::print(){
 	print(&std::cout);
 }
+void HDD::print_csv(std::fstream * textgohere){
+
+	/* appends csv file of batch file*/
+
+	/* format is Model fam,model,serial,capacity,client,start time,percent complete,runtime,errors/n*/
+
+
+	//*textgohere<<"Status of: "<<this->path<<std::endl;
+	//*textgohere<<"Presence :    "<<((this->Present)?"detected":"undetected")<<std::endl;
+	//*textgohere<<"Smart Support: "<<(this->SmartSupport?"available":"unavailable")<<std::endl;
+	*textgohere<<this->ModelFamily<<",";
+	*textgohere<<this->Model<<",";
+	*textgohere<<this->SerialNumber<<",";
+	*textgohere<<this->size<<",";
+//	*textgohere<<this->PresentTask<<",";
+
+	*textgohere<<(ctime(&StartTime))<<",";//<<std::endl;
+	//if(EndTime>0)*textgohere<<"End Time: "<<this->EndTime<<std::endl;
+	*textgohere<<this->RunTime<<",";//std::endl;
+	//*textgohere<<"Erasing "<<(currentLBA*1.0/size)*100<<"% Complete"<<std::endl;
+	//*textgohere<<"ETA: "<<(eta/3600)<<"hours "<<((eta%3600)/60)<<" min(s) "<<(eta%60)<<"second(s)"<<std::endl;
+	//if(this->Exception!="none"){
+	*textgohere<<this->Exception<<",";
+		//*textgohere<<"Last/Current Command :" << this->CmdString<<std::endl;
+		//*textgohere<<"Last Output : "<<this->LastOutput<<std::endl;
+		//*textgohere<<"Exit Status : "<<this->LastExitStatus<<std::endl;	
+	*textgohere
+		<<ResultTToString(this->Status)
+		<<","
+		<<std::endl;
+}
 //*/
 void HDD::log(std::string * batch){
 	std::string filename="/home/hdd-test-server/HDD_logs/"
-		+(*batch)+".log";
+		+(*batch)+".csv";
 	this->PresentTask ="Writing to the log file:"+filename;	
 	std::fstream* LogFile
 		= new std::fstream(filename,std::ios::app);
+	print_csv(LogFile);
 	*dstream<<this->path<<" :  "<<this->PresentTask<<std::endl;
 	*dstream<<this->path<<" : log file is open:"<<LogFile->is_open()<<std::endl;
-	print(dstream);
-	print(LogFile);
+	//print(dstream);
+	//print(LogFile);
 }

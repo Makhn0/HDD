@@ -24,10 +24,6 @@ main.o : main.cpp
 	$(CXX) -c $(CPFLAGS) $(args) main.cpp	
 run : $(BinName)
 	$(BinName)
-nwipetest : nwipetest.o
-	$(CXX) $(CPFLAGS) $(args) -o nwipetest nwipetest.o
-nwipetest.o: nwipetest.cpp
-	$(CXX) -c $(CPFLAGS) $(args) nwipetest.cpp	
 edit :
 	$(Editor) main.cpp &
 	$(Editor) HDD.cpp &
