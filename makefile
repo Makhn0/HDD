@@ -30,6 +30,7 @@ edit :
 	$(Editor) HDD.h &
 edit-all:edit
 	$(Editor) makefile &
+	$(Editor) homeupdate.zsh &
 clean-help:
 	$(del) HDD.o
 	$(del) main.o
@@ -50,7 +51,7 @@ install:
 load:
 	#for use on server
 	sudo cp ./$(BinName) ~/$(BinName)
-	sudo ~/homeupdate.zsh
+	sudo ./homeupdate.zsh
 update:
 	sudo make clean
 	sudo git add -A .
