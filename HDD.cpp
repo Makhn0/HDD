@@ -1,6 +1,6 @@
 #include "HDD.h"
 #include "Exceptions.h"
-
+#include "methods.cpp"
 #include <stdio.h>
 #include <fstream>
 #include <ostream>
@@ -23,37 +23,7 @@ struct Exception : public exception{
 	}
 }
 */
-std::string month(int i){
-	switch(i){
-		case 0:return "Jan";
-		case 1:return "Feb";
-		case 2:return "Mar";
-		case 3:return "Apr";
-		case 4:return "May";
-		case 5:return "June";
-		case 6:return "July";
-		case 7:return "Aug";
-		case 8:return "Sep";
-		case 9:return "Oct";
-		case 10:return "Nov";
-		case 11:return "Dec";
-		default:return "Jan";
-	}
-}
-#ifndef Result_To_String
-#define Result_To_String
-std::string ResultTToString(Result_t a)
-{
-	switch(a)
-	{
-		case Unfinished: return "Unfinished :|";
-		case FinishedSuccess: return "Finished, Success :)";
-		case FinishedFail: return "Finished, Failure :(";
-		default: return "Unfinished";
-	}
-	return "Unfinished";
-}
-#endif
+
 
 std::string HDD::StdOut(std::string cmd, bool throwing=true) {
     std::string data;
@@ -69,23 +39,8 @@ std::string HDD::StdOut(std::string cmd, bool throwing=true) {
     }
     return data;
 }
-long myStol(std::string a){
-	long output=0;
-	const char * data =a.c_str();
-	for(unsigned int i=0;i<a.length();i++)
-	{// unsigned to avoid warning. i guess its bad.
-		if (47<data[i] && data[i]<58){
-			output*=10;
-			output += (long)(data[i]-48);
-		}
-		if (data[i]=='[') break; //just in case we make substring in HDD::get_data() too big or small
-	}
-	return output;
-}
-void trim(std::string &a){
-	if(a[a.length()-1]=='\n')
-		a.erase(a.length()-1);
-}
+
+
 void HDD::Command(std::string a,std::string task,bool throwing=true){
 	PresentTask=task;
 	*dstream<<path<<" : "<<PresentTask<<std::endl;
@@ -209,7 +164,6 @@ void HDD::reset(){
 	this->SerialNumber="";
 	this->Model="";
 	this->ModelFamily="";
-	this->UserCapacity="";
 	this->size=0;
 	this->currentLBA=0;
 	this->StartTime=-1;//time(0);
@@ -304,20 +258,18 @@ void HDD::get_data(){
 		+" | awk '/User Capacity:/'",true
 	);
 	if(LastOutput!=""){
-		this->UserCapacity=LastOutput.substr(18,25);
-		this->size= myStol(this->UserCapacity);
+		std::string a=LastOutput.substr(18,25);
+		this->size= myStol(a);
 	}
 	else
 	{
-		this->UserCapacity=" none detected";
-		this->size =0;
+		this->size =-1;
 		throw path+" no capacity detected";
 	}
 	
 	trim(this->ModelFamily);
 	trim(SerialNumber);
 	trim(Model);
-	trim(UserCapacity);
 	*dstream<<"Data Extracted..."<<std::endl;
 	print(dstream);
 }
@@ -358,14 +310,14 @@ void HDD::smartctl_kill()
 }
 
 
-int smart_var( int & var,std::string name,HDD * a){
+int HDD::smart_var( int & var,std::string name){
 	std::string output;
-	a->Command(
-		"sudo smartctl -A "+a->path+" | awk '/"+name+"/' ","checking smart variable "+name,true
+	Command(
+		"sudo smartctl -A "+path+" | awk '/"+name+"/' ","checking smart variable "+name,true
 	);
-	if(a->LastOutput!=""){
-		output=a->LastOutput.substr(85,6);	
-		*(a->dstream)<<"output"<<output<<std::endl;
+	if(LastOutput!=""){
+		output=LastOutput.substr(85,6);	
+		*(dstream)<<"output"<<output<<std::endl;
 		try{
 			var=stoi(output);
 		}
@@ -381,12 +333,12 @@ bool HDD::bb_test(){
 	int smart_188;
 	int smart_197;
 	int smart_198;
-	if(!smart_var(smart_5,"5 Reallocated_Sector_Ct",this))
-		smart_var(smart_5,"5 Retired_Block_Count",this);
-	smart_var(smart_187,"187 Reported_Uncorrect",this);	
-	smart_var(smart_188,"188 Command_Timeout",this);
-	smart_var(smart_197,"197 Current_Pending_Sector",this);
-	smart_var(smart_198,"198 Offline_Uncorrectable",this);
+	if(!smart_var(smart_5,"5 Reallocated_Sector_Ct"))
+		smart_var(smart_5,"5 Retired_Block_Count");
+	smart_var(smart_187,"187 Reported_Uncorrect");	
+	smart_var(smart_188,"188 Command_Timeout");
+	smart_var(smart_197,"197 Current_Pending_Sector");
+	smart_var(smart_198,"198 Offline_Uncorrectable");
 	/*jsut for testing*///return 1;
 	return smart_5 || smart_187 || smart_188 || smart_197 || smart_198;
 	//returns 0 if passed 1 if failed
@@ -981,7 +933,7 @@ void HDD::print(std::ostream* textgohere=&std::cout){
 	*textgohere<<"Model Family: "<<this->ModelFamily<<std::endl;
 	*textgohere<<"Model  : "<<this->Model<<std::endl;
 	*textgohere<<"Serial : "<<this->SerialNumber<<std::endl;
-	*textgohere<<"User Capacity: "<<this->UserCapacity<<std::endl;
+	*textgohere<<"User Capacity: "<<SizeToString(size)<<std::endl;
 	*textgohere<<"Present Task: "<<this->PresentTask<<std::endl;
 
 	*textgohere<<"Start Time: "<<(ctime(&StartTime));//<<std::endl;
@@ -1007,12 +959,13 @@ void HDD::print_csv(std::fstream * textgohere){
 
 	/* appends csv file of batch file*/
 
-	/* format is Model fam,model,serial,capacity,client,start time,percent complete,runtime,errors/n*/
+	/* format is client HomePath,Model fam,model,serial,capacity,client,start time,percent complete,runtime,errors/n*/
 
 
 	//*textgohere<<"Status of: "<<this->path<<std::endl;
 	//*textgohere<<"Presence :    "<<((this->Present)?"detected":"undetected")<<std::endl;
 	//*textgohere<<"Smart Support: "<<(this->SmartSupport?"available":"unavailable")<<std::endl;
+	*textgohere<<this->HomePath<<",";	
 	*textgohere<<this->ModelFamily<<",";
 	*textgohere<<this->Model<<",";
 	*textgohere<<this->SerialNumber<<",";

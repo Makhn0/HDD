@@ -5,12 +5,14 @@ src=main.cpp HDD.cpp Exceptions.h
 Rargs="-D_Erase"
 ifeq ($(os),nt)
 BinName:=ewhde.exe
+TestName:=test.exe
 Editor:=notepad++
 del:=del
 endif
 
 ifeq ($(os),linux)
 BinName:=ewhde
+TestName:=test
 Editor:=gedit
 del:=sudo rm
 endif
@@ -57,7 +59,7 @@ update:
 	sudo git add -A .
 	sudo git commit -m "$(commit)"
 	sudo git push
-test:
-	$(CXX) $(args) -o test.exe test.cpp
+test: test.cpp
+	$(CXX) --std=c++0x $(args) -o $(TestName) test.cpp
 open-test:
 	$(Editor) test.cpp
