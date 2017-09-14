@@ -12,7 +12,8 @@ while (( $Count != 51 )); do
 	sudo cp ~/HDD/DateTest /home/'test'$Count/DateTest;
 	
 	sudo chown 'test'$Count -R /home/'test'$Count;
-	sudo ls -a /home/'test'$Count/;
 
+	sudo ls -a /home/'test'$Count/;
+	sudo cat /home/'test'$Count/dates.csv >> ~/dates.csv
 	(( Count = $Count + 1 ));
 done;

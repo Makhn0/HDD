@@ -83,8 +83,8 @@ std::string SizeToString(long a){
 	return std::to_string(a)+" Bytes";
 }
 int other(){
-	std::string url="/home/hdd-test-server/dates.csv";
-	std::fstream *a=new std::fstream(url,std::ios::app);
+	std::string url="dates.csv";
+	std::fstream *a=new std::fstream(url,std::ios::out);
 
 	std::string data=StdOut0("echo ~");
 	trim(data);
@@ -92,9 +92,10 @@ int other(){
 	trim(data);
 	std::cout<<data<<std::endl;
 	//a.open();
-	std::cout<<"ok : "<<a->is_open()<<std::endl;
-	*a<<"somedata"<<std::endl;
+	std::cout<<"ok  a: "<<a->is_open()<<std::endl;
+	*a<<data<<std::endl;
+
 	a->close();
-	return 1;
+	return 0;
 }
 #endif

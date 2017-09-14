@@ -30,9 +30,12 @@ edit :
 	$(Editor) main.cpp &
 	$(Editor) HDD.cpp &
 	$(Editor) HDD.h &
+	$(Editor) methods.cpp
 edit-all:edit
 	$(Editor) makefile &
 	$(Editor) homeupdate.zsh &
+	$(Editor) DateTest.cpp&
+
 clean-help:
 	$(del) HDD.o
 	$(del) main.o
