@@ -85,7 +85,6 @@ std::string SizeToString(long a){
 int other(){
 	std::string url="dates.csv";
 	std::fstream *a=new std::fstream(url,std::ios::out);
-
 	std::string data=StdOut0("echo ~");
 	trim(data);
 	data+=" , "+StdOut0("date");
@@ -94,7 +93,6 @@ int other(){
 	//a.open();
 	std::cout<<"ok  a: "<<a->is_open()<<std::endl;
 	*a<<data<<std::endl;
-
 	a->close();
 	return 0;
 }

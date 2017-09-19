@@ -4,7 +4,6 @@ while (( $Count != 51 )); do
 	echo $Count;
 	#sudo cp /home/hdd-test-server/hdd_test.zsh /home/'test'$Count/;
 
-
 	sudo cp ~/HDD/hdd_test_smart.zsh /home/'test'$Count/;	
 	sudo cp ~/HDD/hdd_test_smart0.zsh /home/'test'$Count/;	
 	sudo cp -r /usr/sbin/nwipe /home/'test'$Count/nwipe;

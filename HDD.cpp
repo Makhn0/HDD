@@ -157,6 +157,7 @@ void HDD::run_body(std::string* batch,char pattern){
 
 }
 void HDD::reset(){
+	//todo COMMAND( ntp etc
 	this->SmartSupport=false;
 	this->Present=false;
 	if(Present) this->fd=open(path.c_str(),O_RDWR);//std::open?
@@ -208,6 +209,7 @@ void HDD::get_data(){
 	Capacity
 		*/
 	//fd is in reset() as well, this is just in case it changes;
+	Comman
 	if(Present) this->fd=open(path.c_str(),O_RDWR);//std::open?
 	Command(
 		"sudo smartctl -i "
