@@ -5,12 +5,14 @@ src=main.cpp HDD.cpp Exceptions.h
 Rargs="-D_Erase"
 ifeq ($(os),nt)
 BinName:=ewhde.exe
+TestName:=test.exe
 Editor:=notepad++
 del:=del
 endif
 
 ifeq ($(os),linux)
 BinName:=ewhde
+TestName:=test
 Editor:=gedit
 del:=sudo rm
 endif
@@ -28,8 +30,12 @@ edit :
 	$(Editor) main.cpp &
 	$(Editor) HDD.cpp &
 	$(Editor) HDD.h &
+	$(Editor) methods.cpp
 edit-all:edit
 	$(Editor) makefile &
+	$(Editor) homeupdate.zsh &
+	$(Editor) DateTest.cpp&
+
 clean-help:
 	$(del) HDD.o
 	$(del) main.o
@@ -50,13 +56,13 @@ install:
 load:
 	#for use on server
 	sudo cp ./$(BinName) ~/$(BinName)
-	sudo ~/homeupdate.zsh
+	sudo ./homeupdate.zsh
 update:
 	sudo make clean
 	sudo git add -A .
 	sudo git commit -m "$(commit)"
 	sudo git push
-test:
-	$(CXX) $(args) -o test.exe test.cpp
+test: test.cpp
+	$(CXX) --std=c++0x $(args) -o $(TestName) test.cpp
 open-test:
 	$(Editor) test.cpp

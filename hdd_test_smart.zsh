@@ -593,7 +593,6 @@ function queue_job_control(){
 	elif (( $Queue[$1] == 3 )); then
 		#3 Smart testing complete
 		#check_smartctl_status has updated the queue to here or the error queue code, so we must pass it along the line.
-		#different in hdd_test_smart0.zsh
 	
 		Queue+=(${1} 4);
 	elif (( $Queue[$1] == 4 )); then

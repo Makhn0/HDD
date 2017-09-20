@@ -10,7 +10,7 @@ enum Result_t{Unfinished,FinishedSuccess,FinishedFail};
 class HDD{
 	public:
 		//port properties
-		const std::string client;
+		const std::string HomePath;
 		const std::string path;
 		int fd;
 		static int instances;
@@ -21,8 +21,6 @@ class HDD{
 		std::string Model;
 		std::string ModelFamily;
 		std::string SerialNumber;
-		std::string UserCapacity="";
-		//TODO get rid of UserCapacity?
 		long size;//=0;
 	
 		//run properties
@@ -48,8 +46,8 @@ class HDD{
 		HDD(std::string path) : path(path),StartTime(time(0)){
 			//TODO define client
 			/*
-			Command("ls /home | grep ");
-			client=lastOutput;
+			Command("echo ~");
+			HomePath=LastOutput;
 			//*/
 			instances++;
 		}
@@ -75,6 +73,7 @@ class HDD{
 		void get_data();
 		void smartctl_run();
 		bool smartctl_running();
+		int smart_var(int&,std::string);
 		bool bb_test();
 		void smartctl_kill();
 		void dd(std::string*);
