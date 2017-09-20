@@ -1,5 +1,6 @@
 #ifndef HDD_h
 #define HDD_h
+
 #include <ostream>
 #include <iostream>
 #include <thread>
@@ -101,4 +102,5 @@ class HDD{
 		void run(std::string*,char);
 		void reset();
 };
+
 #endif
