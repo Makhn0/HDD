@@ -1,7 +1,7 @@
 #ifndef methods_cpp
 #define methods_cpp
 
-#include "HDD.h"
+
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -20,7 +20,7 @@ long myStol(std::string a){
 	}
 	return output;
 }
-std::string StdOut0(std::string cmd, bool throwing=true) {
+std::string StdOut0(std::string cmd) {
     std::string data;
     FILE * stream;
     const int max_buffer = 256;
@@ -51,20 +51,7 @@ std::string month(int i){
 		default:return "Jan";
 	}
 }
-#ifndef Result_To_String
-#define Result_To_String
-std::string ResultTToString(Result_t a)
-{
-	switch(a)
-	{
-		case Unfinished: return "Unfinished :|";
-		case FinishedSuccess: return "Finished, Success :)";
-		case FinishedFail: return "Finished, Failure :(";
-		default: return "Unfinished";
-	}
-	return "Unfinished";
-}
-#endif
+
 void trim(std::string &a){
 	if(a[a.length()-1]=='\n')
 		a.erase(a.length()-1);

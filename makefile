@@ -20,10 +20,10 @@ endif
 $(BinName): main.o HDD.o
 	$(CXX) $(CPFLAGS) $(args) -o $(BinName) main.o HDD.o
 	$(CXX) $(CPFLAGS) $(args) -D_Test -o $(BinName)_test main.o HDD.o
-HDD.o : HDD.cpp
+HDD.o : HDD.cpp 
 	$(CXX) -c $(CPFLAGS) $(args) HDD.cpp
 main.o : main.cpp
-	$(CXX) -c $(CPFLAGS) $(args) main.cpp	
+	$(CXX) -c $(CPFLAGS) $(args) main.cpp
 run : $(BinName)
 	$(BinName)
 edit :
@@ -34,16 +34,13 @@ edit :
 edit-all:edit
 	$(Editor) makefile &
 	$(Editor) homeupdate.zsh &
-	$(Editor) DateTest.cpp&
-
 clean-help:
-	$(del) HDD.o
-	$(del) main.o
+	$(del) *.o
 	$(del) $(BinName)
 	$(del) *~
 clean: 
-	sudo make clean-help ||\
-	echo " already clean"
+	sudo make clean-help || echo 'already clean'
+
 release:
 	sudo git pull
 	sudo make all args=$(Rargs)

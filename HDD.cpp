@@ -24,7 +24,17 @@ struct Exception : public exception{
 }
 */
 
-
+std::string ResultTToString(Result_t a)
+{
+	switch(a)
+	{
+		case Unfinished: return "Unfinished :|";
+		case FinishedSuccess: return "Finished, Success :)";
+		case FinishedFail: return "Finished, Failure :(";
+		default: return "Unfinished";
+	}
+	return "Unfinished";
+}
 std::string HDD::StdOut(std::string cmd, bool throwing=true) {
     std::string data;
     FILE * stream;
@@ -157,7 +167,7 @@ void HDD::run_body(std::string* batch,char pattern){
 
 }
 void HDD::reset(){
-	//todo COMMAND( ntp etc
+	
 	this->SmartSupport=false;
 	this->Present=false;
 	if(Present) this->fd=open(path.c_str(),O_RDWR);//std::open?
@@ -209,7 +219,6 @@ void HDD::get_data(){
 	Capacity
 		*/
 	//fd is in reset() as well, this is just in case it changes;
-	Comman
 	if(Present) this->fd=open(path.c_str(),O_RDWR);//std::open?
 	Command(
 		"sudo smartctl -i "
@@ -803,7 +812,8 @@ void HDD::erase_n(char pattern){
 		}
 
 		//* Check for a partial write. 
-		if( r != blocksize )
+		// cast as unsigned to avoid warning. is it better though?
+		if( (unsigned int )r != blocksize )
 		{
 			//* TODO: Handle a partial write. 
 
@@ -1002,3 +1012,4 @@ void HDD::log(std::string * batch){
 	//print(dstream);
 	//print(LogFile);
 }
+

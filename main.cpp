@@ -7,7 +7,7 @@
 #include <time.h>
 #include <sstream>
 #include <ctime>
-
+//#include "methods.cpp"
 std::string BatchName;
 std::string argPath;
 std::ostream * printstream;
@@ -34,9 +34,11 @@ void contPrint(HDD * HDDs[], int length)
 	}
 }
 extern std::string month(int i);
+extern std::string StdOut0(std::string i);//needs methods link?
 int main(int argc, char * argv[]){
 	//TODO test time is accurate on all clients
-	std::cout<<"Start Instances :"<<HDD::instances<<std::endl;
+	std::cout<<StdOut0("ntpupdate 192.168.1.1 ; date")<<std::endl;
+	std::cout<<"Start Instances : "<<HDD::instances<<std::endl;
 	/*
 	argv 1 is batchname
 	argv 2 is whether to run printer
