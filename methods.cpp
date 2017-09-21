@@ -20,6 +20,12 @@ long myStol(std::string a){
 	}
 	return output;
 }
+std::string trim(std::string &a){
+	if(a[a.length()-1]=='\n')
+		a.erase(a.length()-1);
+	return a;
+}
+
 std::string StdOut0(std::string cmd) {
     std::string data;
     FILE * stream;
@@ -32,7 +38,7 @@ std::string StdOut0(std::string cmd) {
 	//LastExitStatus=pclose(stream);
       //  if ((LastExitStatus!=0)&&throwing)throw (std::string) "Critical error stopping";
     }
-    return data;
+    return trim(data);
 }
 std::string month(int i){
 	switch(i){
@@ -52,10 +58,7 @@ std::string month(int i){
 	}
 }
 
-void trim(std::string &a){
-	if(a[a.length()-1]=='\n')
-		a.erase(a.length()-1);
-}
+
 
 
 std::string SizeToString(long a){

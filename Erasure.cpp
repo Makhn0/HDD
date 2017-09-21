@@ -1,4 +1,6 @@
-
+#include <iostream>
+#include <time.h>
+#include <string>
 void Erasure::erase(std::string * method)
 {  	
 	std::string TempName("");
@@ -25,7 +27,7 @@ void Erasure::erase(char pattern)
 		//erase_c(pattern);
 		erase_n(0x00);
 //		erase(new std::string("zero");
-		//	this->erase_debrief();
+		//this->erase_debrief();
 	}
 	catch(std::string e){
 		std::cerr<<drive->path<<" : string thrown"<<std::endl;

@@ -11,6 +11,7 @@
 #include <unistd.h> //write()
 #include <sys/stat.h>//O_RDWR?
 #include <sys/types.h>//open();
+
 #include <stdint.h>//u64 in nwipe_static_pass?
 #include <fcntl.h>
 #include <time.h>

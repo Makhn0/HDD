@@ -1,8 +1,9 @@
 #ifndef Erasure_h
 #define Erasure_h
-#include "HDD.h"
+#include "HDD.h"//include result_t data type?
 
 class Erasure{
+
 	HDD* Drive;
 
 	long currentLBA=0;

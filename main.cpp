@@ -7,6 +7,11 @@
 #include <time.h>
 #include <sstream>
 #include <ctime>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <dirent.h>
+
+
 //#include "methods.cpp"
 std::string BatchName;
 std::string argPath;
@@ -35,10 +40,25 @@ void contPrint(HDD * HDDs[], int length)
 }
 extern std::string month(int i);
 extern std::string StdOut0(std::string i);//needs methods link?
+extern void trim(std::string);
 int main(int argc, char * argv[]){
+	
+	std::string csvpath=StdOut0("echo ~");
+	std::cout<<"client home =" <<csvpath<<std::endl; 
+	csvpath.append("/batch_csv");
+	std::cout<<"checking for directory ~/batch_csv viz. "<< csvpath<<std::endl;
+	DIR * Diropen = opendir(csvpath.c_str());
+	if(!Diropen){	
+		std::cout<<"creating directory ~/batch_csv"<<std::endl;
+		int dirmake=mkdir(csvpath.c_str(),S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+		if(!dirmake) std::cout<<" couldn't create directory try sudo"<<std::endl;
+		else std::cout<<" created !!!"<<std::endl;
+	}
+	std::cout<<" syncing clocks "<<std::endl;
 	//TODO test time is accurate on all clients
 	std::cout<<StdOut0(" sudo ntpdate 192.168.1.1 ; date")<<std::endl;
 	std::cout<<"Start Instances : "<<HDD::instances<<std::endl;
+	return 0;
 	/*
 	argv 1 is batchname
 	argv 2 is whether to run printer
