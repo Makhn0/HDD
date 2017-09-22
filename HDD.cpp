@@ -951,7 +951,8 @@ void HDD::print(std::ostream* textgohere=&std::cout){
 
 	*textgohere<<"Start Time: "<<(ctime(&StartTime));//<<std::endl;
 	if(EndTime>0)*textgohere<<"End Time: "<<this->EndTime<<std::endl;
-	*textgohere<<"Run Time: "<<this->RunTime<<std::endl;
+	*textgohere<<"Run Time: "<<(this->RunTime/3600)<<"hours "<<((this->RunTime%3600)/60)<<" min(s) "<<(this->RunTime%60)<<"second(s)"<<std::endl;
+	//*textgohere<<"Run Time: "<<this->RunTime<<std::endl;
 	*textgohere<<"Erasing "<<(currentLBA*1.0/size)*100<<"% Complete"<<std::endl;
 	*textgohere<<"ETA: "<<(eta/3600)<<"hours "<<((eta%3600)/60)<<" min(s) "<<(eta%60)<<"second(s)"<<std::endl;
 	if(this->Exception!="none"){
