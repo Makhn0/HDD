@@ -51,14 +51,17 @@ int main(int argc, char * argv[]){
 	if(!Diropen){	
 		std::cout<<"creating directory ~/batch_csv"<<std::endl;
 		int dirmake=mkdir(csvpath.c_str(),S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-		if(!dirmake) std::cout<<" couldn't create directory try sudo"<<std::endl;
+		if(dirmake==-1) std::cout<<" couldn't create directory try sudo"<<std::endl;
 		else std::cout<<" created !!!"<<std::endl;
+	}
+	else{	
+		std::cout<< csvpath<< " already exists"<<std::endl;
 	}
 	std::cout<<" syncing clocks "<<std::endl;
 	//TODO test time is accurate on all clients
 	std::cout<<StdOut0(" sudo ntpdate 192.168.1.1 ; date")<<std::endl;
 	std::cout<<"Start Instances : "<<HDD::instances<<std::endl;
-	return 0;
+
 	/*
 	argv 1 is batchname
 	argv 2 is whether to run printer

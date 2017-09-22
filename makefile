@@ -46,14 +46,14 @@ release:
 	sudo make all args=$(Rargs)
 all: 
 	sudo make clean
-	sudo make args="$(args)"
-	sudo make load 1>/dev/null
+	sudo make
+	sudo make load
 install:
 	sudo cp ./$(BinName) /usr/bin/$(BinName)
-load:
+load: $(BinName)
 	#for use on server
 	sudo cp ./$(BinName) ~/$(BinName)
-	sudo ./homeupdate.zsh
+	sudo ./homeupdate.zsh  1>/dev/null
 update:
 	sudo make clean
 	sudo git add -A .
