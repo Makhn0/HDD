@@ -18,12 +18,12 @@ del:=sudo rm
 endif
 
 $(BinName): main.o HDD.o
-	$(CXX) $(CPFLAGS) $(args) -o $(BinName) main.o HDD.o
+	$(CXX) $(CPFLAGS) $(args) -o $(BinName) main.o HDD.o 
 	$(CXX) $(CPFLAGS) $(args) -D_Test -o $(BinName)_test main.o HDD.o
 HDD.o : HDD.cpp 
-	$(CXX) -c $(CPFLAGS) $(args) HDD.cpp
+	$(CXX) -c $(CPFLAGS) $(args) HDD.cpp 
 main.o : main.cpp
-	$(CXX) -c $(CPFLAGS) $(args) main.cpp
+	$(CXX) -c $(CPFLAGS) $(args) main.cpp 
 run : $(BinName)
 	$(BinName)
 edit :

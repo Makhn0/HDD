@@ -17,17 +17,55 @@ std::string BatchName;
 std::string argPath;
 std::ostream * printstream;
 std::ostream * debugstream;
+extern std::string month(int i);
+extern std::string StdOut0(std::string i);//needs methods link?
+extern std::string trim(std::string&);
+
+std::string reorganize(std::string a[],int length,int ScreenHeight){
+	std::string output="";
+	for(int i=0;i<length;i++){
+
+		output+=a[i]+" s"+a[ScreenHeight+i];
+	}
+	return output;
+}
+char * reorganize(char**a)
+{
+	//?
+	while(a){
+	//	std::cout<<a[i]
+	break;
+	}
+	return a[0];	
+}
+void PrintToScreen(std::stringstream a,int n){
+	std::string buffer[n];
+	for(int i=0;i<n;i++)
+	{
+		getline(a,buffer[i]);
+	}
+	for(int i=0;i<n;i++)
+	{
+		trim(buffer[i]);
+		getline(a,buffer[i]);
+		trim(buffer[i]);
+		std::cout<<buffer[i];
+	}
+}
+void PrintToScreen(std::ostream * a,int n){} //overload for when argument is pointer to cout
 void print(HDD * HDDs[], int length)
 {
 	std::cout<<"Welcome to Eric's Wonderful Hard Drive Eraser !!! :D \n";
 	std::cout<<"BatchName : "<<BatchName<<std::endl;
 	//std::cout<<"EraseCmd: "<<EraseCmd<<std::endl;
-	std::cout<<"total HDDs  : "<<HDD::instances<<std::endl;	std::cout<<"########################################################\n\n";
+	std::cout<<"total HDDs  : "<<HDD::instances<<std::endl;
+	std::cout<<"########################################################\n\n";
 	for(int i=0;i<length;i++)	
 	{
 		if(HDDs[i]->Present)
 			HDDs[i]->print(printstream);
 	}
+	PrintToScreen(printstream,30);
 }
 void contPrint(HDD * HDDs[], int length)
 {
@@ -38,11 +76,15 @@ void contPrint(HDD * HDDs[], int length)
 		std::this_thread::sleep_for(std::chrono::milliseconds(5000));
 	}
 }
-extern std::string month(int i);
-extern std::string StdOut0(std::string i);//needs methods link?
-extern void trim(std::string);
+
 int main(int argc, char * argv[]){
+
+	HDD * a=new HDD("/dev/sdf");
+	std::stringstream s;
+	a->print(s);
+	PrintToScreen(s);
 	
+	return 0;
 	std::string csvpath=StdOut0("echo ~");
 	std::cout<<"client home =" <<csvpath<<std::endl; 
 	csvpath.append("/batch_csv");
