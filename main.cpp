@@ -23,8 +23,8 @@ extern std::string trim(std::string&);
 
 std::string reorganize(std::string a[],int length,int ScreenHeight){
 	std::string output="";
-	for(int i=0;i<length;i++){
-
+	for(int i=0;i<length;i++)
+	{
 		output+=a[i]+" s"+a[ScreenHeight+i];
 	}
 	return output;
@@ -34,7 +34,7 @@ char * reorganize(char**a)
 	//?
 	while(a){
 	//	std::cout<<a[i]
-	break;
+		break;
 	}
 	return a[0];	
 }
@@ -102,7 +102,7 @@ int main(int argc, char * argv[]){
 	}
 	std::cout<<" syncing clocks "<<std::endl;
 	//TODO test time is accurate on all clients
-	std::cout<<StdOut0(" sudo ntpdate 192.168.1.1 ; date")<<std::endl;
+	std::cout<<StdOut0(" sudo ntpdate 192.168.1.1 ; date ")<<std::endl;
 	std::cout<<"Start Instances : "<<HDD::instances<<std::endl;
 
 	/*
