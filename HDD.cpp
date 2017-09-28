@@ -991,6 +991,7 @@ void HDD::print(std::ostream* textgohere=&std::cout){
 	else if(PresentTask=="Running Smart Control..."||PresentTask=="Checking Smart Control is still running...")
 	{
 		*textgohere<<SmartEta<<std::endl;
+		*textgohere<<"Last Output : "<<this->LastOutput<<std::endl;
 	}
 	if(this->Exception!="none"){
 		*textgohere<<"Last Exception : "<<this->Exception<<std::endl;
