@@ -6,7 +6,7 @@
 #include <thread>
 #include <time.h>
 
-enum Result_t{Unfinished,FinishedSuccess,FinishedFail};
+enum Result_t{Unfinished,FinishedSuccess,FinishedFail,Incomplete};
 
 class HDD{
 	public:

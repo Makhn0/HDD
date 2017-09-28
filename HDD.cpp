@@ -32,6 +32,7 @@ std::string ResultTToString(Result_t a)
 		case Unfinished: return "Unfinished :|";
 		case FinishedSuccess: return "Finished, Success :)";
 		case FinishedFail: return "Finished, Failure :(";
+		case Incomplete : return " Program ended, Incomplete "
 		default: return "Unfinished";
 	}
 	return "Unfinished";
@@ -39,14 +40,14 @@ std::string ResultTToString(Result_t a)
 std::string HDD::StdOut(std::string cmd, bool throwing=true) {
     std::string data;
     FILE * stream;
-    const int max_buffer = 256;
+    const int max_buffer= 256;
     char buffer[max_buffer];
-    stream = popen(cmd.c_str(), "r");
+    stream= popen(cmd.c_str(), "r");
     if(stream) {
         while(!feof(stream)&& Present)
             if(fgets(buffer, max_buffer, stream) != NULL) data.append(buffer);
 	LastExitStatus=pclose(stream);
-        if ((LastExitStatus!=0)&&throwing)throw (std::string) "Critical error stopping";
+        if ((LastExitStatus!=0)&&throwing)throw  "Critical error stopping";
     }
     return data;
 }
@@ -248,7 +249,7 @@ void HDD::get_data(){
 		+" | awk '/SMART support is:/' | sed -n '1,1p'"
 		,"getting data...",true
 	);
-	std::string temp = LastOutput.substr(18,9);
+	std::string temp= LastOutput.substr(18,9);
 	this->SmartSupport=(temp=="Available");	
 	
 	*dstream<<this->path<<" : SmartSupport : "<<temp<<" : "<<this->SmartSupport<<std::endl; 
@@ -266,7 +267,7 @@ void HDD::get_data(){
 		this->ModelFamily="none detected";
 	}
 
-	this->Model = StdOut(
+	this->Model= StdOut(
 		"sudo smartctl -i "
 		+this->path
 		+" | awk '/Device Model:/'"
@@ -296,8 +297,8 @@ void HDD::get_data(){
 	}
 	else
 	{
-		this->size =-1;
-		throw path+" no capacity detected";
+		this->size=-1;
+		throw " no capacity detected";
 	}
 	
 	trim(this->ModelFamily);
@@ -333,7 +334,7 @@ bool HDD::smartctl_running()
 	bool done=code=="   0";
 	*dstream<<this->path<<" : smartctl: "<<((!done)?"is running":" has stopped ")<<" code :"<<code<<std::endl;
 	if (done) return false;
-	throw (std::string) path+" smartctl error test runtime  "+code;
+	throw " smartctl error test runtime  "+code;
 }
 void HDD::smartctl_kill()
 {
@@ -438,7 +439,7 @@ void HDD::hash_check(std::string* batch,std::string hashfile,std::string outputf
 	);
 	std::string ReadHash= LastOutput.substr(0,32);
 	if(MainHash!=ReadHash){
-		throw (std::string) path+"hash rw failure...";
+		throw  "hash rw failure...";
 	}
 	else{*dstream<<path<<" : Hashes are the Same"<<std::endl;}
 	Command("sudo rm "+hashfile+" "+outputfile," Erasing Output and Input files...", true);
@@ -486,7 +487,7 @@ void HDD::erase(char pattern)
 	//*/
 }
 
-void HDD::Write_All( char pattern =0x00,long begin=0,long end=0){
+void HDD::Write_All( char pattern =0x00,long begin =0,long end =0){
 	if(!end)end=size;
 	std::ofstream drive(path.c_str(),std::ostream::out);
 	if(!drive) throw "cannot open HDD";
@@ -664,7 +665,7 @@ void HDD::Write_All( char pattern =0x00,long begin=0,long end=0){
 		<<date->tm_min<<":"
 		<<date->tm_sec<<std::endl;
 }
-bool HDD::Long_Verify(unsigned char pattern =0x00,long begin=0, long end=0){
+bool HDD::Long_Verify(unsigned char pattern =0x00,long begin =0, long end =0){
 	if(!end)end=size;
 	std::ifstream idrive(path.c_str(),std::istream::in);
 	if(!idrive) throw "cannot open HDD to read";
@@ -697,7 +698,7 @@ void HDD::erase_c(char pattern){
 	/* make sure that program can access whole drive*/
 	std::ifstream in(path.c_str(),std::istream::in);
 	in.seekg(0,std::ios_base::end);
-	long size1 =in.tellg();
+	long size1= in.tellg();
 	in.close();
 
 	if(size!=size1) throw "cannot resolve size";	
@@ -740,10 +741,10 @@ void HDD::erase_n(char pattern){
 	char* p;
 
 	/* The output buffer window offset. */
-	int w = 0;
+	int w= 0;
 
 	/* The number of bytes remaining in the pass. */
-	unsigned long z =size; //originally unsigned long long in nwipe
+	unsigned long z=size; //originally unsigned long long in nwipe
 	int errors=0; 		//should use long long for size everywhere?
 	this->fd=open(path.c_str(),O_RDWR);//just incase reset didn't get it because of no presence or somethign
 //* tottaly copy pasted from nwipe's github
@@ -763,7 +764,7 @@ void HDD::erase_n(char pattern){
 	}*///will never happen
 
 	// Create the output buffer. 
-	b = (char *) malloc( blocksize  +2 );
+	b= (char *) malloc( blocksize  +2 );
 
 	// Check the memory allocation. 
 	if( ! b )
@@ -772,7 +773,7 @@ void HDD::erase_n(char pattern){
 		throw "unable to create buffer" ;//return;//return -1;
 	}
 
-	for( p = b ; p < b + 512  + 1 ; p += 1 )
+	for( p= b ; p < b + 512  + 1 ; p += 1 )
 	{
 		// Fill the output buffer with the pattern.
 		//memcpy( p, pattern, 1 ); 
@@ -781,12 +782,12 @@ void HDD::erase_n(char pattern){
 ///
 	// Reset the file pointer. 
 	*dstream<<"filedescriptor int fd = "<<fd<<std::endl;
-	offset = lseek( fd, 0, SEEK_SET );
+	offset= lseek( fd, 0, SEEK_SET );
 
 	// Reset the pass byte counter. 
 	//c->pass_done = 0; don't need for copy
 
-	if( offset == (off64_t)-1 )
+	if( offset== (off64_t)-1 )
 	{
 		//nwipe_perror( errno, __FUNCTION__, "lseek" );
 		//nwipe_log( NWIPE_LOG_FATAL, "Unable to reset the '%s' file offset.", c->device_name );
@@ -794,7 +795,7 @@ void HDD::erase_n(char pattern){
 		throw " unable to reset ofset";//return ;//return -1;
 	}
 
-	if( offset != 0 )
+	if( offset!= 0 )
 	{
 		//* This is system insanity. 
 		//nwipe_log( NWIPE_LOG_SANITY, "__FUNCTION__: lseek() returned a bogus offset on '%s'.", c->device_name );
@@ -807,13 +808,13 @@ void HDD::erase_n(char pattern){
 	{
 		if( 512 <= z )
 		{
-			blocksize = 512 ;
+			blocksize= 512 ;
 		}
 		else
 		{
 			//* This is a seatbelt for buggy drivers and programming errors because 
 			//* the device size should always be an even multiple of its blocksize. 
-			blocksize = z;
+			blocksize= z;
 			*dstream<<"the size of "<< path<< " is not a multiple of block size "<<blocksize<<std::endl;
 			//nwipe_log( NWIPE_LOG_WARNING,
 			//  "%s: The size of '%s' is not a multiple of its block size %i.",
@@ -823,7 +824,7 @@ void HDD::erase_n(char pattern){
 		//* Fill the output buffer with the random pattern. 
 		//* Write the next block out to the device. 
 		//
-		r = write( fd, &b[w], blocksize );
+		r= write( fd, &b[w], blocksize );
 
 		//* Check the result for a fatal error. 
 		if( r < 0 )
@@ -841,17 +842,17 @@ void HDD::erase_n(char pattern){
 			//* TODO: Handle a partial write. 
 
 			//* The number of bytes that were not written. 
-			int s = blocksize - r;
+			int s= blocksize - r;
 			
 			//* Increment the error count. 
-			errors += s;
+			errors+= s;
 
 			*dstream <<"partial write errors = "<<errors<<std::endl;
 
 			//* Bump the file pointer to the next block. 
-			offset = lseek( fd, s, SEEK_CUR );
+			offset= lseek( fd, s, SEEK_CUR );
 
-			if( offset == (off64_t)-1 )
+			if( offset== (off64_t)-1 )
 			{
 				//nwipe_perror( errno, __FUNCTION__, "lseek" );
 				//nwipe_log( NWIPE_LOG_ERROR, "Unable to bump the '%s' file offset after a partial write.", c->device_name );
@@ -978,8 +979,9 @@ void HDD::print(std::ostream* textgohere=&std::cout){
 		*textgohere<<"Erasing "<<(currentLBA*1.0/size)*100<<"% Complete"<<std::endl;
 		*textgohere<<"ETA: "<<(eta/3600)<<"hours "<<((eta%3600)/60)<<" min(s) "<<(eta%60)<<"second(s)"<<std::endl;
 	}
-	else if(PresentTask=="Running Smart Control..."||PresentTask=="Checking Smart Control is still running..."){
-	*textgohere<<SmartEta<<std::endl;
+	else if(PresentTask=="Running Smart Control..."||PresentTask=="Checking Smart Control is still running...")
+	{
+		*textgohere<<SmartEta<<std::endl;
 	}
 	if(this->Exception!="none"){
 		*textgohere<<"Last Exception : "<<this->Exception<<std::endl;
@@ -1031,9 +1033,8 @@ void HDD::print_csv(std::fstream * textgohere){
 void HDD::log(std::string * batch){
 	std::string filename="/home/hdd-test-server/HDD_logs/"
 		+(*batch)+".csv";
-	this->PresentTask ="Writing to the log file:"+filename;	
-	std::fstream* LogFile
-		= new std::fstream(filename,std::ios::app);
+	this->PresentTask="Writing to the log file:"+filename;	
+	std::fstream* LogFile= new std::fstream(filename,std::ios::app);
 	print_csv(LogFile);
 	*dstream<<this->path<<" :  "<<this->PresentTask<<std::endl;
 	*dstream<<this->path<<" : log file is open:"<<LogFile->is_open()<<std::endl;
