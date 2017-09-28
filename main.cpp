@@ -65,7 +65,7 @@ void print(HDD * HDDs[], int length)
 		if(HDDs[i]->Present)
 			HDDs[i]->print(printstream);
 	}
-	PrintToScreen(printstream,30);
+	//PrintToScreen(printstream,30);
 }
 void contPrint(HDD * HDDs[], int length)
 {
@@ -78,13 +78,14 @@ void contPrint(HDD * HDDs[], int length)
 }
 
 int main(int argc, char * argv[]){
-
+	/*
 	HDD * a=new HDD("/dev/sdf");
 	std::stringstream s;
-	a->print(s);
+	a->print((std::iostream) s);
 	PrintToScreen(s);
 	
 	return 0;
+	*/
 	std::string csvpath=StdOut0("echo ~");
 	std::cout<<"client home =" <<csvpath<<std::endl; 
 	csvpath.append("/batch_csv");
@@ -127,7 +128,7 @@ int main(int argc, char * argv[]){
 
 	if(
 		1//argv[1]=="date"
-		)
+	)
 	{
 		//if time needed for other things take out of else
 		time_t now=time(0);
