@@ -172,7 +172,7 @@ int main(int argc, char * argv[]){
 	}
 	
 	#ifdef _Debug
-	*printstream<<"ended instantiating "<<HDD::instances<<"HDD objects"<<std::endl;
+	*printstream<<"ended instantiating "<<HDD::instances<<" HDD objects"<<std::endl;
 	#endif
 
 	#ifndef _Debug

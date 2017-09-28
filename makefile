@@ -46,7 +46,7 @@ release:
 	sudo make all args=$(Rargs)
 all: 
 	sudo make clean
-	sudo make
+	sudo make args="$(args)"
 	sudo make load
 install:
 	sudo cp ./$(BinName) /usr/bin/$(BinName)

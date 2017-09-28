@@ -27,6 +27,7 @@ class HDD{
 		//run properties
 		long currentLBA=0;
 		Result_t Status=Unfinished;
+		std::string SmartEta="";
 		std::string PresentTask;
 		std::string Exception="none";
 		std::string CmdString;

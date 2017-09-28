@@ -10,7 +10,7 @@
 #include <string>
 #include <unistd.h> //write()
 #include <sys/stat.h>//O_RDWR?
-#include <sys/types.h>//open();
+#include <sys/types.h>//open();close()[ithink];
 
 #include <stdint.h>//u64 in nwipe_static_pass?
 #include <fcntl.h>
@@ -77,7 +77,7 @@ void HDD::exception_catch(const char *e){
 }
 void HDD::exception_catch(std::string e){
 	this->Exception= e;
-	this->PresentTask = " Critical error, stopping. ";
+	this->PresentTask= " Critical error, stopping. ";
 	this->Status=FinishedFail;		
 	*dstream<<this->path<<"#####################WARNING#####################"<<std::endl;
 	*dstream<<this->path<<" : Exception thrown : "<<this->Exception<<std::endl;	
@@ -95,6 +95,7 @@ void HDD::run(std::string* batch,char pattern){
 		*dstream<<this->path<<" : resetting... "<<std::endl;
 		reset();
 		PresentTask="waiting to detect...";
+		*dstream<<this->path<<" : "<<this->PresentTask<<std::endl;
 		while(!presence()){
 			sleep(5);
 		}
@@ -117,6 +118,8 @@ void HDD::run(std::string* batch,char pattern){
 		catch(std::exception e){
 			exception_catch(e);
 		}
+		*dstream<<this->path<<"closing fd"<<std::endl;
+		close(fd);
 		/*END TRY BLOCK*/
 		*dstream<<this->path<<" : end of run_body"<<std::endl;
 
@@ -124,27 +127,41 @@ void HDD::run(std::string* batch,char pattern){
 		{
 				sleep(10);
 		}
-		break;
+		//break;
 		*dstream<<this->path<<" : pulled out starting over..."<<std::endl<<std::endl;
 	}
 	*dstream<<path<<" : we did it out of the loop"<<std::endl;;
 }
 void HDD::run_body(std::string* batch,char pattern){
+	*dstream<<"beginning run_body"<<std::endl;
 	this->StartTime=time(0);
 	get_data();
 	if(!presence()){return ;}
 	#ifndef _Skip_Smart
+	//TODO stop already running smartctl?
+	//TODO handle (41) self test interrupted
 	smartctl_run();
 	bool a=false;
 	/* smart ctl*/
+	/*
 	while(smartctl_running()){
 		if(!presence()){
 			a=true;
+			smartctl_kill();
 			break;
 		}
 		sleep(10);		
 	}
-	if(a) return;
+	*/
+	while(presence())
+	{
+		sleep(5);
+		if(!smartctl_running()) {
+			break;
+		}
+		sleep(5);
+	}
+	
 
 	#endif
 	/* back blaze test*/
@@ -163,8 +180,11 @@ void HDD::run_body(std::string* batch,char pattern){
 
 	this->EndTime=time(0);
 	if(!this->presence()){return;}
-	*dstream<<this->path<<" : end of erase: writing to logs";
+	*dstream<<this->path<<"closing fd.. "<<std::endl;
+	close(fd);
+	*dstream<<this->path<<" : end of erase: writing to logs"<<std::endl;
 	log(batch);
+
 
 }
 void HDD::reset(){
@@ -177,6 +197,7 @@ void HDD::reset(){
 	this->Model="";
 	this->ModelFamily="";
 	this->size=0;
+this->SmartEta="";
 	this->currentLBA=0;
 	this->StartTime=-1;//time(0);
 	this->EndTime=-1;
@@ -199,7 +220,7 @@ bool HDD::presence(bool print ){
 		access( this->path.c_str(),0 )==0;
 		
 	if(print) *dstream<<this->path<<" : presence "<<((this->Present)?"detected":"not detected")<<std::endl;
-	
+	if(!Present) close(this->fd);
 	return this->Present;
 }
 void HDD::Presence_checker(){
@@ -294,6 +315,7 @@ void HDD::smartctl_run()
 		+ this->path
 		,"Running Smart Control...",true
 	);
+	SmartEta=this->LastOutput.substr(LastOutput.find("Please Wait"),30);
 	sleep(2);
 }
 
@@ -690,7 +712,7 @@ void HDD::erase_c(char pattern){
 	
 }
 void HDD::erase_n(char pattern){
-
+	PresentTask="Erasing...";
 	time_t begin_t=time(0);
 	tm * date=localtime(&begin_t);
 	*dstream<<path<<" :start erasing w/erase_n:  "
@@ -747,7 +769,7 @@ void HDD::erase_n(char pattern){
 	if( ! b )
 	{
 		*dstream<<"unable to create buffer"<<std::endl;
-		return;//return -1;
+		throw "unable to create buffer" ;//return;//return -1;
 	}
 
 	for( p = b ; p < b + 512  + 1 ; p += 1 )
@@ -769,7 +791,7 @@ void HDD::erase_n(char pattern){
 		//nwipe_perror( errno, __FUNCTION__, "lseek" );
 		//nwipe_log( NWIPE_LOG_FATAL, "Unable to reset the '%s' file offset.", c->device_name );
 		*dstream<<"unable to reset offset"<<std::endl;
-		return ;//return -1;
+		throw " unable to reset ofset";//return ;//return -1;
 	}
 
 	if( offset != 0 )
@@ -777,7 +799,7 @@ void HDD::erase_n(char pattern){
 		//* This is system insanity. 
 		//nwipe_log( NWIPE_LOG_SANITY, "__FUNCTION__: lseek() returned a bogus offset on '%s'.", c->device_name );
 		*dstream<<"lseek returned bad offset"<<std::endl;
-		return ;//return -1;
+		throw "lseek returned bad offset";//return ;//return -1;
 	}
 
 	*dstream<<"actually erasing part"<<std::endl;
@@ -809,7 +831,7 @@ void HDD::erase_n(char pattern){
 			//nwipe_perror( errno, __FUNCTION__, "write" );
 			//nwipe_log( NWIPE_LOG_FATAL, "Unable to write to '%s'.", c->device_name );
 			*dstream<<" unable to write fully to"<<path<<std::endl;
-			return ; //return -1;
+			throw "unable to write fully";//return ; //return -1;
 		}
 
 		//* Check for a partial write. 
@@ -834,7 +856,7 @@ void HDD::erase_n(char pattern){
 				//nwipe_perror( errno, __FUNCTION__, "lseek" );
 				//nwipe_log( NWIPE_LOG_ERROR, "Unable to bump the '%s' file offset after a partial write.", c->device_name );
 				*dstream<<"unable to bump the file offset after a partial write"<<std::endl;
-				return ;//return -1;
+				throw "unable to bump the file offset after a partial write";//return ;//return -1;
 			}
 
 		} //* partial write 
@@ -948,13 +970,17 @@ void HDD::print(std::ostream* textgohere=&std::cout){
 	*textgohere<<"Serial : "<<this->SerialNumber<<std::endl;
 	*textgohere<<"User Capacity: "<<SizeToString(size)<<std::endl;
 	*textgohere<<"Present Task: "<<this->PresentTask<<std::endl;
-
-	*textgohere<<"Start Time: "<<(ctime(&StartTime));//<<std::endl;
-	if(EndTime>0)*textgohere<<"End Time: "<<this->EndTime<<std::endl;
-	*textgohere<<"Run Time: "<<(this->RunTime/3600)<<"hours "<<((this->RunTime%3600)/60)<<" min(s) "<<(this->RunTime%60)<<"second(s)"<<std::endl;
-	//*textgohere<<"Run Time: "<<this->RunTime<<std::endl;
-	*textgohere<<"Erasing "<<(currentLBA*1.0/size)*100<<"% Complete"<<std::endl;
-	*textgohere<<"ETA: "<<(eta/3600)<<"hours "<<((eta%3600)/60)<<" min(s) "<<(eta%60)<<"second(s)"<<std::endl;
+	if(PresentTask=="Erasing..."){
+		*textgohere<<"Start Time: "<<(ctime(&StartTime));//<<std::endl;
+		if(EndTime>0)*textgohere<<"End Time: "<<this->EndTime<<std::endl;
+		*textgohere<<"Run Time: "<<(this->RunTime/3600)<<"hours "<<((this->RunTime%3600)/60)<<" min(s) "<<(this->RunTime%60)<<"second(s)"<<std::endl;
+		//*textgohere<<"Run Time: "<<this->RunTime<<std::endl;
+		*textgohere<<"Erasing "<<(currentLBA*1.0/size)*100<<"% Complete"<<std::endl;
+		*textgohere<<"ETA: "<<(eta/3600)<<"hours "<<((eta%3600)/60)<<" min(s) "<<(eta%60)<<"second(s)"<<std::endl;
+	}
+	else if(PresentTask=="Running Smart Control..."||PresentTask=="Checking Smart Control is still running..."){
+	*textgohere<<SmartEta<<std::endl;
+	}
 	if(this->Exception!="none"){
 		*textgohere<<"Last Exception : "<<this->Exception<<std::endl;
 		*textgohere<<"Last/Current Command :" << this->CmdString<<std::endl;
