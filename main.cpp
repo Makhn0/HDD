@@ -101,8 +101,8 @@ int main(int argc, char * argv[]){
 		std::cout<< csvpath<< " already exists"<<std::endl;
 	}
 	std::cout<<" syncing clocks "<<std::endl;
-	//TODO test time is accurate on all clients
-	std::cout<<StdOut0(" sudo ntpdate 192.168.1.1 ; date ")<<std::endl;
+	//TODO uncomment time sync
+	//std::cout<<StdOut0(" sudo ntpdate 192.168.1.1 ; date ")<<std::endl;
 	std::cout<<"Start Instances : "<<HDD::instances<<std::endl;
 
 	/*

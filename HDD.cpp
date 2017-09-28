@@ -32,7 +32,7 @@ std::string ResultTToString(Result_t a)
 		case Unfinished: return "Unfinished :|";
 		case FinishedSuccess: return "Finished, Success :)";
 		case FinishedFail: return "Finished, Failure :(";
-		case Incomplete : return " Program ended, Incomplete "
+		case Incomplete : return " Program ended, Incomplete ";
 		default: return "Unfinished";
 	}
 	return "Unfinished";
@@ -47,7 +47,7 @@ std::string HDD::StdOut(std::string cmd, bool throwing=true) {
         while(!feof(stream)&& Present)
             if(fgets(buffer, max_buffer, stream) != NULL) data.append(buffer);
 	LastExitStatus=pclose(stream);
-        if ((LastExitStatus!=0)&&throwing)throw  "Critical error stopping";
+        if ((LastExitStatus!=0)&&throwing)throw  "Last System call returned not 0";
     }
     return data;
 }
@@ -154,7 +154,7 @@ void HDD::run_body(std::string* batch,char pattern){
 		sleep(10);		
 	}
 	*/
-	while(presence())
+	while(presence(true))
 	{
 		sleep(5);
 		if(!smartctl_running()) {
@@ -316,7 +316,16 @@ void HDD::smartctl_run()
 		+ this->path
 		,"Running Smart Control...",true
 	);
-	SmartEta=this->LastOutput.substr(LastOutput.find("Please Wait"),30);
+	try{	
+
+		SmartEta=this->LastOutput.substr(LastOutput.find("Please wait"),90);
+	}
+	catch(std::exception e)
+	{
+
+		*dstream<<"oops bad substring"<<std::endl;
+		*dstream<<LastOutput.size()<<" : "<<LastOutput.find("Please Wait")<<std::endl;
+	}
 	sleep(2);
 }
 
