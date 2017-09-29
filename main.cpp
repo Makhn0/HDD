@@ -15,7 +15,7 @@
 //#include "methods.cpp"
 std::string BatchName;
 std::string argPath;
-std::ostream * printstream;
+std::stringstream * printstream;
 std::ostream * debugstream;
 extern std::string month(int i);
 extern std::string StdOut0(std::string i);//needs methods link?
@@ -38,21 +38,64 @@ char * reorganize(char**a)
 	}
 	return a[0];	
 }
-void PrintToScreen(std::stringstream a,int n){
+void PrintToScreen(std::stringstream * a,int n){
+			
+	//std::cout<<a->str()<<std::endl;
+	/*
+	std::string buffer;
+		getline(*a,buffer);
+	std::cout<<buffer<<std::endl;
+	/*/
+	int NextCollumnAt=80;
 	std::string buffer[n];
+	std::string buffer1[n];
+	int outsize;
+	
 	for(int i=0;i<n;i++)
 	{
-		getline(a,buffer[i]);
+		getline(*a,buffer[i]);
 	}
 	for(int i=0;i<n;i++)
 	{
+		
 		trim(buffer[i]);
-		getline(a,buffer[i]);
+		getline(*a,buffer1[i]);
 		trim(buffer[i]);
-		std::cout<<buffer[i]<<std::endl;
+		//std::cout<<"buffer going out"<<std::endl;
+		//formatted
+		
+		outsize= (int)buffer[i].size();
+		if(outsize>NextCollumnAt)
+		{
+			for(int j=0;j<outsize;j++)
+			{
+				if(j%(NextCollumnAt-5)==0)
+					std::cout<<'\n';
+				std::cout
+				//<<"first ish"
+				<<buffer[i][j];
+			}
+			std::cout<<std::endl;
+		}
+		else
+		{
+			std::cout<<buffer[i];
+		}
+		for(int j=0;j<(int)(NextCollumnAt-outsize);j++){
+			std::cout<<" ";
+		}
+		std::cout<<buffer1[i]<<std::endl;
 	}
+	while(!a->eof()){
+		getline(*a,buffer[0]);
+		std::cout
+//		<<"last bit"
+		<<buffer[0]<<std::endl;
+	}
+
+	//*/
 }
-void PrintToScreen(std::ostream * a,int n){} //overload for when argument is pointer to cout
+//void PrintToScreen(std::ostream * a,int n){} //overload for when argument is pointer to cout
 void print(HDD * HDDs[], int length)
 {
 	std::cout<<"Welcome to Eric's Wonderful Hard Drive Eraser !!! :D \n";
@@ -60,12 +103,21 @@ void print(HDD * HDDs[], int length)
 	//std::cout<<"EraseCmd: "<<EraseCmd<<std::endl;
 	std::cout<<"total HDDs  : "<<HDD::instances<<std::endl;
 	std::cout<<"########################################################\n\n";
+	static int count;
+	count++;
+	std::cout<<count<<std::endl;
 	for(int i=0;i<length;i++)	
 	{
+		
 		if(HDDs[i]->Present)
-			HDDs[i]->print(printstream);
+			HDDs[i]->print(
+	//			(std::ostream*) 
+			printstream);
 	}
+	
 	PrintToScreen(printstream,30);
+	printstream->str("");
+	std::cout<<"end"<<std::endl;
 }
 void contPrint(HDD * HDDs[], int length)
 {
@@ -78,6 +130,10 @@ void contPrint(HDD * HDDs[], int length)
 }
 
 int main(int argc, char * argv[]){
+	/*
+	printstream = new std::stringstream("first line\n ooo\n222222\n3333333\n what??\n132456789012345678901234567980123456790123456790123456790123456790123456790123456790\nwhat in tarnation\nbut what theremare \n ohaas\n even more\thats righ\n o yea \nothing to see here \n one more\n end");
+	PrintToScreen(printstream,6);
+	return 0;
 	/*
 	HDD * a=new HDD("/dev/sdf");
 	std::stringstream s;
@@ -192,5 +248,7 @@ int main(int argc, char * argv[]){
 	{
 		runner[i]->join();
 	}
+	delete(printstream);
+	delete(debugstream);
 	return 0;
 }

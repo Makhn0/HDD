@@ -971,6 +971,7 @@ void HDD::erase_debrief(){
 //trouble with default pointer types; need to override function
 void HDD::print(std::ostream* textgohere=&std::cout){
 	UpdateRunTime();
+	std::cout<<this->path<<"hiya"<<std::endl;
 	//TODO add info on which client is running
 	*textgohere<<"Status of: "<<this->path<<std::endl;
 	*textgohere<<"Presence :    "<<((this->Present)?"detected":"undetected")<<std::endl;
