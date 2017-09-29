@@ -49,7 +49,7 @@ void PrintToScreen(std::stringstream a,int n){
 		trim(buffer[i]);
 		getline(a,buffer[i]);
 		trim(buffer[i]);
-		std::cout<<buffer[i];
+		std::cout<<buffer[i]<<std::endl;
 	}
 }
 void PrintToScreen(std::ostream * a,int n){} //overload for when argument is pointer to cout
@@ -65,7 +65,7 @@ void print(HDD * HDDs[], int length)
 		if(HDDs[i]->Present)
 			HDDs[i]->print(printstream);
 	}
-	//PrintToScreen(printstream,30);
+	PrintToScreen(printstream,30);
 }
 void contPrint(HDD * HDDs[], int length)
 {
@@ -124,7 +124,8 @@ int main(int argc, char * argv[]){
 	//*/
 	sleep(1);	
 	debugstream=&std::cerr;
-	printstream=&std::cout;
+	printstream= new std::stringstream("");
+		//&std::cout;
 
 	if(
 		1//argv[1]=="date"

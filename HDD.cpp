@@ -976,8 +976,8 @@ void HDD::print(std::ostream* textgohere=&std::cout){
 	*textgohere<<"Presence :    "<<((this->Present)?"detected":"undetected")<<std::endl;
 	*textgohere<<"Smart Support: "<<(this->SmartSupport?"available":"unavailable")<<std::endl;
 	*textgohere<<"Model Family: "<<this->ModelFamily<<std::endl;
-	*textgohere<<"Model  : "<<this->Model<<std::endl;
-	*textgohere<<"Serial : "<<this->SerialNumber<<std::endl;
+	*textgohere<<"Model  #: "<<this->Model<<std::endl;
+	*textgohere<<"Serial #: "<<this->SerialNumber<<std::endl;
 	*textgohere<<"User Capacity: "<<SizeToString(size)<<std::endl;
 	*textgohere<<"Present Task: "<<this->PresentTask<<std::endl;
 
