@@ -980,6 +980,7 @@ void HDD::print(std::ostream* textgohere=&std::cout){
 	*textgohere<<"Serial : "<<this->SerialNumber<<std::endl;
 	*textgohere<<"User Capacity: "<<SizeToString(size)<<std::endl;
 	*textgohere<<"Present Task: "<<this->PresentTask<<std::endl;
+
 	if(PresentTask=="Erasing..."){
 		*textgohere<<"Start Time: "<<(ctime(&StartTime));//<<std::endl;
 		if(EndTime>0)*textgohere<<"End Time: "<<this->EndTime<<std::endl;
@@ -988,12 +989,14 @@ void HDD::print(std::ostream* textgohere=&std::cout){
 		*textgohere<<"Erasing "<<(currentLBA*1.0/size)*100<<"% Complete"<<std::endl;
 		*textgohere<<"ETA: "<<(eta/3600)<<"hours "<<((eta%3600)/60)<<" min(s) "<<(eta%60)<<"second(s)"<<std::endl;
 	}
+
 	else if(PresentTask=="Running Smart Control..."||PresentTask=="Checking Smart Control is still running...")
 	{
 		*textgohere<<SmartEta<<std::endl;
 		*textgohere<<"Last Output : "<<this->LastOutput<<std::endl;
 	}
-	if(this->Exception!="none"){
+
+	else if(this->Exception!="none"){
 		*textgohere<<"Last Exception : "<<this->Exception<<std::endl;
 		*textgohere<<"Last/Current Command :" << this->CmdString<<std::endl;
 		*textgohere<<"Last Output : "<<this->LastOutput<<std::endl;
