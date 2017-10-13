@@ -41,7 +41,7 @@ clean-help:
 clean: 
 	sudo make clean-help || echo 'already clean'
 
-release:
+update:
 	sudo git pull
 	sudo make all args=$(Rargs)
 all: 
@@ -54,7 +54,7 @@ load: $(BinName)
 	#for use on server
 	sudo cp ./$(BinName) ~/$(BinName)
 	sudo ./homeupdate.zsh  1>/dev/null
-update:
+push:
 	sudo make clean
 	sudo git add -A .
 	sudo git commit -m "$(commit)"

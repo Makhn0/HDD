@@ -1,4 +1,5 @@
 #include <ostream>
+#include <fstream>
 #include <iostream>
 #include <thread>
 #include <stdlib.h>
@@ -50,10 +51,11 @@ void PrintToScreen(std::stringstream * a,int n){
 	std::string buffer[n];
 	std::string buffer1[n];
 	int outsize;
-	
+	std::cout<<" printing to screen"<<std::endl;
 	for(int i=0;i<n;i++)
 	{
 		getline(*a,buffer[i]);
+		//std::cout<<buffer[i]<<std::endl;
 	}
 	for(int i=0;i<n;i++)
 	{
@@ -92,12 +94,17 @@ void PrintToScreen(std::stringstream * a,int n){
 //		<<"last bit"
 		<<buffer[0]<<std::endl;
 	}
+	if((a->rdstate()&(std::ifstream::badbit|std::ifstream::failbit))!=0)a->clear();
 
 	//*/
 }
 //void PrintToScreen(std::ostream * a,int n){} //overload for when argument is pointer to cout
 void print(HDD * HDDs[], int length)
 {
+	printstream->str("");
+	printstream->flush();
+	printstream->str("hello again world");
+	std::cout<<printstream->str()<<std::endl;;
 	std::cout<<"Welcome to Eric's Wonderful Hard Drive Eraser !!! :D \n";
 	std::cout<<"BatchName : "<<BatchName<<std::endl;
 	//std::cout<<"EraseCmd: "<<EraseCmd<<std::endl;
@@ -114,9 +121,9 @@ void print(HDD * HDDs[], int length)
 	//			(std::ostream*) 
 			printstream);
 	}
-	
+	//std::cout<<printstream->str();
 	PrintToScreen(printstream,30);
-	printstream->str("");
+	
 	std::cout<<"end"<<std::endl;
 }
 void contPrint(HDD * HDDs[], int length)
@@ -130,18 +137,29 @@ void contPrint(HDD * HDDs[], int length)
 }
 
 int main(int argc, char * argv[]){
-	/*
-	printstream = new std::stringstream("first line\n ooo\n222222\n3333333\n what??\n132456789012345678901234567980123456790123456790123456790123456790123456790123456790\nwhat in tarnation\nbut what theremare \n ohaas\n even more\thats righ\n o yea \nothing to see here \n one more\n end");
-	PrintToScreen(printstream,6);
-	return 0;
-	/*
+/*	
+	std::string stuff="first line\n ooo\n222222\n3333333\n what??\n132456789012345678901234567980123456790123456790123456790123456790123456790123456790\nwhat in tarnation\nbut what theremare \n ohaas\n even more\thats righ\n o yea \nothing to see here \n one more\n end";
 	HDD * a=new HDD("/dev/sdf");
-	std::stringstream s;
-	a->print((std::iostream) s);
-	PrintToScreen(s);
+	HDD*b=new HDD("/dev/sdg");
+	a->reset();
+	b->reset();
+	//a->print();
+	std::stringstream* s=new std::stringstream;
+	std::cout<<"s.good="<<s->good()<<std::endl;
+	a->print(s);
+	b->print(s);
+        *s<<"some other stuff: \n asdf asdf\n"<<stuff<<std::endl;
+	PrintToScreen(s,20);
+	a->print(s);
+	b->print(s);
 	
+	std::cout<<"second PrintToScreen call"<<std::endl;
+	PrintToScreen(s,20);
+	std::cout<<"end"<<std::endl;
+
 	return 0;
-	*/
+	//*/
+	printstream=new std::stringstream;
 	std::string csvpath=StdOut0("echo ~");
 	std::cout<<"client home =" <<csvpath<<std::endl; 
 	csvpath.append("/batch_csv");
