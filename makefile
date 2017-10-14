@@ -1,25 +1,25 @@
 CPFLAGS=--std=c++0x -pthread -Wall
-os=linux
-
 src=main.cpp HDD.cpp Exceptions.h
 Rargs="-D_Erase"
-ifeq ($(os),nt)
-BinName:=ewhde.exe
-TestName:=test.exe
+
+BinName:=ewhde
+DebugName:=$(BinName)_Debug
+
+ifeq ($(OS),Windows_NT)
 Editor:=notepad++
 del:=del
 endif
 
 ifeq ($(os),linux)
-BinName:=ewhde
-TestName:=test
+sudo:=sudo
 Editor:=gedit
 del:=sudo rm
 endif
 
 $(BinName): main.o HDD.o
 	$(CXX) $(CPFLAGS) $(args) -o $(BinName) main.o HDD.o 
-	$(CXX) $(CPFLAGS) $(args) -D_Test -o $(BinName)_test main.o HDD.o
+	$(CXX) $(CPFLAGS) $(args) -D_Debug -o $(DebugName) main.o HDD.o
+HDD.o : HDD.cpp 
 HDD.o : HDD.cpp 
 	$(CXX) -c $(CPFLAGS) $(args) HDD.cpp 
 main.o : main.cpp
@@ -39,26 +39,25 @@ clean-help:
 	$(del) $(BinName)
 	$(del) *~
 clean: 
-	sudo make clean-help || echo 'already clean'
-
+	$(sudo) make clean-help || echo 'already clean'
 update:
-	sudo git pull
-	sudo make all args=$(Rargs)
+	$(sudo) git pull
+	$(sudo)make all args=$(Rargs)
 all: 
-	sudo make clean
-	sudo make args="$(args)"
-	sudo make load
+	$(sudo) make clean
+	$(sudo) make args="$(args)"
+	$(sudo) make load
 install:
-	sudo cp ./$(BinName) /usr/bin/$(BinName)
+	$(sudo) cp ./$(BinName) /usr/bin/$(BinName)
 load: $(BinName)
 	#for use on server
-	sudo cp ./$(BinName) ~/$(BinName)
-	sudo ./homeupdate.zsh  1>/dev/null
+	$(sudo) cp ./$(BinName) ~/$(BinName)
+	$(sudo) ./homeupdate.zsh  1>/dev/null
 push:
-	sudo make clean
-	sudo git add -A .
-	sudo git commit -m "$(commit)"
-	sudo git push
+	$(sudo) make clean
+	$(sudo) git add -A .
+	$(sudo) git commit -m "$(commit)"
+	$(sudo) git push
 test: test.cpp
 	$(CXX) --std=c++0x $(args) -o $(TestName) test.cpp
 open-test:
