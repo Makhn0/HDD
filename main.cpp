@@ -39,7 +39,7 @@ char * reorganize(char**a)
 	}
 	return a[0];	
 }
-void PrintToScreen(std::stringstream * a,int n){
+void PrintToScreen(std::stringstream * a,int n=50){
 			
 	//std::cout<<a->str()<<std::endl;
 	/*
