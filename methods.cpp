@@ -26,6 +26,7 @@ std::string trim(std::string &a){
 	return a;
 }
 
+
 std::string StdOut0(std::string cmd) {
     std::string data;
     FILE * stream;

@@ -39,7 +39,34 @@ char * reorganize(char**a)
 	}
 	return a[0];	
 }
-void PrintToScreen(std::stringstream * a,int n=50){
+void printhelp(std::string a[], std::string b[],int n,int col)
+{
+	bool eos=false;
+	
+	std::cout<<"printhelp start"<<std::endl;
+	for(int i =0; i<n;i++){
+		for(int j=0;j<col;j++){
+			if(!eos){
+				if(a[i][j])std::cout<<(a[i][j]);
+				else eos=true;			
+			}
+			else std::cout<<" ";
+		}
+		eos=false;
+		std::cout<<"  ";
+		for(int j=0;j<col;j++){
+			if(!eos){
+				if(b[i][j])std::cout<<(b[i][j]);
+				else eos=true;			
+			}
+			else{break;} //std::cout<<" "<<std::endl;
+		}
+		std::cout<<std::endl;
+		eos=false;		
+	}
+
+}
+void PrintToScreen(std::stringstream * a,int H=50){
 			
 	//std::cout<<a->str()<<std::endl;
 	/*
@@ -47,31 +74,57 @@ void PrintToScreen(std::stringstream * a,int n=50){
 		getline(*a,buffer);
 	std::cout<<buffer<<std::endl;
 	/*/
-	int NextCollumnAt=80;
-	std::string buffer[n];
-	std::string buffer1[n];
+	unsigned int col=30;
+	std::string buffer[H];
+	std::string buffer1[H];
+	std::string buf;
 	int outsize;
-	//std::cout<<" printing to screen"<<std::endl;
-	for(int i=0;i<n;i++)
+	std::cout<<" printing to screen"<<std::endl;
+	
+	for(int i=0;i<H;i++)
 	{
-		getline(*a,buffer[i]);
+		getline(*a,buf);
+		std::cout<<buf<<std::endl;
 		//std::cout<<buffer[i]<<std::endl;
+	std::cout<<i<<std::endl;
+		int j=0;
+		while((j*col)<buf.size()){
+			std::cout<<j<<"j*col"<<(j*col)<<std::endl;
+			if((i+j)<H)buffer[i+j]=buf.substr(j*col,col);
+			else break;
+			j+=1;
+		}
+		i+=j;
+		buf="";
 	}
-	for(int i=0;i<n;i++)
+	std::cout<<"got first buffer"<<std::endl;
+	for(int i=0;i<H;i++)
 	{
 		
-		trim(buffer[i]);
-		getline(*a,buffer1[i]);
-		trim(buffer[i]);
+		//trim(buffer[i]);
+		getline(*a,buf);
+		
 		//std::cout<<"buffer going out"<<std::endl;
 		//formatted
+	std::cout<<i<<std::endl;
+		int j=0;
+		while((j*col)<buf.size()){
+			if((i+j)<H)buffer1[i+j]=buf.substr(j*col,col);
+			else break;
+			j+=1;
+		}
+		i+=j;
+		buf="";
+		//trim(buffer1[i]);
+///*
 		
+/*/
 		outsize= (int)buffer[i].size();
-		if(outsize>NextCollumnAt)
+		if(outsize>col)
 		{
 			for(int j=0;j<outsize;j++)
 			{
-				if(j%(NextCollumnAt-5)==0)
+				if(j%(col-5)==0)
 					std::cout<<'\n';
 				std::cout
 				//<<"first ish"
@@ -83,11 +136,13 @@ void PrintToScreen(std::stringstream * a,int n=50){
 		{
 			std::cout<<buffer[i];
 		}
-		for(int j=0;j<(int)(NextCollumnAt-outsize);j++){
+		for(int j=0;j<(int)(col-outsize);j++){
 			std::cout<<" ";
 		}
 		std::cout<<buffer1[i]<<std::endl;
+		//*/
 	}
+	printhelp(buffer,buffer1,H,col);
 	while(!a->eof()){
 		getline(*a,buffer[0]);
 		std::cout
@@ -137,9 +192,22 @@ void contPrint(HDD * HDDs[], int length)
 		std::this_thread::sleep_for(std::chrono::milliseconds(5000));
 	}
 }
+void printhelptest(){
+	std::string a[3];
+	a[0]="look ma";
+	a[2]="no hands";
+	a[1]="no more";
+	std::string b[3];
+	b[0]="look m5a";
+	b[2]="no hands";
+	b[1]="no more";
+	printhelp(a,b,4,10);
+}
+
 
 int main(int argc, char * argv[]){
-/*	
+
+//*	
 	std::string stuff="first line\n ooo\n222222\n3333333\n what??\n132456789012345678901234567980123456790123456790123456790123456790123456790123456790\nwhat in tarnation\nbut what theremare \n ohaas\n even more\thats righ\n o yea \nothing to see here \n one more\n end";
 	HDD * a=new HDD("/dev/sdf");
 	HDD*b=new HDD("/dev/sdg");
@@ -148,17 +216,17 @@ int main(int argc, char * argv[]){
 	//a->print();
 	std::stringstream* s=new std::stringstream;
 	std::cout<<"s.good="<<s->good()<<std::endl;
-	a->print(s);
-	b->print(s);
+	//a->print(s);
+	//b->print(s);
         *s<<"some other stuff: \n asdf asdf\n"<<stuff<<std::endl;
 	PrintToScreen(s,20);
-	a->print(s);
-	b->print(s);
-	
+	//a->print(s);
+	//b->print(s);
+	/*
 	std::cout<<"second PrintToScreen call"<<std::endl;
 	PrintToScreen(s,20);
 	std::cout<<"end"<<std::endl;
-
+*/
 	return 0;
 	//*/
 	printstream=new std::stringstream;

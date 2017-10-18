@@ -1004,7 +1004,8 @@ void HDD::print(std::ostream* textgohere=&std::cout){
 	}
 	*textgohere<<"Result: "
 		<<ResultTToString(this->Status)
-		<<std::endl;	*textgohere<<"______________________________________________________"<<std::endl;
+		<<std::endl;			*textgohere<<"______________________________________________________"<<std::endl;
+*textgohere<<"##end##"<<std::endl;
 
 }
 ///*
