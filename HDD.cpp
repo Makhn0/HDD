@@ -970,18 +970,8 @@ void HDD::erase_debrief(){
 }
 //trouble with default pointer types; need to override function
 void HDD::print(std::ostream* textgohere=&std::cout){
-	std::cout<<this->path<<" hiya"<<std::endl;
 	UpdateRunTime();
-
 	//TODO add info on which client is running
-
-	try{
-
-	}
-	catch(std::exception e)
-	{
-		std::cout<<"exception thrown:"<<std::endl;
-	}
 	*textgohere<<"Status of: "<<this->path<<std::endl;
 	*textgohere<<"Presence :    "<<((this->Present)?"detected":"undetected")<<std::endl;
 	*textgohere<<"Smart Support: "<<(this->SmartSupport?"available":"unavailable")<<std::endl;

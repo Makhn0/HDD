@@ -51,7 +51,7 @@ void PrintToScreen(std::stringstream * a,int n=50){
 	std::string buffer[n];
 	std::string buffer1[n];
 	int outsize;
-	std::cout<<" printing to screen"<<std::endl;
+	//std::cout<<" printing to screen"<<std::endl;
 	for(int i=0;i<n;i++)
 	{
 		getline(*a,buffer[i]);
@@ -101,12 +101,14 @@ void PrintToScreen(std::stringstream * a,int n=50){
 //void PrintToScreen(std::ostream * a,int n){} //overload for when argument is pointer to cout
 void print(HDD * HDDs[], int length)
 {
-	printstream->str("");
-	printstream->flush();
-	printstream->str("hello again world");
+	//printstream->str("");
+	//printstream->flush();
+	
 	std::cout<<printstream->str()<<std::endl;;
 	std::cout<<"Welcome to Eric's Wonderful Hard Drive Eraser !!! :D \n";
+	std::cout<<"running on:"<<StdOut0("pwd");
 	std::cout<<"BatchName : "<<BatchName<<std::endl;
+	
 	//std::cout<<"EraseCmd: "<<EraseCmd<<std::endl;
 	std::cout<<"total HDDs  : "<<HDD::instances<<std::endl;
 	std::cout<<"########################################################\n\n";
@@ -119,12 +121,12 @@ void print(HDD * HDDs[], int length)
 		if(HDDs[i]->Present)
 			HDDs[i]->print(
 	//			(std::ostream*) 
-			printstream);
+			&std::cout);
 	}
 	//std::cout<<printstream->str();
-	PrintToScreen(printstream,30);
+	//PrintToScreen(printstream,30);
 	
-	std::cout<<"end"<<std::endl;
+	//std::cout<<"end"<<std::endl;
 }
 void contPrint(HDD * HDDs[], int length)
 {

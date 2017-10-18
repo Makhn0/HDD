@@ -8,12 +8,18 @@ DebugName:=$(BinName)_Debug
 ifeq ($(OS),Windows_NT)
 Editor:=notepad++
 del:=del
+else
+OS:=$(shell uname -s 2>/dev/null)
+
 endif
 
-ifeq ($(os),linux)
+ifeq ($(OS),Linux)
 sudo:=sudo
 Editor:=gedit
 del:=sudo rm
+else
+echo "Unknown OS"
+echo $(OS)
 endif
 
 $(BinName): main.o HDD.o
