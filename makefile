@@ -8,6 +8,7 @@ DebugName:=$(BinName)_Debug
 ifeq ($(OS),Windows_NT)
 Editor:=notepad++
 del:=del
+Win:=_NT_
 else
 OS:=$(shell uname -s 2>/dev/null)
 
@@ -17,19 +18,16 @@ ifeq ($(OS),Linux)
 sudo:=sudo
 Editor:=gedit
 del:=sudo rm
-else
-echo "Unknown OS"
-echo $(OS)
 endif
 
 $(BinName): main.o HDD.o
-	$(CXX) $(CPFLAGS) $(args) -o $(BinName) main.o HDD.o 
-	$(CXX) $(CPFLAGS) $(args) -D_Debug -o $(DebugName) main.o HDD.o
+	$(CXX) $(CPFLAGS) $(args) -D$(Win) -o $(BinName) main.o HDD.o 
+	$(CXX) $(CPFLAGS) $(args) -D$(Win) -D_Debug -o $(DebugName) main.o HDD.o
 HDD.o : HDD.cpp 
 HDD.o : HDD.cpp 
-	$(CXX) -c $(CPFLAGS) $(args) HDD.cpp 
+	$(CXX) -c $(CPFLAGS) $(args)-D$(Win) HDD.cpp 
 main.o : main.cpp
-	$(CXX) -c $(CPFLAGS) $(args) main.cpp 
+	$(CXX) -c $(CPFLAGS) $(args) -D$(Win) main.cpp 
 run : $(BinName)
 	$(BinName)
 edit :
@@ -37,7 +35,7 @@ edit :
 	$(Editor) HDD.cpp &
 	$(Editor) HDD.h &
 	$(Editor) methods.cpp
-edit-all:edit
+edit-all: edit
 	$(Editor) makefile &
 	$(Editor) homeupdate.zsh &
 clean-help:

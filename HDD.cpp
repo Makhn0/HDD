@@ -1,3 +1,4 @@
+
 #include "HDD.h"
 #include "Exceptions.h"
 #include "methods.cpp"
@@ -1004,7 +1005,7 @@ void HDD::print(std::ostream* textgohere=&std::cout){
 	}
 	*textgohere<<"Result: "
 		<<ResultTToString(this->Status)
-		<<std::endl;			*textgohere<<"______________________________________________________"<<std::endl;
+		<<std::endl;			*textgohere<<"______________________________________"<<std::endl;
 *textgohere<<"##end##"<<std::endl;
 
 }

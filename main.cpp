@@ -41,18 +41,22 @@ char * reorganize(char**a)
 }
 void printhelp(std::string a[], std::string b[],int n,int col)
 {
+	//prints two collumns of output side by side, a in first collumn
+	//b in second, n is length of arrays, col is width of the collums
 	bool eos=false;
 	
 	std::cout<<"printhelp start"<<std::endl;
 	for(int i =0; i<n;i++){
+		//std::cout<<i<<":";
 		for(int j=0;j<col;j++){
 			if(!eos){
 				if(a[i][j])std::cout<<(a[i][j]);
 				else eos=true;			
-			}
+			}//pad till end of collumn
 			else std::cout<<" ";
 		}
 		eos=false;
+		//separate collumns
 		std::cout<<"  ";
 		for(int j=0;j<col;j++){
 			if(!eos){
@@ -66,89 +70,71 @@ void printhelp(std::string a[], std::string b[],int n,int col)
 	}
 
 }
-void PrintToScreen(std::stringstream * a,int H=50){
-			
-	//std::cout<<a->str()<<std::endl;
-	/*
-	std::string buffer;
-		getline(*a,buffer);
-	std::cout<<buffer<<std::endl;
-	/*/
-	unsigned int col=30;
+void BuffClear(std::string a[],int size)
+{
+	for(int i=0;i<size;i++)
+	{
+		a[i].clear();
+	}
+}
+void PrintToScreen(std::stringstream * a,int H=15,int col=90){
 	std::string buffer[H];
 	std::string buffer1[H];
 	std::string buf;
 	int outsize;
 	std::cout<<" printing to screen"<<std::endl;
-	
-	for(int i=0;i<H;i++)
-	{
-		getline(*a,buf);
-		std::cout<<buf<<std::endl;
-		//std::cout<<buffer[i]<<std::endl;
-	std::cout<<i<<std::endl;
-		int j=0;
-		while((j*col)<buf.size()){
-			std::cout<<j<<"j*col"<<(j*col)<<std::endl;
-			if((i+j)<H)buffer[i+j]=buf.substr(j*col,col);
-			else break;
-			j+=1;
-		}
-		i+=j;
-		buf="";
-	}
-	std::cout<<"got first buffer"<<std::endl;
-	for(int i=0;i<H;i++)
-	{
-		
-		//trim(buffer[i]);
-		getline(*a,buf);
-		
-		//std::cout<<"buffer going out"<<std::endl;
-		//formatted
-	std::cout<<i<<std::endl;
-		int j=0;
-		while((j*col)<buf.size()){
-			if((i+j)<H)buffer1[i+j]=buf.substr(j*col,col);
-			else break;
-			j+=1;
-		}
-		i+=j;
-		buf="";
-		//trim(buffer1[i]);
-///*
-		
-/*/
-		outsize= (int)buffer[i].size();
-		if(outsize>col)
+	while(!(a->eof())){
+		for(int i=0;i<H;)
 		{
-			for(int j=0;j<outsize;j++)
-			{
-				if(j%(col-5)==0)
-					std::cout<<'\n';
-				std::cout
-				//<<"first ish"
-				<<buffer[i][j];
+			getline(*a,buf);
+			//std::cout<<buf<<std::endl;
+			if(buf=="##end##")break;
+			if(a->eof()) break;
+			//std::cout<<buffer[i]<<std::endl;
+		//std::cout<<"0:"<<i<<std::endl;
+			int j=0;
+			while((j*col)<buf.size()){
+			//	std::cout<<j<<"j*col"<<(j*col)<<std::endl;
+				if((i+j)<H)buffer[i+j]=buf.substr(j*col,col);
+				else break;
+				j+=1;
 			}
-			std::cout<<std::endl;
+			i+=j;
+			buf="";
 		}
-		else
+		//std::cout<<"got first buffer"<<std::endl;
+		for(int i=0;i<H;)
 		{
-			std::cout<<buffer[i];
+			//trim(buffer[i]);
+			getline(*a,buf);
+			if(buf=="##end##")break;
+			if(a->eof()) break;
+			//std::cout<<"buffer going out"<<std::endl;
+			//formatted
+			//std::cout<<"1:"<<i<<std::endl;
+			int j=0;
+			while((j*col)<buf.size()){
+				if((i+j)<H){ 
+					buffer1[i+j]=buf.substr(j*col,col);
+				}
+				else break;
+				j+=1;
+			}
+			i+=j;
+			buf="";
 		}
-		for(int j=0;j<(int)(col-outsize);j++){
-			std::cout<<" ";
-		}
-		std::cout<<buffer1[i]<<std::endl;
-		//*/
+		
+		printhelp(buffer,buffer1,H,col);
+		BuffClear(buffer,H);
+		BuffClear(buffer1,H);
 	}
-	printhelp(buffer,buffer1,H,col);
+/*
 	while(!a->eof()){
 		getline(*a,buffer[0]);
 		std::cout
 //		<<"last bit"
 		<<buffer[0]<<std::endl;
-	}
+	}*/
 	if((a->rdstate()&(std::ifstream::badbit|std::ifstream::failbit))!=0)a->clear();
 
 	//*/
@@ -203,72 +189,33 @@ void printhelptest(){
 	b[1]="no more";
 	printhelp(a,b,4,10);
 }
-
-
-int main(int argc, char * argv[]){
-
-//*	
-	std::string stuff="first line\n ooo\n222222\n3333333\n what??\n132456789012345678901234567980123456790123456790123456790123456790123456790123456790\nwhat in tarnation\nbut what theremare \n ohaas\n even more\thats righ\n o yea \nothing to see here \n one more\n end";
-	HDD * a=new HDD("/dev/sdf");
-	HDD*b=new HDD("/dev/sdg");
-	a->reset();
-	b->reset();
-	//a->print();
-	std::stringstream* s=new std::stringstream;
-	std::cout<<"s.good="<<s->good()<<std::endl;
-	//a->print(s);
-	//b->print(s);
-        *s<<"some other stuff: \n asdf asdf\n"<<stuff<<std::endl;
-	PrintToScreen(s,20);
-	//a->print(s);
-	//b->print(s);
-	/*
-	std::cout<<"second PrintToScreen call"<<std::endl;
-	PrintToScreen(s,20);
-	std::cout<<"end"<<std::endl;
-*/
-	return 0;
-	//*/
-	printstream=new std::stringstream;
+void preamble(){	printstream=new std::stringstream;
 	std::string csvpath=StdOut0("echo ~");
 	std::cout<<"client home =" <<csvpath<<std::endl; 
 	csvpath.append("/batch_csv");
 	std::cout<<"checking for directory ~/batch_csv viz. "<< csvpath<<std::endl;
+	//windows no likey
+	#ifndef _NT_
 	DIR * Diropen = opendir(csvpath.c_str());
 	if(!Diropen){	
 		std::cout<<"creating directory ~/batch_csv"<<std::endl;
-		int dirmake=mkdir(csvpath.c_str(),S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-		if(dirmake==-1) std::cout<<" couldn't create directory try sudo"<<std::endl;
+	//	int dirmake=mkdir(csvpath.c_str(),S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+	//	if(dirmake==-1) std::cout<<" couldn't create directory try sudo"<<std::endl;
 		else std::cout<<" created !!!"<<std::endl;
 	}
 	else{	
 		std::cout<< csvpath<< " already exists"<<std::endl;
-	}
+	}*/
 	std::cout<<" syncing clocks "<<std::endl;
 	//TODO uncomment time sync
 	//std::cout<<StdOut0(" sudo ntpdate 192.168.1.1 ; date ")<<std::endl;
-	std::cout<<"Start Instances : "<<HDD::instances<<std::endl;
-
-	/*
-	argv 1 is batchname
-	argv 2 is whether to run printer
-	argv 3 is pattern
-	*/
-	/*
-	std::cout<<"argv[1] :"<<argv[1]<<std::endl;
-	std::cout<<"argv[2] :"<<argv[2]<<std::endl;
-	std::cout<<"argv[2][0] :"<<argv[2][0]<<std::endl;
-	std::cout<<"argv[2]!=anp :"<<(argv[2]!="anp")<<std::endl;
-	std::cout<<"argv[2][0]=='a'?0:3 "<<(argv[2][0]=='a'?3:0)<<std::endl;
-	std::cout<<"argv[3] "<<argv[3]<<std::endl;
-	char pattern=(char)std::stoi(std::string(argv[3]));
-	std::cout<<"pattern "<<pattern<<std::endl;
-	/*/
-	char pattern = 0x00;
+		char pattern = 0x00;
 	//*/
 	sleep(1);	
+
 	debugstream=&std::cerr;
 	printstream= new std::stringstream("");
+	#endif
 		//&std::cout;
 
 	if(
@@ -289,9 +236,39 @@ int main(int argc, char * argv[]){
 	else{
 		BatchName="default";
 	}
-		
+	}
+void PrintToScreen_test(){
+	std::string stuff="first line\n second line\n33333333333\n4444444444444\n wh5at??\n666132456789012345678901234567980123456790123456790123456790123456790123456790123456790\nwhat in tarnation\nbut what theremare \n ohaas\n even more\thats righ\n o yea \nothing to see here \n one more\n end";
+	HDD * a=new HDD("/dev/sdf");
+	HDD*b=new HDD("/dev/sdg");
+	a->reset();
+	b->reset();
+	//a->print();
+	std::stringstream* s=new std::stringstream;
+	std::cout<<"s.good="<<s->good()<<std::endl;
+	a->print(s);
+	b->print(s);
+    *s<<stuff<<std::endl;
+	PrintToScreen(s,15,90);
+///*	
+	s->str("");
+	a->print(s);
+	b->print(s);
+	
+	std::cout<<"second PrintToScreen call"<<std::endl;
+	PrintToScreen(s,11,90);
+	std::cout<<"end"<<std::endl;
+	//*/
+}
+int main(int argc, char * argv[]){
 
-
+	PrintToScreen_test();
+	return 0;
+	/*
+	//*
+	preamble();
+		//debugstream=&std::cerr;
+	//printstream= new std::stringstream("");
 	#ifdef _Debug
 	*printstream<<"Debug Mode"<<std::endl;
 	*debugstream<< "making dev path prefix =";
@@ -308,6 +285,8 @@ int main(int argc, char * argv[]){
 	#endif
 	HDD * HDDs[DriveNum];
 	std::thread * runner[DriveNum];
+	
+	std::cout<<"Start Instances : "<<HDD::instances<<std::endl;
 	for(int i =0;i<DriveNum;i++)
 	{
 		HDDs[i]= new HDD(devPath+(char)('a'+i));
@@ -339,4 +318,5 @@ int main(int argc, char * argv[]){
 	delete(printstream);
 	delete(debugstream);
 	return 0;
+	/*/
 }
