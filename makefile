@@ -8,10 +8,11 @@ DebugName:=$(BinName)_Debug
 ifeq ($(OS),Windows_NT)
 Editor:=notepad++
 del:=del
-Win:=_NT_
+Win:=-D_NT_
+
 else
 OS:=$(shell uname -s 2>/dev/null)
-
+args:=-D_test_
 endif
 
 ifeq ($(OS),Linux)
@@ -21,15 +22,15 @@ del:=sudo rm
 endif
 
 $(BinName): main.o HDD.o
-	$(CXX) $(CPFLAGS) $(args) -D$(Win) -o $(BinName) main.o HDD.o 
-	$(CXX) $(CPFLAGS) $(args) -D$(Win) -D_Debug -o $(DebugName) main.o HDD.o
+	$(CXX) $(CPFLAGS) $(args) $(Win) -o $(BinName) main.o HDD.o 
+	$(CXX) $(CPFLAGS) $(args) $(Win) -D_Debug -o $(DebugName) main.o HDD.o
 HDD.o : HDD.cpp 
 HDD.o : HDD.cpp 
-	$(CXX) -c $(CPFLAGS) $(args)-D$(Win) HDD.cpp 
+	$(CXX) -c $(CPFLAGS) $(args) $(Win) HDD.cpp 
 main.o : main.cpp
-	$(CXX) -c $(CPFLAGS) $(args) -D$(Win) main.cpp 
+	$(CXX) -c $(CPFLAGS) $(args) $(Win) main.cpp 
 run : $(BinName)
-	$(BinName)
+	$(sudo) $(BinName)
 edit :
 	$(Editor) main.cpp &
 	$(Editor) HDD.cpp &

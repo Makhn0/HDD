@@ -18,6 +18,7 @@ std::string BatchName;
 std::string argPath;
 std::stringstream * printstream;
 std::ostream * debugstream;
+char pattern = 0x00;
 extern std::string month(int i);
 extern std::string StdOut0(std::string i);//needs methods link?
 extern std::string trim(std::string&);
@@ -90,6 +91,11 @@ int getlines(std::stringstream *a,std::string buffer[],int H,int col){
 //prints the contents of a in two collumns of height H, and width 90
 void PrintToScreen(std::stringstream * a,int H=15,int col=90)
 {
+	if(col==-1)
+	{
+		std::cout<<a->str();
+		return;
+	}
 	std::string buffer[H];
 	std::string buffer1[H];
 	
@@ -132,7 +138,7 @@ void print(HDD * HDDs[], int length)
 			);
 	}
 	//std::cout<<printstream->str();
-	PrintToScreen(printstream);
+	PrintToScreen(printstream,0,-1);
 	
 	//std::cout<<"end"<<std::endl;
 }
@@ -166,17 +172,17 @@ void preamble(){	printstream=new std::stringstream;
 	DIR * Diropen = opendir(csvpath.c_str());
 	if(!Diropen){	
 		std::cout<<"creating directory ~/batch_csv"<<std::endl;
-	//	int dirmake=mkdir(csvpath.c_str(),S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-	//	if(dirmake==-1) std::cout<<" couldn't create directory try sudo"<<std::endl;
+		int dirmake=mkdir(csvpath.c_str(),S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+		if(dirmake==-1) std::cout<<" couldn't create directory try sudo"<<std::endl;
 		else std::cout<<" created !!!"<<std::endl;
 	}
 	else{	
 		std::cout<< csvpath<< " already exists"<<std::endl;
-	}*/
+	}
 	std::cout<<" syncing clocks "<<std::endl;
 	//TODO uncomment time sync
 	//std::cout<<StdOut0(" sudo ntpdate 192.168.1.1 ; date ")<<std::endl;
-		char pattern = 0x00;
+		
 	//*/
 	sleep(1);	
 
@@ -205,6 +211,7 @@ void preamble(){	printstream=new std::stringstream;
 	}
 	}
 void PrintToScreen_test(){
+	std::cout<<"PrintToScreen_test():"<<std::endl;
 	std::string stuff="first line\n second line\n33333333333\n4444444444444\n wh5at??\n666132456789012345678901234567980123456790123456790123456790123456790123456790123456790\nwhat in tarnation\nbut what theremare \n ohaas\n even more\thats righ\n o yea \nothing to see here \n one more\n end";
 	HDD * a=new HDD("/dev/sdf");
 	HDD*b=new HDD("/dev/sdg");
@@ -212,18 +219,16 @@ void PrintToScreen_test(){
 	b->reset();
 	//a->print();
 	std::stringstream* s=new std::stringstream;
-	std::cout<<"s.good="<<s->good()<<std::endl<<std::endl;
 	a->print(s);
 	b->print(s);
-    *s<<stuff<<std::endl;
-	PrintToScreen(s,15,90);
+ 	*s<<stuff<<std::endl;
+	PrintToScreen(s,15,-1);
 ///*	
 	s->str("");s->flush();s->sync();
 	a->print(s);
 	b->print(s);
-	*s<<"what up"<<std::endl;
 	std::cout<<"second PrintToScreen call"<<std::endl;
-	PrintToScreen(s,15,90);
+	PrintToScreen(s,1000,-1);
 	std::cout<<"end"<<std::endl;
 	//*/
 }
@@ -231,8 +236,8 @@ int main(int argc, char * argv[]){
 
 	PrintToScreen_test();
 	return 0;
-	/*
-	//*
+	///*
+	
 	preamble();
 		//debugstream=&std::cerr;
 	//printstream= new std::stringstream("");
@@ -285,5 +290,5 @@ int main(int argc, char * argv[]){
 	delete(printstream);
 	delete(debugstream);
 	return 0;
-	/*/
+	//*/
 }

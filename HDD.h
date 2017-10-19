@@ -82,6 +82,7 @@ class HDD{
 		void dd_write(std::string*,std::string);
 		void dd_read(std::string*,std::string);
 		void hash_check(std::string*,std::string,std::string);
+		void resolve_size();
 		void erase(std::string*);
 		void erase(char);
 		void erase_c(char);

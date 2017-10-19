@@ -174,6 +174,8 @@ void HDD::run_body(std::string* batch,char pattern){
 		this->dd(batch); //TODO add back in
 	if(!this->presence()){return;}
 	//*/
+	resolve_size();
+	if(!this->presence()){return;}
 	//erase
 	#ifdef _Erase
 	erase(pattern);		
@@ -701,8 +703,7 @@ bool HDD::Long_Verify(unsigned char pattern =0x00,long begin =0, long end =0){
 	idrive.close();
 	return !fail;//TODO change to return in for loop;
 }
-void HDD::erase_c(char pattern){
-	//Working
+void HDD::resolve_size(){
 	PresentTask="Resolving sizes...";
 	
 	/* make sure that program can access whole drive*/
@@ -719,6 +720,10 @@ void HDD::erase_c(char pattern){
 	/* writes all single character*/
 	//97=a currently d0
 	PresentTask="Erasing ....";
+}
+void HDD::erase_c(char pattern){
+	//erases
+	
 	this->Write_All(pattern,0,size);
 	
 }
@@ -946,6 +951,7 @@ void HDD::erase_n(char pattern){
 		<<date->tm_sec<<std::endl;
 
 }
+void print_time();
 void HDD::erase_dd(){
 	Command(
 	"sudo dd if=/dev/zero of="
