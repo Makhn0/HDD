@@ -47,7 +47,7 @@ clean:
 	$(sudo) make clean-help || echo 'already clean'
 update:
 	$(sudo) git pull
-	$(sudo)make all args=$(Rargs)
+	$(sudo) make all args=$(Rargs)
 all: 
 	$(sudo) make clean
 	$(sudo) make args="$(args)"
