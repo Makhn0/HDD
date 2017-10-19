@@ -22,30 +22,13 @@ extern std::string month(int i);
 extern std::string StdOut0(std::string i);//needs methods link?
 extern std::string trim(std::string&);
 
-std::string reorganize(std::string a[],int length,int ScreenHeight){
-	std::string output="";
-	for(int i=0;i<length;i++)
-	{
-		output+=a[i]+" s"+a[ScreenHeight+i];
-	}
-	return output;
-}
-char * reorganize(char**a)
-{
-	//?
-	while(a){
-	//	std::cout<<a[i]
-		break;
-	}
-	return a[0];	
-}
 void printhelp(std::string a[], std::string b[],int n,int col)
 {
 	//prints two collumns of output side by side, a in first collumn
 	//b in second, n is length of arrays, col is width of the collums
 	bool eos=false;
 	
-	std::cout<<"printhelp start"<<std::endl;
+	//std::cout<<"printhelp start"<<std::endl;
 	for(int i =0; i<n;i++){
 		//std::cout<<i<<":";
 		for(int j=0;j<col;j++){
@@ -77,21 +60,22 @@ void BuffClear(std::string a[],int size)
 		a[i].clear();
 	}
 }
-void PrintToScreen(std::stringstream * a,int H=15,int col=90){
-	std::string buffer[H];
-	std::string buffer1[H];
+//reads from a up to H lines until special string or end of file is found, writes to buffer in strings of length col
+//returns number of lines read from stringstream i.e. the "height" of the text
+int getlines(std::stringstream *a,std::string buffer[],int H,int col){
 	std::string buf;
-	int outsize;
-	std::cout<<" printing to screen"<<std::endl;
-	while(!(a->eof())){
-		for(int i=0;i<H;)
+	for(int i=0;i<H;)
 		{
 			getline(*a,buf);
 			//std::cout<<buf<<std::endl;
-			if(buf=="##end##")break;
-			if(a->eof()) break;
+			//if end of file or special line is reached,stops writing to buffer array 
+			if(buf=="##end##"||a->eof()){
+				return i;//passed to printhelp, so that extra blank lines aren't printed
+				break;
+			}
 			//std::cout<<buffer[i]<<std::endl;
 		//std::cout<<"0:"<<i<<std::endl;
+			//this while loop allows in-collumn word wrapping
 			int j=0;
 			while((j*col)<buf.size()){
 			//	std::cout<<j<<"j*col"<<(j*col)<<std::endl;
@@ -102,55 +86,37 @@ void PrintToScreen(std::stringstream * a,int H=15,int col=90){
 			i+=j;
 			buf="";
 		}
+}
+//prints the contents of a in two collumns of height H, and width 90
+void PrintToScreen(std::stringstream * a,int H=15,int col=90)
+{
+	std::string buffer[H];
+	std::string buffer1[H];
+	
+	int h=H;
+	int h1=H;
+	//std::cout<<" printing to screen"<<std::endl;
+	while(!(a->eof())){
+		h=H;
+		h1=H;
+		h=getlines(a,buffer,H,col);
 		//std::cout<<"got first buffer"<<std::endl;
-		for(int i=0;i<H;)
-		{
-			//trim(buffer[i]);
-			getline(*a,buf);
-			if(buf=="##end##")break;
-			if(a->eof()) break;
-			//std::cout<<"buffer going out"<<std::endl;
-			//formatted
-			//std::cout<<"1:"<<i<<std::endl;
-			int j=0;
-			while((j*col)<buf.size()){
-				if((i+j)<H){ 
-					buffer1[i+j]=buf.substr(j*col,col);
-				}
-				else break;
-				j+=1;
-			}
-			i+=j;
-			buf="";
-		}
-		
-		printhelp(buffer,buffer1,H,col);
+		if(a->eof()) break;
+		h1=getlines(a,buffer1,H,col);	
+		printhelp(buffer,buffer1,((h<h1)?h1:h),col);
 		BuffClear(buffer,H);
 		BuffClear(buffer1,H);
 	}
-/*
-	while(!a->eof()){
-		getline(*a,buffer[0]);
-		std::cout
-//		<<"last bit"
-		<<buffer[0]<<std::endl;
-	}*/
 	if((a->rdstate()&(std::ifstream::badbit|std::ifstream::failbit))!=0)a->clear();
 
 	//*/
 }
-//void PrintToScreen(std::ostream * a,int n){} //overload for when argument is pointer to cout
 void print(HDD * HDDs[], int length)
 {
-	//printstream->str("");
-	//printstream->flush();
-	
 	std::cout<<printstream->str()<<std::endl;;
 	std::cout<<"Welcome to Eric's Wonderful Hard Drive Eraser !!! :D \n";
 	std::cout<<"running on:"<<StdOut0("pwd");
 	std::cout<<"BatchName : "<<BatchName<<std::endl;
-	
-	//std::cout<<"EraseCmd: "<<EraseCmd<<std::endl;
 	std::cout<<"total HDDs  : "<<HDD::instances<<std::endl;
 	std::cout<<"########################################################\n\n";
 	static int count;
@@ -161,11 +127,12 @@ void print(HDD * HDDs[], int length)
 		
 		if(HDDs[i]->Present)
 			HDDs[i]->print(
-	//			(std::ostream*) 
-			&std::cout);
+			printstream
+			//&std::cout
+			);
 	}
 	//std::cout<<printstream->str();
-	//PrintToScreen(printstream,30);
+	PrintToScreen(printstream);
 	
 	//std::cout<<"end"<<std::endl;
 }
@@ -245,18 +212,18 @@ void PrintToScreen_test(){
 	b->reset();
 	//a->print();
 	std::stringstream* s=new std::stringstream;
-	std::cout<<"s.good="<<s->good()<<std::endl;
+	std::cout<<"s.good="<<s->good()<<std::endl<<std::endl;
 	a->print(s);
 	b->print(s);
     *s<<stuff<<std::endl;
 	PrintToScreen(s,15,90);
 ///*	
-	s->str("");
+	s->str("");s->flush();s->sync();
 	a->print(s);
 	b->print(s);
-	
+	*s<<"what up"<<std::endl;
 	std::cout<<"second PrintToScreen call"<<std::endl;
-	PrintToScreen(s,11,90);
+	PrintToScreen(s,15,90);
 	std::cout<<"end"<<std::endl;
 	//*/
 }
