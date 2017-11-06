@@ -21,14 +21,15 @@ Editor:=gedit
 del:=sudo rm
 endif
 
-$(BinName): main.o HDD.o
-	$(CXX) $(CPFLAGS) $(args) $(Win) -o $(BinName) main.o HDD.o 
-	$(CXX) $(CPFLAGS) $(args) $(Win) -D_Debug -o $(DebugName) main.o HDD.o
-HDD.o : HDD.cpp 
-HDD.o : HDD.cpp 
-	$(CXX) -c $(CPFLAGS) $(args) $(Win) HDD.cpp 
+$(BinName): main.o HDD.o Erasure.o
+	$(CXX) $(CPFLAGS) $(args) $(Win) -o $(BinName) main.o Erasure.o HDD.o
+	$(CXX) $(CPFLAGS) $(args) $(Win) -D_Debug -o $(DebugName) main.o Erasure.o HDD.o
 main.o : main.cpp
 	$(CXX) -c $(CPFLAGS) $(args) $(Win) main.cpp 
+HDD.o : HDD.cpp 
+	$(CXX) -c $(CPFLAGS) $(args) $(Win) HDD.cpp 
+Erasure.o : Erasure.cpp HDD.o
+	$(CXX) -c $(CPFLAGS) $(args) $(Win) Erasure.cpp HDD.cpp
 run : $(BinName)
 	$(sudo) $(BinName)
 edit :

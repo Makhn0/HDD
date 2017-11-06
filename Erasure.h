@@ -1,10 +1,11 @@
 #ifndef Erasure_h
 #define Erasure_h
 #include "HDD.h"//include result_t data type?
+#include <iostream>
 
-class Erasure{
+class Erasure : public HDD{
 
-	HDD* Drive;
+	
 
 	long currentLBA=0;
 	Result_t Status=Unfinished;
@@ -15,9 +16,9 @@ class Erasure{
 	long EndTime=0;
 	time_t eta;
 	long RunTime;
-	
-	Erasure(HDD*drive,char pattern) : drive(drive){
-		erase(pattern);
+	public:	
+	Erasure(std::string pattern):HDD(pattern){
+		
 	}
 	void erase(std::string*);
 	void erase(char);

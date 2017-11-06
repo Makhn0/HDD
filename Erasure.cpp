@@ -1,22 +1,24 @@
 #include <iostream>
 #include <time.h>
 #include <string>
-void Erasure::erase(std::string * method)
+#include "HDD.h"
+#include "Erasure.h"
+void Erasure:: erase(std::string * method)
 {  	
 	std::string TempName("");
 	TempName.append("Temp_");
-	TempName.append( drive->path.substr(drive->path.size()-1,1) );
+	TempName.append( path.substr(path.size()-1,1) );
 	TempName.append(".txt");
-	drive->TempLogFileName=TempName;
-	std::cerr<<"templogfilename : "<<drive->TempLogFileName<<std::endl;
-	Drive->Command("sudo rm "+drive->TempLogFileName, "erasing old temporay log file, if it exists",false);
-	drive->Command("sudo touch "+drive->TempLogFileName, "touching new temporary log file",true);
-	drive->Command("sudo ./nwipe --autonuke --nogui --method="
+	TempLogFileName=TempName;
+	std::cerr<<"templogfilename : "<<TempLogFileName<<std::endl;
+	Command("sudo rm "+TempLogFileName, "erasing old temporay log file, if it exists",false);
+	Command("sudo touch "+TempLogFileName, "touching new temporary log file",true);
+	Command("sudo ./nwipe --autonuke --nogui --method="
 		+*method		
 		+" -l"
-		+drive->TempLogFileName
+		+TempLogFileName
 		+ " "
-		+drive->path	
+		+path	
 		,"Erasing With Nwipe...",true
 	);
 }
@@ -30,12 +32,12 @@ void Erasure::erase(char pattern)
 		//this->erase_debrief();
 	}
 	catch(std::string e){
-		std::cerr<<drive->path<<" : string thrown"<<std::endl;
+		std::cerr<<path<<" : string thrown"<<std::endl;
 		this->erase_debrief();
 		throw e;
 	}
 	catch(std::exception e){
-		std::cerr<<drive->path<<" : exception thrown"<<std::endl;
+		std::cerr<<path<<" : exception thrown"<<std::endl;
 		this->erase_debrief();
 		throw e;
 	}
@@ -45,11 +47,11 @@ void Erasure::erase(char pattern)
 }
 
 void Erasure::Write_All( char pattern =0x00,long begin=0,long end=0){
-	if(!end)end=drive->size;
-	std::ofstream drivestream(drive->path.c_str(),std::ostream::out);
+	if(!end)end=size;
+	std::ofstream drivestream(path.c_str(),std::ostream::out);
 	if(!drive) throw "cannot open HDD";
 	//watch out for this line
-	else std::cerr<<drive->path<<" : opened drive and writing "
+	else std::cerr<<path<<" : opened drive and writing "
 		<<(pattern!=0?(const char *)&pattern:"zero")<<"s from "<<begin<<" to "<<end<<std::endl;
 	const long bs=512;
 	char block[bs];
@@ -60,7 +62,7 @@ void Erasure::Write_All( char pattern =0x00,long begin=0,long end=0){
 		<<std::endl;
 	time_t begin_t=time(0);
 	tm * date=localtime(&begin_t);
-	std::cerr<<drive->path<<" :start erasing:  "
+	std::cerr<<path<<" :start erasing:  "
 		<<(1900+ date->tm_year)
 		<<"/"
 		<<month(date->tm_mon)
@@ -303,7 +305,7 @@ void Erasure::erase_n(char pattern){
 	/* The number of bytes remaining in the pass. */
 	unsigned long z =size; //originally unsigned long long in nwipe
 	int errors=0; 		//should use long long for size everywhere?
-	drive->fd=open(path.c_str(),O_RDWR);//just incase reset didn't get it because of no presence or somethign
+	fd=open(path.c_str(),O_RDWR);//just incase reset didn't get it because of no presence or somethign
 //* tottaly copy pasted from nwipe's github
 	
 	/*if( pattern == NULL )
@@ -494,25 +496,25 @@ void Erasure::erase_n(char pattern){
 
 }
 void HDD::erase_dd(){
-	drive->Command(
+	Command(
 	"sudo dd if=/dev/zero of="
 	+path
 	,"erasing with dd write and /dev/zero"	,true);
 }
 void HDD::erase_debrief(){
-	drive->Command("sudo cat "+drive->TempLogFileName,"debriefing, retreiving log file contents",true);
-	if(drive->LastOutput.find("Failure")!=std::string::npos)
+	Command("sudo cat "+TempLogFileName,"debriefing, retreiving log file contents",true);
+	if(LastOutput.find("Failure")!=std::string::npos)
 	{
-		drive->PresentTask= "Finished Erasing, Failed";
-		drive->Status=FinishedFail;
+		PresentTask= "Finished Erasing, Failed";
+		Status=FinishedFail;
 	}
 	else if(
-		drive->(LastOutput.find("Success")!=std::string::npos)
-		||(drive->LastOutput.find("verified")!=std::string::npos)
-		||(drive->LastOutput.find("Blanked Device")!=std::string::npos)
+		(LastOutput.find("Success")!=std::string::npos)
+		||(LastOutput.find("verified")!=std::string::npos)
+		||(LastOutput.find("Blanked Device")!=std::string::npos)
 	){
-		drive->PresentTask="Finished Erasing, Success";
-		drive->Status=FinishedSuccess;
+		PresentTask="Finished Erasing, Success";
+		Status=FinishedSuccess;
 	}
-	drive->Command("sudo rm "+drive->TempLogFileName, "erasing temporay log file...",false);
+	Command("sudo rm "+TempLogFileName, "erasing temporay log file...",false);
 }

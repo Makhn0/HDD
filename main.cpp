@@ -11,7 +11,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <dirent.h>
-
+#include "Erasure.h"
 
 //#include "methods.cpp"
 std::string BatchName;
@@ -261,8 +261,8 @@ int main(int argc, char * argv[]){
 	std::cout<<"Start Instances : "<<HDD::instances<<std::endl;
 	for(int i =0;i<DriveNum;i++)
 	{
-		HDDs[i]= new HDD(devPath+(char)('a'+i));
-		runner[i]=new std::thread(&HDD::run, HDDs[i],&BatchName,pattern);	
+		HDDs[i]= new Erasure(devPath+(char)('a'+i));
+		runner[i]= new std::thread(&HDD::run, HDDs[i],&BatchName,pattern);	
 		sleep(1);
 		std::cout<<i<<" in loop count "<<HDD::instances<<std::endl;
 	}
