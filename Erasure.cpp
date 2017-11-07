@@ -1,8 +1,18 @@
+#ifndef Erasure_cpp
+#define Erasure_cpp
 #include <iostream>
 #include <time.h>
 #include <string>
 #include "HDD.h"
 #include "Erasure.h"
+#include <fstream>
+#include <time.h>
+#include <unistd.h>
+#include <sys/stat.h>//O_RDWR?
+#include <sys/types.h>//open();close()[ithink];
+#include <stdint.h>//u64 in nwipe_static_pass?
+#include <fcntl.h>
+#include "methods.h"
 void Erasure:: erase(std::string * method)
 {  	
 	std::string TempName("");
@@ -48,7 +58,7 @@ void Erasure::erase(char pattern)
 
 void Erasure::Write_All( char pattern =0x00,long begin=0,long end=0){
 	if(!end)end=size;
-	std::ofstream drivestream(path.c_str(),std::ostream::out);
+	std::ofstream drive(path.c_str(),std::ostream::out);
 	if(!drive) throw "cannot open HDD";
 	//watch out for this line
 	else std::cerr<<path<<" : opened drive and writing "
@@ -93,9 +103,9 @@ void Erasure::Write_All( char pattern =0x00,long begin=0,long end=0){
 	{
 		//ERASE HERE TODO uncomment to erase
 		//std::cerr<<"beginL"<<std::endl;
-		drive_stream.seekp(currentLBA);
+		drive.seekp(currentLBA);
 		//drive<<block;
-		drive_stream.write(block,bs);
+		drive.write(block,bs);
 		
 		if(currentLBA%check==0||currentLBA/bs<9)
 		{	
@@ -495,13 +505,13 @@ void Erasure::erase_n(char pattern){
 		<<date->tm_sec<<std::endl;
 
 }
-void HDD::erase_dd(){
+void Erasure::erase_dd(){
 	Command(
 	"sudo dd if=/dev/zero of="
 	+path
 	,"erasing with dd write and /dev/zero"	,true);
 }
-void HDD::erase_debrief(){
+void Erasure::erase_debrief(){
 	Command("sudo cat "+TempLogFileName,"debriefing, retreiving log file contents",true);
 	if(LastOutput.find("Failure")!=std::string::npos)
 	{
@@ -518,3 +528,4 @@ void HDD::erase_debrief(){
 	}
 	Command("sudo rm "+TempLogFileName, "erasing temporay log file...",false);
 }
+#endif
