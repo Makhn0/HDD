@@ -83,15 +83,7 @@ class HDD{
 		void dd_read(std::string*,std::string);
 		void hash_check(std::string*,std::string,std::string);
 		void resolve_size();
-		void erase(std::string*);
-		void erase(char);
-		void erase_c(char);
-		void erase_n(char);
-		
-		void Write_All( char pattern,long,long);
-		void erase_dd();
-		void erase_debrief();	
-		bool Long_Verify(unsigned char pattern,long,long);
+
 
 		void exception_catch(std::exception);
 		void exception_catch(std::string);

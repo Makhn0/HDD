@@ -63,9 +63,8 @@ load: $(BinName)
 	$(sudo) ./homeupdate.zsh  1>/dev/null
 push:
 	$(sudo) make clean
-	$(sudo) git add -A .
-	$(sudo) git commit -m "$(commit)"
-	$(sudo) git push
+	$(sudo) git commit -am "$(commit)"
+	$(sudo) git push #only for master
 test: test.cpp
 	$(CXX) --std=c++0x $(args) -o $(TestName) test.cpp
 open-test:
