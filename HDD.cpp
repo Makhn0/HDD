@@ -1,7 +1,7 @@
 
 #include "HDD.h"
 #include "Exceptions.h"
-#include "methods.cpp"
+#include "methods.h"
 #include <stdio.h>
 #include <fstream>
 #include <ostream>
@@ -25,8 +25,7 @@ struct Exception : public exception{
 	}
 }
 */
-
-std::string ResultTToString(Result_t a)
+std::string HDD::ResultTToString(Result_t a)
 {
 	switch(a)
 	{
@@ -52,6 +51,7 @@ std::string HDD::StdOut(std::string cmd, bool throwing=true) {
     }
     return data;
 }
+
 
 
 void HDD::Command(std::string a,std::string task,bool throwing=true){
@@ -88,109 +88,10 @@ void HDD::exception_catch(std::string e){
 	*dstream<<this->path<<" : LastOutput : "<<this->LastOutput<<std::endl;
 	*dstream<<this->path<<"#################################################"<<std::endl;
 }
-void HDD::run(std::string* batch,char pattern){
-	//std::thread a(&HDD::presence_checker,this,false);
-	while(1){
-		*dstream<<this->path<<" : beginning running loop... "<< std::endl;
-		//sleep(1);
-		PresentTask="reseting";
-		*dstream<<this->path<<" : resetting... "<<std::endl;
-		reset();
-		PresentTask="waiting to detect...";
-		*dstream<<this->path<<" : "<<this->PresentTask<<std::endl;
-		while(!presence()){
-			sleep(5);
-		}
-		//PresentTask="reseting";
-		//*dstream<<this->path<<" : resetting... "<<std::endl;
-		//reset();
-		/*BEGIN TRY BLOCK*/
-		try{	
-			run_body(batch,pattern);
-			this->Status=FinishedSuccess;
-			print(dstream);
-			//log(batch);
-		}
-		catch(std::string e){
-			exception_catch(e);
-		}
-		catch(const char * e){
-			exception_catch(e);
-		}
-		catch(std::exception e){
-			exception_catch(e);
-		}
-		*dstream<<this->path<<"closing fd"<<std::endl;
-		close(fd);
-		/*END TRY BLOCK*/
-		*dstream<<this->path<<" : end of run_body"<<std::endl;
+void HDD::UpdateRunTime(){
+				RunTime=time(0)-StartTime;
+			}
 
-		while(presence())
-		{
-				sleep(10);
-		}
-		//break;
-		*dstream<<this->path<<" : pulled out starting over..."<<std::endl<<std::endl;
-	}
-	*dstream<<path<<" : we did it out of the loop"<<std::endl;;
-}
-void HDD::run_body(std::string* batch,char pattern){
-	*dstream<<"beginning run_body"<<std::endl;
-	this->StartTime=time(0);
-	get_data();
-	if(!presence()){return ;}
-	#ifndef _Skip_Smart
-	//TODO stop already running smartctl?
-	//TODO handle (41) self test interrupted
-	smartctl_run();
-	bool a=false;
-	/* smart ctl*/
-	/*
-	while(smartctl_running()){
-		if(!presence()){
-			a=true;
-			smartctl_kill();
-			break;
-		}
-		sleep(10);		
-	}
-	*/
-	while(presence(true))
-	{
-		sleep(5);
-		if(!smartctl_running()) {
-			break;
-		}
-		sleep(5);
-	}
-	
-
-	#endif
-	/* back blaze test*/
-	if(bb_test()) throw " >0 of smart 5;187;188;197;198 is >0  : drive likely to fail soon";
-
-	///* confirm read write
-	if(!this->presence()){return;}
-		this->dd(batch); //TODO add back in
-	if(!this->presence()){return;}
-	//*/
-	resolve_size();
-	if(!this->presence()){return;}
-	//erase
-	#ifdef _Erase
-	erase(pattern);		
-	if(!this->presence()){return;}
-	#endif
-
-	this->EndTime=time(0);
-	if(!this->presence()){return;}
-	*dstream<<this->path<<"closing fd.. "<<std::endl;
-	close(fd);
-	*dstream<<this->path<<" : end of erase: writing to logs"<<std::endl;
-	log(batch);
-
-
-}
 void HDD::reset(){
 	
 	this->SmartSupport=false;
@@ -201,8 +102,7 @@ void HDD::reset(){
 	this->Model="";
 	this->ModelFamily="";
 	this->size=0;
-this->SmartEta="";
-	this->currentLBA=0;
+	this->SmartEta="";
 	this->StartTime=-1;//time(0);
 	this->EndTime=-1;
 	this->RunTime=0;
@@ -212,30 +112,7 @@ this->SmartEta="";
 	this->Status=Unfinished;
 }
 ///*
-bool HDD::presence(){
-	return presence(false);
-}
-//*/
-bool HDD::presence(bool print ){
-	//print for explicit
-	if(print) *dstream<<this->path<<" : checking presence... "<<std::endl;
-	
-	this->Present=
-		access( this->path.c_str(),0 )==0;
-		
-	if(print) *dstream<<this->path<<" : presence "<<((this->Present)?"detected":"not detected")<<std::endl;
-	if(!Present) close(this->fd);
-	return this->Present;
-}
-void HDD::Presence_checker(){
-	Presence_checker(false);
-}
-void HDD::Presence_checker(bool throwing){
-	while(1){
-		if (!presence()&&throwing )throw "Hard Drive Unplugged";
-		sleep(10);
-	}
-}
+
 void HDD::get_data(){
 	/*  gets
 	SmartSupport
@@ -308,7 +185,8 @@ void HDD::get_data(){
 	trim(SerialNumber);
 	trim(Model);
 	*dstream<<"Data Extracted..."<<std::endl;
-	print(dstream);
+	//print overrided in erasure
+	print(dstream);//
 }
 void HDD::smartctl_run()
 {	
@@ -490,16 +368,7 @@ void HDD::print(std::ostream* textgohere=&std::cout){
 	*textgohere<<"User Capacity: "<<SizeToString(size)<<std::endl;
 	*textgohere<<"Present Task: "<<this->PresentTask<<std::endl;
 
-	if(PresentTask=="Erasing..."){
-		*textgohere<<"Start Time: "<<(ctime(&StartTime));//<<std::endl;
-		if(EndTime>0)*textgohere<<"End Time: "<<this->EndTime<<std::endl;
-		*textgohere<<"Run Time: "<<(this->RunTime/3600)<<"hours "<<((this->RunTime%3600)/60)<<" min(s) "<<(this->RunTime%60)<<"second(s)"<<std::endl;
-		//*textgohere<<"Run Time: "<<this->RunTime<<std::endl;
-		*textgohere<<"Erasing "<<(currentLBA*1.0/size)*100<<"% Complete"<<std::endl;
-		*textgohere<<"ETA: "<<(eta/3600)<<"hours "<<((eta%3600)/60)<<" min(s) "<<(eta%60)<<"second(s)"<<std::endl;
-	}
-
-	else if(PresentTask=="Running Smart Control..."||PresentTask=="Checking Smart Control is still running...")
+	if(PresentTask=="Running Smart Control..."||PresentTask=="Checking Smart Control is still running...")
 	{
 		*textgohere<<SmartEta<<std::endl;
 		*textgohere<<"Last Output : "<<this->LastOutput<<std::endl;
@@ -565,4 +434,103 @@ void HDD::log(std::string * batch){
 	//print(dstream);
 	//print(LogFile);
 }
+void HDD::run(std::string* batch,char pattern){
+	//std::thread a(&HDD::presence_checker,this,false);
+	while(1){
+		*dstream<<this->path<<" : beginning running loop... "<< std::endl;
+		//sleep(1);
+		PresentTask="reseting";
+		*dstream<<this->path<<" : resetting... "<<std::endl;
+		reset();
+		PresentTask="waiting to detect...";
+		*dstream<<this->path<<" : "<<this->PresentTask<<std::endl;
+		while(!presence()){
+			sleep(5);
+		}
+		//PresentTask="reseting";
+		//*dstream<<this->path<<" : resetting... "<<std::endl;
+		//reset();
+		/*BEGIN TRY BLOCK*/
+		try{	
+			run_body(batch,pattern);
+			this->Status=FinishedSuccess;
+			print(dstream);
+			//log(batch);
+		}
+		catch(std::string e){
+			exception_catch(e);
+		}
+		catch(const char * e){
+			exception_catch(e);
+		}
+		catch(std::exception e){
+			exception_catch(e);
+		}
+		*dstream<<this->path<<"closing fd"<<std::endl;
+		close(fd);
+		/*END TRY BLOCK*/
+		*dstream<<this->path<<" : end of run_body"<<std::endl;
 
+		while(presence())
+		{
+				sleep(10);
+		}
+		//break;
+		*dstream<<this->path<<" : pulled out starting over..."<<std::endl<<std::endl;
+	}
+	*dstream<<path<<" : we did it out of the loop"<<std::endl;;
+}
+void HDD::run_body(std::string* batch,char pattern){
+	*dstream<<"beginning run_body"<<std::endl;
+	this->StartTime=time(0);
+	get_data();
+	if(!presence()){return ;}
+	#ifndef _Skip_Smart
+	//TODO stop already running smartctl?
+	//TODO handle (41) self test interrupted
+	smartctl_run();
+	/* smart ctl*/
+	/*
+	while(smartctl_running()){
+		if(!presence()){
+			a=true;
+			smartctl_kill();
+			break;
+		}
+		sleep(10);		
+	}
+	*/
+	while(presence(true))
+	{
+		sleep(5);
+		if(!smartctl_running()) {
+			break;
+		}
+		sleep(5);
+	}
+	
+
+	#endif
+	/* back blaze test*/
+	if(bb_test()) throw " >0 of smart 5;187;188;197;198 is >0  : drive likely to fail soon";
+
+	///* confirm read write
+	if(!this->presence()){return;}
+		this->dd(batch); //TODO add back in
+	if(!this->presence()){return;}
+	//*/
+	resolve_size();
+	if(!this->presence()){return;}
+	//erase
+	#ifdef _Erase
+	erase(pattern);		
+	if(!this->presence()){return;}
+	#endif
+
+	this->EndTime=time(0);
+	if(!this->presence()){return;}
+	*dstream<<this->path<<"closing fd.. "<<std::endl;
+	close(fd);
+	*dstream<<this->path<<" : end of erase: writing to logs"<<std::endl;
+	log(batch);
+}

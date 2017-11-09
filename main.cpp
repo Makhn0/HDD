@@ -13,7 +13,7 @@
 #include <dirent.h>
 #include "Erasure.h"
 
-//#include "methods.cpp"
+#include "methods.h"
 std::string BatchName;
 std::string argPath;
 std::stringstream * printstream;
@@ -78,7 +78,7 @@ int getlines(std::stringstream *a,std::string buffer[],int H,int col){
 		//std::cout<<"0:"<<i<<std::endl;
 			//this while loop allows in-collumn word wrapping
 			int j=0;
-			while((j*col)<buf.size()){
+			while((j*col)<(signed int) buf.size()){
 			//	std::cout<<j<<"j*col"<<(j*col)<<std::endl;
 				if((i+j)<H)buffer[i+j]=buf.substr(j*col,col);
 				else break;
@@ -87,6 +87,7 @@ int getlines(std::stringstream *a,std::string buffer[],int H,int col){
 			i+=j;
 			buf="";
 		}
+	return H;
 }
 //prints the contents of a in two collumns of height H, and width 90
 void PrintToScreen(std::stringstream * a,int H=15,int col=90)

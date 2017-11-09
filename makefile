@@ -1,5 +1,7 @@
 CPFLAGS=--std=c++0x -pthread -Wall
 src=main.cpp HDD.cpp Exceptions.h
+classes=Erasure.o HDD.o HDD_Base.o
+lib=methods.o
 Rargs="-D_Erase"
 
 BinName:=ewhde
@@ -21,16 +23,18 @@ Editor:=gedit
 del:=sudo rm
 endif
 
-$(BinName): main.o HDD.o Erasure.o
-	$(CXX) $(CPFLAGS) $(args) $(Win) -o $(BinName) main.o Erasure.o HDD.o 
-	$(CXX) $(CPFLAGS) $(args) $(Win) -D_Debug -o $(DebugName) main.o Erasure.o HDD.o
+$(BinName): main.o HDD.o Erasure.o HDD_Base.o methods.o
+	$(CXX) $(CPFLAGS) $(args) $(Win) -o $(BinName) main.o $(classes) $(lib)
+	$(CXX) $(CPFLAGS) $(args) $(Win) -D_Debug -o $(DebugName) main.o $(classes) $(lib)
 main.o : main.cpp
 	$(CXX) -c $(CPFLAGS) $(args) $(Win) main.cpp 
+Erasure.o : Erasure.cpp 
+	$(CXX) -c $(CPFLAGS) $(args) $(Win) Erasure.cpp 
 HDD.o : HDD.cpp 
 	$(CXX) -c $(CPFLAGS) $(args) $(Win) HDD.cpp 
-Erasure.o : Erasure.cpp HDD.o
-	$(CXX) -c $(CPFLAGS) $(args) $(Win) Erasure.cpp 
-Methods.o: methods.cpp
+HDD_Base.o : HDD_Base.cpp
+	$(CXX) -c $(CPFLAGS) $(args) $(Win) HDD_Base.cpp
+methods.o: methods.cpp
 	$(CXX) -c $(CPFLAGS) $(args) $(Win) methods.cpp
 run : $(BinName)
 	$(sudo) $(BinName)

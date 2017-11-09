@@ -1,18 +1,58 @@
 #ifndef Erasure_cpp
 #define Erasure_cpp
+
+
 #include <iostream>
 #include <time.h>
 #include <string>
-#include "HDD.h"
-#include "Erasure.h"
 #include <fstream>
-#include <time.h>
 #include <unistd.h>
 #include <sys/stat.h>//O_RDWR?
 #include <sys/types.h>//open();close()[ithink];
 #include <stdint.h>//u64 in nwipe_static_pass?
 #include <fcntl.h>
+#include "HDD.h"
+#include "Erasure.h"
 #include "methods.h"
+void Erasure::print(std::ostream* textgohere=&std::cout){
+	UpdateRunTime();
+	//TODO add info on which client is running
+	*textgohere<<"Status of: "<<this->path<<std::endl;
+	*textgohere<<"Presence :    "<<((this->Present)?"detected":"undetected")<<std::endl;
+	*textgohere<<"Smart Support: "<<(this->SmartSupport?"available":"unavailable")<<std::endl;
+	*textgohere<<"Model Family: "<<this->ModelFamily<<std::endl;
+	*textgohere<<"Model  #: "<<this->Model<<std::endl;
+	*textgohere<<"Serial #: "<<this->SerialNumber<<std::endl;
+	*textgohere<<"User Capacity: "<<SizeToString(size)<<std::endl;
+	*textgohere<<"Present Task: "<<this->PresentTask<<std::endl;
+
+	if(PresentTask=="Erasing..."){
+		*textgohere<<"Start Time: "<<(ctime(&StartTime));//<<std::endl;
+		if(EndTime>0)*textgohere<<"End Time: "<<this->EndTime<<std::endl;
+		*textgohere<<"Run Time: "<<(this->RunTime/3600)<<"hours "<<((this->RunTime%3600)/60)<<" min(s) "<<(this->RunTime%60)<<"second(s)"<<std::endl;
+		//*textgohere<<"Run Time: "<<this->RunTime<<std::endl;
+		*textgohere<<"Erasing "<<(currentLBA*1.0/size)*100<<"% Complete"<<std::endl;
+		*textgohere<<"ETA: "<<(eta/3600)<<"hours "<<((eta%3600)/60)<<" min(s) "<<(eta%60)<<"second(s)"<<std::endl;
+	}
+
+	else if(PresentTask=="Running Smart Control..."||PresentTask=="Checking Smart Control is still running...")
+	{
+		*textgohere<<SmartEta<<std::endl;
+		*textgohere<<"Last Output : "<<this->LastOutput<<std::endl;
+	}
+
+	else if(this->Exception!="none"){
+		*textgohere<<"Last Exception : "<<this->Exception<<std::endl;
+		*textgohere<<"Last/Current Command :" << this->CmdString<<std::endl;
+		*textgohere<<"Last Output : "<<this->LastOutput<<std::endl;
+		*textgohere<<"Exit Status : "<<this->LastExitStatus<<std::endl;	
+	}
+	*textgohere<<"Result: "
+		<<ResultTToString(this->Status)
+		<<std::endl;			*textgohere<<"______________________________________"<<std::endl;
+*textgohere<<"##end##"<<std::endl;
+
+}
 void Erasure::erase(std::string * method)
 {  	
 	std::string TempName("");
@@ -56,6 +96,19 @@ void Erasure::erase(char pattern)
 	//*/
 }
 
+void Erasure::PrintDate(std::string message,tm * date){
+	*dstream
+		<<path
+		<<message
+		<<(1900+ date->tm_year)
+		<<"/"
+		<<month(date->tm_mon)
+		<<"/"
+		<<(1+date->tm_mday)<<"  | "	
+		<<date->tm_hour<<":"
+		<<date->tm_min<<":"
+		<<date->tm_sec<<std::endl;
+}
 void Erasure::Write_All( char pattern =0x00,long begin=0,long end=0){
 	if(!end)end=size;
 	std::ofstream drive(path.c_str(),std::ostream::out);
@@ -72,15 +125,8 @@ void Erasure::Write_All( char pattern =0x00,long begin=0,long end=0){
 		<<std::endl;
 	time_t begin_t=time(0);
 	tm * date=localtime(&begin_t);
-	*dstream<<path<<" :start erasing:  "
-		<<(1900+ date->tm_year)
-		<<"/"
-		<<month(date->tm_mon)
-		<<"/"
-		<<(1+date->tm_mday)<<"  | "	
-		<<date->tm_hour<<":"
-		<<date->tm_min<<":"
-		<<date->tm_sec<<std::endl;
+	PrintDate(" :start erasing:  ",date);
+	
 	long lastLBA=-1;
 	time_t Last_t=time(0)-1;
 	time_t current_t=time(0);
@@ -204,29 +250,14 @@ void Erasure::Write_All( char pattern =0x00,long begin=0,long end=0){
 		<<std::endl;
 	drive.close();
 	*dstream<<"closed"<<std::endl;
+	
 	time_t end_t=time(0);
 	*dstream<<"time(0);"<<std::endl;
 	date=localtime(&begin_t);
 	*dstream<<"date=local..;"<<std::endl;
-	*dstream<<path<<" :started erasing:  "
-		<<(1900+ date->tm_year)
-		<<"/"
-		<<month(date->tm_mon)
-		<<"/"
-		<<(1+date->tm_mday)<<"  | "	
-		<<date->tm_hour<<":"
-		<<date->tm_min<<":"
-		<<date->tm_sec<<std::endl;
+	PrintDate(" :started eraseing:  ",date);
 	date=localtime(&end_t);
-	*dstream<<path<<" :ended erasing:  "
-		<<(1900+ date->tm_year)
-		<<"/"
-		<<month(date->tm_mon)
-		<<"/"
-		<<(1+date->tm_mday)<<"  | "	
-		<<date->tm_hour<<":"
-		<<date->tm_min<<":"
-		<<date->tm_sec<<std::endl;
+	PrintDate(" :ended erasing:  ",date);
 	time_t diff_t=end_t-begin_t;
 	date=localtime(&diff_t);
 	*dstream<<path<<" erased"<<(begin-end)<<" bytes in... :time elapsed:  "	
@@ -282,7 +313,7 @@ void Erasure::erase_c(char pattern){
 	
 }
 void Erasure::erase_n(char pattern){
-
+	//fastest time recorded currently being used
 	time_t begin_t=time(0);
 	tm * date=localtime(&begin_t);
 	*dstream<<path<<" :start erasing w/erase_n:  "

@@ -5,47 +5,33 @@
 #include <iostream>
 #include <thread>
 #include <time.h>
+#include "HDD_Base.h"
 
 enum Result_t{Unfinished,FinishedSuccess,FinishedFail,Incomplete};
 
-class HDD{
+class HDD: public HDD_Base {
 	public:
-		//port properties
-		const std::string HomePath;
-		const std::string path;
-		int fd;
 		static int instances;
-		bool Present;
-		bool Running;		
-		//hdd properties
-		bool SmartSupport=false;
-		std::string Model;
-		std::string ModelFamily;
-		std::string SerialNumber;
-		long size;//=0;
-	
+		
+
+
 		//run properties
-		long currentLBA=0;
 		Result_t Status=Unfinished;
 		std::string SmartEta="";
 		std::string PresentTask;
 		std::string Exception="none";
+		//printing commands
 		std::string CmdString;
 		std::string LastOutput;
 		std::string TempLogFileName;
 		int LastExitStatus;
-		std::ostream * dstream=&std::cerr;
-
-		
 		time_t StartTime=0;
-		long EraseStart=0;
-		long EraseEnd=0;
 		long EndTime=0;
-		time_t eta;
 		long RunTime;
-		
+	
 		///* learn how to make constructor in src*/
-		HDD(std::string path) : path(path),StartTime(time(0)){
+		HDD(std::string path) : HDD_Base(path), StartTime(time(0)){
+			
 			//TODO define client
 			/*
 			Command("echo ~");
@@ -57,22 +43,17 @@ class HDD{
 		~HDD(){
 			instances--;
 		}
-		void UpdateRunTime(){
-			RunTime=time(0)-StartTime;
-		}
-
+		std::string ResultTToString(Result_t a);
+		
+		void UpdateRunTime();
 		std::string StdOut(std::string , bool);
 		void Command(std::string ,std::string ,bool );
 		void Command(std::string ,bool );
 
 		/*why defaults no work?*/
-
-		bool presence();
-		bool presence(bool);
-		void Presence_checker();
-		void Presence_checker(bool);
-
+		void reset();
 		void get_data();
+		
 		void smartctl_run();
 		bool smartctl_running();
 		int smart_var(int&,std::string);
@@ -94,7 +75,7 @@ class HDD{
 		void print_csv(std::fstream* );
 		void run_body(std::string*,char);
 		void run(std::string*,char);
-		void reset();
+
 };
 
 #endif
