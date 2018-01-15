@@ -17,6 +17,8 @@
 #include <fcntl.h>
 #include <time.h>
 
+using namespace std;
+
 int HDD::instances;
 /* // might be more usefull than throwing strings
 struct Exception : public exception{
@@ -26,7 +28,7 @@ struct Exception : public exception{
 }
 */
 
-std::string ResultTToString(Result_t a)
+string ResultTToString(Result_t a)
 {
 	switch(a)
 	{
@@ -38,8 +40,8 @@ std::string ResultTToString(Result_t a)
 	}
 	return "Unfinished";
 }
-std::string HDD::StdOut(std::string cmd, bool throwing=true) {
-    std::string data;
+string HDD::StdOut(string cmd, bool throwing=true) {
+    string data;
     FILE * stream;
     const int max_buffer= 256;
     char buffer[max_buffer];
@@ -54,55 +56,55 @@ std::string HDD::StdOut(std::string cmd, bool throwing=true) {
 }
 
 
-void HDD::Command(std::string a,std::string task,bool throwing=true){
+void HDD::Command(string a,string task,bool throwing=true){
 	PresentTask=task;
-	*dstream<<path<<" : "<<PresentTask<<std::endl;
+	*dstream<<path<<" : "<<PresentTask<<endl;
 	Command(a,throwing);
-	*dstream<<this->path<<" : "<<this->PresentTask<<" done "<<std::endl;
+	*dstream<<this->path<<" : "<<this->PresentTask<<" done "<<endl;
 }
-void HDD::Command(std::string a,bool throwing=true){
+void HDD::Command(string a,bool throwing=true){
 	a.append(" 2>&1");
 	CmdString=a;
-	*dstream<<path<<" : Last Command:"<<CmdString<<std::endl;
+	*dstream<<path<<" : Last Command:"<<CmdString<<endl;
 	this->LastOutput=StdOut(this->CmdString,throwing);
 	
 	*dstream<<this->path<<" : Last Output:"<<this->LastOutput
-	<<"_::exit status :"<<LastExitStatus<<std::endl;	
+	<<"_::exit status :"<<LastExitStatus<<endl;	
 }
-void HDD::exception_catch(std::exception e){
+void HDD::exception_catch(exception e){
 	exception_catch(e.what());
 }
 void HDD::exception_catch(const char *e){
-		//std::string * a= new std::string(*e);
-		*dstream<<path<<"const char thrown :"<<e<<std::endl;
-		exception_catch((std::string)e);
+		//string * a= new string(*e);
+		*dstream<<path<<"const char thrown :"<<e<<endl;
+		exception_catch((string)e);
 }
-void HDD::exception_catch(std::string e){
+void HDD::exception_catch(string e){
 	this->Exception= e;
 	this->PresentTask= " Critical error, stopping. ";
 	this->Status=FinishedFail;		
-	*dstream<<this->path<<"#####################WARNING#####################"<<std::endl;
-	*dstream<<this->path<<" : Exception thrown : "<<this->Exception<<std::endl;	
-	*dstream<<this->path<<" : PresentTask : "<<this->PresentTask<<std::endl;
-	*dstream<<this->path<<" : LastCommand : "<<this->CmdString<<std::endl;	
-	*dstream<<this->path<<" : LastOutput : "<<this->LastOutput<<std::endl;
-	*dstream<<this->path<<"#################################################"<<std::endl;
+	*dstream<<this->path<<"#####################WARNING#####################"<<endl;
+	*dstream<<this->path<<" : Exception thrown : "<<this->Exception<<endl;	
+	*dstream<<this->path<<" : PresentTask : "<<this->PresentTask<<endl;
+	*dstream<<this->path<<" : LastCommand : "<<this->CmdString<<endl;	
+	*dstream<<this->path<<" : LastOutput : "<<this->LastOutput<<endl;
+	*dstream<<this->path<<"#################################################"<<endl;
 }
-void HDD::run(std::string* batch,char pattern){
-	//std::thread a(&HDD::presence_checker,this,false);
+void HDD::run(string* batch,char pattern){
+	//thread a(&HDD::presence_checker,this,false);
 	while(1){
-		*dstream<<this->path<<" : beginning running loop... "<< std::endl;
+		*dstream<<this->path<<" : beginning running loop... "<< endl;
 		//sleep(1);
 		PresentTask="reseting";
-		*dstream<<this->path<<" : resetting... "<<std::endl;
+		*dstream<<this->path<<" : resetting... "<<endl;
 		reset();
 		PresentTask="waiting to detect...";
-		*dstream<<this->path<<" : "<<this->PresentTask<<std::endl;
+		*dstream<<this->path<<" : "<<this->PresentTask<<endl;
 		while(!presence()){
 			sleep(5);
 		}
 		//PresentTask="reseting";
-		//*dstream<<this->path<<" : resetting... "<<std::endl;
+		//*dstream<<this->path<<" : resetting... "<<endl;
 		//reset();
 		/*BEGIN TRY BLOCK*/
 		try{	
@@ -111,31 +113,31 @@ void HDD::run(std::string* batch,char pattern){
 			print(dstream);
 			//log(batch);
 		}
-		catch(std::string e){
+		catch(string e){
 			exception_catch(e);
 		}
 		catch(const char * e){
 			exception_catch(e);
 		}
-		catch(std::exception e){
+		catch(exception e){
 			exception_catch(e);
 		}
-		*dstream<<this->path<<"closing fd"<<std::endl;
+		*dstream<<this->path<<"closing fd"<<endl;
 		close(fd);
 		/*END TRY BLOCK*/
-		*dstream<<this->path<<" : end of run_body"<<std::endl;
+		*dstream<<this->path<<" : end of run_body"<<endl;
 
 		while(presence())
 		{
 				sleep(10);
 		}
 		//break;
-		*dstream<<this->path<<" : pulled out starting over..."<<std::endl<<std::endl;
+		*dstream<<this->path<<" : pulled out starting over..."<<endl<<endl;
 	}
-	*dstream<<path<<" : we did it out of the loop"<<std::endl;;
+	*dstream<<path<<" : we did it out of the loop"<<endl;;
 }
-void HDD::run_body(std::string* batch,char pattern){
-	*dstream<<"beginning run_body"<<std::endl;
+void HDD::run_body(string* batch,char pattern){
+	*dstream<<"beginning run_body"<<endl;
 	this->StartTime=time(0);
 	get_data();
 	if(!presence()){return ;}
@@ -184,9 +186,9 @@ void HDD::run_body(std::string* batch,char pattern){
 
 	this->EndTime=time(0);
 	if(!this->presence()){return;}
-	*dstream<<this->path<<"closing fd.. "<<std::endl;
+	*dstream<<this->path<<"closing fd.. "<<endl;
 	close(fd);
-	*dstream<<this->path<<" : end of erase: writing to logs"<<std::endl;
+	*dstream<<this->path<<" : end of erase: writing to logs"<<endl;
 	log(batch);
 
 
@@ -195,7 +197,7 @@ void HDD::reset(){
 	
 	this->SmartSupport=false;
 	this->Present=false;
-	if(Present) this->fd=open(path.c_str(),O_RDWR);//std::open?
+	if(Present) this->fd=open(path.c_str(),O_RDWR);//open?
 	this->Exception="none";
 	this->SerialNumber="";
 	this->Model="";
@@ -218,12 +220,12 @@ bool HDD::presence(){
 //*/
 bool HDD::presence(bool print ){
 	//print for explicit
-	if(print) *dstream<<this->path<<" : checking presence... "<<std::endl;
+	if(print) *dstream<<this->path<<" : checking presence... "<<endl;
 	
 	this->Present=
 		access( this->path.c_str(),0 )==0;
 		
-	if(print) *dstream<<this->path<<" : presence "<<((this->Present)?"detected":"not detected")<<std::endl;
+	if(print) *dstream<<this->path<<" : presence "<<((this->Present)?"detected":"not detected")<<endl;
 	if(!Present) close(this->fd);
 	return this->Present;
 }
@@ -252,10 +254,10 @@ void HDD::get_data(){
 		+" | awk '/SMART support is:/' | sed -n '1,1p'"
 		,"getting data...",true
 	);
-	std::string temp= LastOutput.substr(18,9);
+	string temp= LastOutput.substr(18,9);
 	this->SmartSupport=(temp=="Available");	
 	
-	*dstream<<this->path<<" : SmartSupport : "<<temp<<" : "<<this->SmartSupport<<std::endl; 
+	*dstream<<this->path<<" : SmartSupport : "<<temp<<" : "<<this->SmartSupport<<endl; 
 	 Command(
 		"sudo smartctl -i "
 		+this->path
@@ -295,7 +297,7 @@ void HDD::get_data(){
 		+" | awk '/User Capacity:/'",true
 	);
 	if(LastOutput!=""){
-		std::string a=LastOutput.substr(18,25);
+		string a=LastOutput.substr(18,25);
 		this->size= myStol(a);
 	}
 	else
@@ -307,7 +309,7 @@ void HDD::get_data(){
 	trim(this->ModelFamily);
 	trim(SerialNumber);
 	trim(Model);
-	*dstream<<"Data Extracted..."<<std::endl;
+	*dstream<<"Data Extracted..."<<endl;
 	print(dstream);
 }
 void HDD::smartctl_run()
@@ -323,11 +325,11 @@ void HDD::smartctl_run()
 
 		SmartEta=this->LastOutput.substr(LastOutput.find("Please wait"),90);
 	}
-	catch(std::exception e)
+	catch(exception e)
 	{
 
-		*dstream<<"oops bad substring"<<std::endl;
-		*dstream<<LastOutput.size()<<" : "<<LastOutput.find("Please Wait")<<std::endl;
+		*dstream<<"oops bad substring"<<endl;
+		*dstream<<LastOutput.size()<<" : "<<LastOutput.find("Please Wait")<<endl;
 	}
 	sleep(2);
 }
@@ -339,12 +341,12 @@ bool HDD::smartctl_running()
 		+" | awk '/Self-test execution status:/' "
 		,"Checking Smart Control is still running...",true
 	);
-	std::string code=LastOutput.substr(34,4);
+	string code=LastOutput.substr(34,4);
 	//only possible problem would be if " 240" is an error
 	// it would return still running
 	if (code[0]==' '&&code[1]=='2'&& code[2]=='4') return true;
 	bool done=code=="   0";
-	*dstream<<this->path<<" : smartctl: "<<((!done)?"is running":" has stopped ")<<" code :"<<code<<std::endl;
+	*dstream<<this->path<<" : smartctl: "<<((!done)?"is running":" has stopped ")<<" code :"<<code<<endl;
 	if (done) return false;
 	throw " smartctl error test runtime  "+code;
 }
@@ -357,18 +359,18 @@ void HDD::smartctl_kill()
 }
 
 
-int HDD::smart_var( int & var,std::string name){
-	std::string output;
+int HDD::smart_var( int & var,string name){
+	string output;
 	Command(
 		"sudo smartctl -A "+path+" | awk '/"+name+"/' ","checking smart variable "+name,true
 	);
 	if(LastOutput!=""){
 		output=LastOutput.substr(85,6);	
-		*(dstream)<<"output"<<output<<std::endl;
+		*(dstream)<<"output"<<output<<endl;
 		try{
 			var=stoi(output);
 		}
-		catch(std::exception e){ var=0;return 0;}
+		catch(exception e){ var=0;return 0;}
 		return 1;
 	}
 	var=0;return 0;
@@ -397,17 +399,17 @@ bool HDD::bb_test(){
 	local bb_198="$(sudo smartctl -A /dev/${1} | awk '/198 Offline_Uncorrectable/' | awk '{ print substr($0,85,6)}')";
 */
 }
-void HDD::dd(std::string * batch){
-	std::string hashfile="/tmp/"+*batch+"_"+path.substr(5,3)+"_File.dd";
-	std::string outputfile="/tmp/"+*batch+"_"+path.substr(5,3)+"_FileRead.dd";
+void HDD::dd(string * batch){
+	string hashfile="/tmp/"+*batch+"_"+path.substr(5,3)+"_File.dd";
+	string outputfile="/tmp/"+*batch+"_"+path.substr(5,3)+"_FileRead.dd";
 	dd_write(batch,hashfile);
 	dd_read(batch,outputfile);
 	hash_check(batch,hashfile,outputfile);
 }
-void HDD::dd_write(std::string* batch,std::string hashfile)
+void HDD::dd_write(string* batch,string hashfile)
 {
 	if(access( hashfile.c_str(),0 )==0){
-		*dstream<<this->path<<" : old hash exists: "<<std::endl;
+		*dstream<<this->path<<" : old hash exists: "<<endl;
 		Command("sudo rm "
 			+hashfile
 			,"Erasing Old Hash File"
@@ -425,10 +427,10 @@ void HDD::dd_write(std::string* batch,std::string hashfile)
 		+" of="
 		+this->path
 		+" count=100KB "
-		,std::string("Copying Input File to Disk.."),true
+		,string("Copying Input File to Disk.."),true
 	);
 }
-void HDD::dd_read(std::string* batch,std::string outputfile)
+void HDD::dd_read(string* batch,string outputfile)
 {
 	Command("sudo dd if="
 		+this->path
@@ -438,32 +440,32 @@ void HDD::dd_read(std::string* batch,std::string outputfile)
 		,"Making Output File from Disk...",true
 	);
 }
-void HDD::hash_check(std::string* batch,std::string hashfile,std::string outputfile)
+void HDD::hash_check(string* batch,string hashfile,string outputfile)
 {
 	Command("md5sum "
 		+hashfile
 		,"Hashing Input File...",true
 	);
-	std::string MainHash=LastOutput.substr(0,32);
+	string MainHash=LastOutput.substr(0,32);
 	Command(
 	"md5sum "+outputfile
 		,"Hashing Output File...",true
 	);
-	std::string ReadHash= LastOutput.substr(0,32);
+	string ReadHash= LastOutput.substr(0,32);
 	if(MainHash!=ReadHash){
 		throw  "hash rw failure...";
 	}
-	else{*dstream<<path<<" : Hashes are the Same"<<std::endl;}
+	else{*dstream<<path<<" : Hashes are the Same"<<endl;}
 	Command("sudo rm "+hashfile+" "+outputfile," Erasing Output and Input files...", true);
 }
-void HDD::erase(std::string * method)
+void HDD::erase(string * method)
 {  	
-	std::string TempName("");
+	string TempName("");
 	TempName.append("Temp_");
 	TempName.append( this->path.substr(this->path.size()-1,1) );
 	TempName.append(".txt");
 	this->TempLogFileName=TempName;
-	*dstream<<"templogfilename : "<<TempLogFileName<<std::endl;
+	*dstream<<"templogfilename : "<<TempLogFileName<<endl;
 	Command("sudo rm "+TempLogFileName, "erasing old temporay log file, if it exists",false);
 	Command("sudo touch "+TempLogFileName, "touching new temporary log file",true);
 	Command("sudo ./nwipe --autonuke --nogui --method="
@@ -481,16 +483,16 @@ void HDD::erase(char pattern)
 	try{
 		//erase_c(pattern);
 		erase_n(0x00);
-//		erase(new std::string("zero");
+//		erase(new string("zero");
 		//	this->erase_debrief();
 	}
-	catch(std::string e){
-		*dstream<<path<<" : string thrown"<<std::endl;
+	catch(string e){
+		*dstream<<path<<" : string thrown"<<endl;
 		this->erase_debrief();
 		throw e;
 	}
-	catch(std::exception e){
-		*dstream<<path<<" : exception thrown"<<std::endl;
+	catch(exception e){
+		*dstream<<path<<" : exception thrown"<<endl;
 		this->erase_debrief();
 		throw e;
 	}
@@ -501,18 +503,18 @@ void HDD::erase(char pattern)
 
 void HDD::Write_All( char pattern =0x00,long begin =0,long end =0){
 	if(!end)end=size;
-	std::ofstream drive(path.c_str(),std::ostream::out);
+	ofstream drive(path.c_str(),ostream::out);
 	if(!drive) throw "cannot open HDD";
 	//watch out for this line
 	else *dstream<<path<<" : opened drive and writing "
-		<<(pattern!=0?(const char *)&pattern:"zero")<<"s from "<<begin<<" to "<<end<<std::endl;
+		<<(pattern!=0?(const char *)&pattern:"zero")<<"s from "<<begin<<" to "<<end<<endl;
 	const long bs=512;
 	char block[bs];
 	for(int i=0;i<bs;i++) block[i]=pattern;
-	*dstream<<"block declared:"<<std::endl	;
+	*dstream<<"block declared:"<<endl	;
 	dstream->write(block,bs);
 	*dstream<<":end"
-		<<std::endl;
+		<<endl;
 	time_t begin_t=time(0);
 	tm * date=localtime(&begin_t);
 	*dstream<<path<<" :start erasing:  "
@@ -523,7 +525,7 @@ void HDD::Write_All( char pattern =0x00,long begin =0,long end =0){
 		<<(1+date->tm_mday)<<"  | "	
 		<<date->tm_hour<<":"
 		<<date->tm_min<<":"
-		<<date->tm_sec<<std::endl;
+		<<date->tm_sec<<endl;
 	long lastLBA=-1;
 	time_t Last_t=time(0)-1;
 	time_t current_t=time(0);
@@ -545,7 +547,7 @@ void HDD::Write_All( char pattern =0x00,long begin =0,long end =0){
 	    )
 	{
 		//ERASE HERE TODO uncomment to erase
-		//*dstream<<"beginL"<<std::endl;
+		//*dstream<<"beginL"<<endl;
 		drive.seekp(currentLBA);
 		//drive<<block;
 		drive.write(block,bs);
@@ -554,7 +556,7 @@ void HDD::Write_All( char pattern =0x00,long begin =0,long end =0){
 		{	
 			if(!presence())throw "pulled out while erasing";
 			if(currentLBA/bs<9)	
-				*dstream<<"beggining blocks :"<<currentLBA<<" tellp "<<drive.tellp()<<std::endl;
+				*dstream<<"beggining blocks :"<<currentLBA<<" tellp "<<drive.tellp()<<endl;
 			current_t=time(0);	
 			delta_t=current_t-Last_t; 
 			elapsed_t=current_t-begin_t;
@@ -572,7 +574,7 @@ void HDD::Write_All( char pattern =0x00,long begin =0,long end =0){
 				<<"MB /"<<(end-begin)/1000000
 				<<" MB : "
 				<<((currentLBA-begin)*1.0/(end-begin))*100
-				<<" percent done"<<std::endl;
+				<<" percent done"<<endl;
 			*dstream<<path<< " : Ave speed : ";
 			*dstream<<aV
 				<<"LBA/sec : inst. speed "
@@ -585,16 +587,16 @@ void HDD::Write_All( char pattern =0x00,long begin =0,long end =0){
 				<<" min(s)"<<(ieta%60)<<" sec ";
 			*dstream<<" avbased eta: "
 				<<(aeta/60)
-				<<" min(s)"<<(aeta%60)<<" sec "<<std::endl;
+				<<" min(s)"<<(aeta%60)<<" sec "<<endl;
 			eta=aeta;
 			Last_t=current_t;
 			lastLBA=currentLBA;
-			//*dstream<<"end of if"<<std::endl;
+			//*dstream<<"end of if"<<endl;
 		}
 	
-		//*dstream<<"endL :"<<currentLBA<<std::endl;
+		//*dstream<<"endL :"<<currentLBA<<endl;
 	}
-	*dstream<<"out"<<std::endl;
+	*dstream<<"out"<<endl;
 	/*get end LBA's just in case remainder modulo bs!=0*/
 	currentLBA-=bs;
 	for(
@@ -608,7 +610,7 @@ void HDD::Write_All( char pattern =0x00,long begin =0,long end =0){
 		
 		if(currentLBA%check==0)
 		{	
-			std::cout<<"tellg = "<<drive.tellp()<<std::endl;
+			cout<<"tellg = "<<drive.tellp()<<endl;
 			current_t=time(0);	
 			delta_t=current_t-Last_t; 
 			elapsed_t=current_t-begin_t;
@@ -623,14 +625,14 @@ void HDD::Write_All( char pattern =0x00,long begin =0,long end =0){
 				<<"MB /"<<(end-begin)/1000000
 				<<" MB : "
 				<<((currentLBA-begin)*1.0/(end-begin))*100
-				<<" percent done"<<std::endl;
+				<<" percent done"<<endl;
 			*dstream<<path<<" delta_t: "<<delta_t<< "s : Ave speed : ";
 			*dstream<<((currentLBA-begin)/elapsed_t)
 				<<"LBA/sec : inst. speed "
 				<<v;
 			*dstream<<"LBA/sec  inst. based eta : "	
 				<<(eta/60)<<" min"
-				<<(eta%60)<<" sec"<<std::endl;
+				<<(eta%60)<<" sec"<<endl;
 			
 			Last_t=current_t;
 			lastLBA=currentLBA;
@@ -638,19 +640,19 @@ void HDD::Write_All( char pattern =0x00,long begin =0,long end =0){
 		}
 		
 	}
-	*dstream<<path<<" out coda"<<std::endl;
+	*dstream<<path<<" out coda"<<endl;
 
 	*dstream<<path<< " : erasing : "
 		<<currentLBA/1000000<<" MB /32,000 MB : "
-		<<((currentLBA-begin)*1.0/(end-begin))*100<<std::endl;
+		<<((currentLBA-begin)*1.0/(end-begin))*100<<endl;
 	*dstream<<"finished erasing... obstensibly... closing file"
-		<<std::endl;
+		<<endl;
 	drive.close();
-	*dstream<<"closed"<<std::endl;
+	*dstream<<"closed"<<endl;
 	time_t end_t=time(0);
-	*dstream<<"time(0);"<<std::endl;
+	*dstream<<"time(0);"<<endl;
 	date=localtime(&begin_t);
-	*dstream<<"date=local..;"<<std::endl;
+	*dstream<<"date=local..;"<<endl;
 	*dstream<<path<<" :started erasing:  "
 		<<(1900+ date->tm_year)
 		<<"/"
@@ -659,7 +661,7 @@ void HDD::Write_All( char pattern =0x00,long begin =0,long end =0){
 		<<(1+date->tm_mday)<<"  | "	
 		<<date->tm_hour<<":"
 		<<date->tm_min<<":"
-		<<date->tm_sec<<std::endl;
+		<<date->tm_sec<<endl;
 	date=localtime(&end_t);
 	*dstream<<path<<" :ended erasing:  "
 		<<(1900+ date->tm_year)
@@ -669,19 +671,19 @@ void HDD::Write_All( char pattern =0x00,long begin =0,long end =0){
 		<<(1+date->tm_mday)<<"  | "	
 		<<date->tm_hour<<":"
 		<<date->tm_min<<":"
-		<<date->tm_sec<<std::endl;
+		<<date->tm_sec<<endl;
 	time_t diff_t=end_t-begin_t;
 	date=localtime(&diff_t);
 	*dstream<<path<<" erased"<<(begin-end)<<" bytes in... :time elapsed:  "	
 		<<date->tm_hour<<":"
 		<<date->tm_min<<":"
-		<<date->tm_sec<<std::endl;
+		<<date->tm_sec<<endl;
 }
 bool HDD::Long_Verify(unsigned char pattern =0x00,long begin =0, long end =0){
 	if(!end)end=size;
-	std::ifstream idrive(path.c_str(),std::istream::in);
+	ifstream idrive(path.c_str(),istream::in);
 	if(!idrive) throw "cannot open HDD to read";
-	else *dstream<<path<<" : opened drive and verifying all  "<<pattern<<"from "<<begin <<" to "<<end<<std::endl;
+	else *dstream<<path<<" : opened drive and verifying all  "<<pattern<<"from "<<begin <<" to "<<end<<endl;
 	char buffer[1];
 	bool fail;
 	for(long i=begin//*3199/3200
@@ -707,14 +709,14 @@ void HDD::resolve_size(){
 	PresentTask="Resolving sizes...";
 	
 	/* make sure that program can access whole drive*/
-	std::ifstream in(path.c_str(),std::istream::in);
-	in.seekg(0,std::ios_base::end);
+	ifstream in(path.c_str(),istream::in);
+	in.seekg(0,ios_base::end);
 	long size1= in.tellg();
 	in.close();
 
 	if(size!=size1) throw "cannot resolve size";	
 
-	*dstream<<path <<" : sizes detected: "<<size<< " : "<<size1<<std::endl;
+	*dstream<<path <<" : sizes detected: "<<size<< " : "<<size1<<endl;
 	/* proceed with wiping*/
 	/**/
 	/* writes all single character*/
@@ -727,19 +729,68 @@ void HDD::erase_c(char pattern){
 	this->Write_All(pattern,0,size);
 	
 }
+class Timer{
+	private:
+/*
+		time_t begin_t=;
+		tm * date=localtime(&begin_t);
+		tm * date=localtime(&begin_t)
+*/
+		time_t begin_t;
+		time_t current_t;
+		time_t end_t;
+		ostream * stream;
+		
+	public:
+		Timer(ostream * astream=&cout) : begin_t(time(0)),current_t(begin_t),stream(astream){}
+		void set(){
+			current_t=time(0);	
+		}
+		void reset(){
+			begin_t=time(0);
+			current_t=begin_t;
+			end_t=0;
+		}
+		void end(){
+			end_t=time(0);
+ 		}
+		void print_out(string msg,tm * date){
+
+			*stream<<msg//include path in message
+			<<(1900+ date->tm_year)
+			<<"/"
+			<<month(date->tm_mon)
+			<<"/"
+			<<(1+date->tm_mday)<<"  | "	
+			<<date->tm_hour<<":"
+			<<date->tm_min<<":"
+			<<date->tm_sec<<endl;
+		}
+		void print_begin(string msg){
+			print_out(msg,localtime(&begin_t));
+		}
+		void print_current(string msg){
+			print_out(msg,localtime(&current_t));
+		}
+		void print_elapsed(string msg){
+			time_t time_elapsed=current_t-begin_t;
+			print_out( msg,localtime(&time_elapsed));
+		}
+		void print_full(string msg){
+			if(end_t){
+				time_t diff= end_t-begin_t;
+				print_out(msg,localtime(&diff));
+			}
+			else *stream<<"end_t not set"<<endl	;		
+		}
+};
 void HDD::erase_n(char pattern){
 	PresentTask="Erasing...";
+	Timer * timer_i = new Timer(dstream); //timer_instance
+	timer_i->print_begin(path+" :start erasing w/erase_n:");
 	time_t begin_t=time(0);
-	tm * date=localtime(&begin_t);
-	*dstream<<path<<" :start erasing w/erase_n:  "
-		<<(1900+ date->tm_year)
-		<<"/"
-		<<month(date->tm_mon)
-		<<"/"
-		<<(1+date->tm_mday)<<"  | "	
-		<<date->tm_hour<<":"
-		<<date->tm_min<<":"
-		<<date->tm_sec<<std::endl;
+	tm * date;
+
 /* The result holder. */
 	int r;
 
@@ -767,14 +818,14 @@ void HDD::erase_n(char pattern){
 	/*if( pattern == NULL )
 	{
 		// Caught insanity. 
-		*dstream<<"null pattern pointer"<<std::endl;
+		*dstream<<"null pattern pointer"<<endl;
 		return -1;
 	}
 	*///will never happen pattern not pointer in this code
 	/*if( pattern->length <= 0 )
 	{
 		// Caught insanity. 
-		*dstream<<"__FUNCTION__: The pattern length member is "<<, pattern->length<<std::endl ;
+		*dstream<<"__FUNCTION__: The pattern length member is "<<, pattern->length<<endl ;
 		return -1;
 	}*///will never happen
 
@@ -784,7 +835,7 @@ void HDD::erase_n(char pattern){
 	// Check the memory allocation. 
 	if( ! b )
 	{
-		*dstream<<"unable to create buffer"<<std::endl;
+		*dstream<<"unable to create buffer"<<endl;
 		throw "unable to create buffer" ;//return;//return -1;
 	}
 
@@ -796,7 +847,7 @@ void HDD::erase_n(char pattern){
 	}
 ///
 	// Reset the file pointer. 
-	*dstream<<"filedescriptor int fd = "<<fd<<std::endl;
+	*dstream<<"filedescriptor int fd = "<<fd<<endl;
 	offset= lseek( fd, 0, SEEK_SET );
 
 	// Reset the pass byte counter. 
@@ -806,7 +857,7 @@ void HDD::erase_n(char pattern){
 	{
 		//nwipe_perror( errno, __FUNCTION__, "lseek" );
 		//nwipe_log( NWIPE_LOG_FATAL, "Unable to reset the '%s' file offset.", c->device_name );
-		*dstream<<"unable to reset offset"<<std::endl;
+		*dstream<<"unable to reset offset"<<endl;
 		throw " unable to reset ofset";//return ;//return -1;
 	}
 
@@ -814,11 +865,11 @@ void HDD::erase_n(char pattern){
 	{
 		//* This is system insanity. 
 		//nwipe_log( NWIPE_LOG_SANITY, "__FUNCTION__: lseek() returned a bogus offset on '%s'.", c->device_name );
-		*dstream<<"lseek returned bad offset"<<std::endl;
+		*dstream<<"lseek returned bad offset"<<endl;
 		throw "lseek returned bad offset";//return ;//return -1;
 	}
 
-	*dstream<<"actually erasing part"<<std::endl;
+	*dstream<<"actually erasing part"<<endl;
 	while( z > 0 )
 	{
 		if( 512 <= z )
@@ -830,7 +881,7 @@ void HDD::erase_n(char pattern){
 			//* This is a seatbelt for buggy drivers and programming errors because 
 			//* the device size should always be an even multiple of its blocksize. 
 			blocksize= z;
-			*dstream<<"the size of "<< path<< " is not a multiple of block size "<<blocksize<<std::endl;
+			*dstream<<"the size of "<< path<< " is not a multiple of block size "<<blocksize<<endl;
 			//nwipe_log( NWIPE_LOG_WARNING,
 			//  "%s: The size of '%s' is not a multiple of its block size %i.",
 		//	  __FUNCTION__, c->device_name, c->device_stat.st_blksize );
@@ -846,7 +897,7 @@ void HDD::erase_n(char pattern){
 		{
 			//nwipe_perror( errno, __FUNCTION__, "write" );
 			//nwipe_log( NWIPE_LOG_FATAL, "Unable to write to '%s'.", c->device_name );
-			*dstream<<" unable to write fully to"<<path<<std::endl;
+			*dstream<<" unable to write fully to"<<path<<endl;
 			throw "unable to write fully";//return ; //return -1;
 		}
 
@@ -862,7 +913,7 @@ void HDD::erase_n(char pattern){
 			//* Increment the error count. 
 			errors+= s;
 
-			*dstream <<"partial write errors = "<<errors<<std::endl;
+			*dstream <<"partial write errors = "<<errors<<endl;
 
 			//* Bump the file pointer to the next block. 
 			offset= lseek( fd, s, SEEK_CUR );
@@ -871,7 +922,7 @@ void HDD::erase_n(char pattern){
 			{
 				//nwipe_perror( errno, __FUNCTION__, "lseek" );
 				//nwipe_log( NWIPE_LOG_ERROR, "Unable to bump the '%s' file offset after a partial write.", c->device_name );
-				*dstream<<"unable to bump the file offset after a partial write"<<std::endl;
+				*dstream<<"unable to bump the file offset after a partial write"<<endl;
 				throw "unable to bump the file offset after a partial write";//return ;//return -1;
 			}
 
@@ -932,7 +983,7 @@ void HDD::erase_n(char pattern){
 		<<(1+date->tm_mday)<<"  | "	
 		<<date->tm_hour<<":"
 		<<date->tm_min<<":"
-		<<date->tm_sec<<std::endl;
+		<<date->tm_sec<<endl;
 	date=localtime(&end_t);
 	*dstream<<path<<" :ended erasing:  "
 		<<(1900+ date->tm_year)
@@ -942,13 +993,13 @@ void HDD::erase_n(char pattern){
 		<<(1+date->tm_mday)<<"  | "	
 		<<date->tm_hour<<":"
 		<<date->tm_min<<":"
-		<<date->tm_sec<<std::endl;
+		<<date->tm_sec<<endl;
 	time_t diff_t=end_t-begin_t;
 	date=localtime(&diff_t);
 	*dstream<<path<<" erased"<<(size)<<" bytes w/erase_n in... :time elapsed:  "	
 		<<date->tm_hour<<":"
 		<<date->tm_min<<":"
-		<<date->tm_sec<<std::endl;
+		<<date->tm_sec<<endl;
 
 }
 void print_time();
@@ -960,15 +1011,15 @@ void HDD::erase_dd(){
 }
 void HDD::erase_debrief(){
 	Command("sudo cat "+TempLogFileName,"debriefing, retreiving log file contents",true);
-	if(LastOutput.find("Failure")!=std::string::npos)
+	if(LastOutput.find("Failure")!=string::npos)
 	{
 		PresentTask= "Finished Erasing, Failed";
 		Status=FinishedFail;
 	}
 	else if(
-		(LastOutput.find("Success")!=std::string::npos)
-		||(LastOutput.find("verified")!=std::string::npos)
-		||(LastOutput.find("Blanked Device")!=std::string::npos)
+		(LastOutput.find("Success")!=string::npos)
+		||(LastOutput.find("verified")!=string::npos)
+		||(LastOutput.find("Blanked Device")!=string::npos)
 	){
 		PresentTask="Finished Erasing, Success";
 		Status=FinishedSuccess;
@@ -976,48 +1027,48 @@ void HDD::erase_debrief(){
 	Command("sudo rm "+TempLogFileName, "erasing temporay log file...",false);
 }
 //trouble with default pointer types; need to override function
-void HDD::print(std::ostream* textgohere=&std::cout){
+void HDD::print(ostream* textgohere=&cout){
 	UpdateRunTime();
 	//TODO add info on which client is running
-	*textgohere<<"Status of: "<<this->path<<std::endl;
-	*textgohere<<"Presence :    "<<((this->Present)?"detected":"undetected")<<std::endl;
-	*textgohere<<"Smart Support: "<<(this->SmartSupport?"available":"unavailable")<<std::endl;
-	*textgohere<<"Model Family: "<<this->ModelFamily<<std::endl;
-	*textgohere<<"Model  #: "<<this->Model<<std::endl;
-	*textgohere<<"Serial #: "<<this->SerialNumber<<std::endl;
-	*textgohere<<"User Capacity: "<<SizeToString(size)<<std::endl;
-	*textgohere<<"Present Task: "<<this->PresentTask<<std::endl;
+	*textgohere<<"Status of: "<<this->path<<endl;
+	*textgohere<<"Presence :    "<<((this->Present)?"detected":"undetected")<<endl;
+	*textgohere<<"Smart Support: "<<(this->SmartSupport?"available":"unavailable")<<endl;
+	*textgohere<<"Model Family: "<<this->ModelFamily<<endl;
+	*textgohere<<"Model  #: "<<this->Model<<endl;
+	*textgohere<<"Serial #: "<<this->SerialNumber<<endl;
+	*textgohere<<"User Capacity: "<<SizeToString(size)<<endl;
+	*textgohere<<"Present Task: "<<this->PresentTask<<endl;
 
 	if(PresentTask=="Erasing..."){
-		*textgohere<<"Start Time: "<<(ctime(&StartTime));//<<std::endl;
-		if(EndTime>0)*textgohere<<"End Time: "<<this->EndTime<<std::endl;
-		*textgohere<<"Run Time: "<<(this->RunTime/3600)<<"hours "<<((this->RunTime%3600)/60)<<" min(s) "<<(this->RunTime%60)<<"second(s)"<<std::endl;
-		//*textgohere<<"Run Time: "<<this->RunTime<<std::endl;
-		*textgohere<<"Erasing "<<(currentLBA*1.0/size)*100<<"% Complete"<<std::endl;
-		*textgohere<<"ETA: "<<(eta/3600)<<"hours "<<((eta%3600)/60)<<" min(s) "<<(eta%60)<<"second(s)"<<std::endl;
+		*textgohere<<"Start Time: "<<(ctime(&StartTime));//<<endl;
+		if(EndTime>0)*textgohere<<"End Time: "<<this->EndTime<<endl;
+		*textgohere<<"Run Time: "<<(this->RunTime/3600)<<"hours "<<((this->RunTime%3600)/60)<<" min(s) "<<(this->RunTime%60)<<"second(s)"<<endl;
+		//*textgohere<<"Run Time: "<<this->RunTime<<endl;
+		*textgohere<<"Erasing "<<(currentLBA*1.0/size)*100<<"% Complete"<<endl;
+		*textgohere<<"ETA: "<<(eta/3600)<<"hours "<<((eta%3600)/60)<<" min(s) "<<(eta%60)<<"second(s)"<<endl;
 	}
 
 	else if(PresentTask=="Running Smart Control..."||PresentTask=="Checking Smart Control is still running...")
 	{
-		*textgohere<<SmartEta<<std::endl;
-		*textgohere<<"Last Output : "<<this->LastOutput<<std::endl;
+		*textgohere<<SmartEta<<endl;
+		*textgohere<<"Last Output : "<<this->LastOutput<<endl;
 	}
 
 	else if(this->Exception!="none"){
-		*textgohere<<"Last Exception : "<<this->Exception<<std::endl;
-		*textgohere<<"Last/Current Command :" << this->CmdString<<std::endl;
-		*textgohere<<"Last Output : "<<this->LastOutput<<std::endl;
-		*textgohere<<"Exit Status : "<<this->LastExitStatus<<std::endl;	
+		*textgohere<<"Last Exception : "<<this->Exception<<endl;
+		*textgohere<<"Last/Current Command :" << this->CmdString<<endl;
+		*textgohere<<"Last Output : "<<this->LastOutput<<endl;
+		*textgohere<<"Exit Status : "<<this->LastExitStatus<<endl;	
 	}
 	*textgohere<<"Result: "
 		<<ResultTToString(this->Status)
-		<<std::endl;			*textgohere<<"______________________________________"<<std::endl;
-*textgohere<<"##end##"<<std::endl;
+		<<endl;			*textgohere<<"______________________________________"<<endl;
+*textgohere<<"##end##"<<endl;
 
 }
 ///*
 void HDD::print(){
-	print(&std::cout);
+	print(&cout);
 }
 void HDD::print_csv(std::fstream * textgohere){
 
@@ -1026,9 +1077,9 @@ void HDD::print_csv(std::fstream * textgohere){
 	/* format is client HomePath,Model fam,model,serial,capacity,client,start time,percent complete,runtime,errors/n*/
 
 
-	//*textgohere<<"Status of: "<<this->path<<std::endl;
-	//*textgohere<<"Presence :    "<<((this->Present)?"detected":"undetected")<<std::endl;
-	//*textgohere<<"Smart Support: "<<(this->SmartSupport?"available":"unavailable")<<std::endl;
+	//*textgohere<<"Status of: "<<this->path<<endl;
+	//*textgohere<<"Presence :    "<<((this->Present)?"detected":"undetected")<<endl;
+	//*textgohere<<"Smart Support: "<<(this->SmartSupport?"available":"unavailable")<<endl;
 	*textgohere<<this->HomePath<<",";	
 	*textgohere<<this->ModelFamily<<",";
 	*textgohere<<this->Model<<",";
@@ -1036,30 +1087,30 @@ void HDD::print_csv(std::fstream * textgohere){
 	*textgohere<<this->size<<",";
 //	*textgohere<<this->PresentTask<<",";
 
-	*textgohere<<(ctime(&StartTime))<<",";//<<std::endl;
-	//if(EndTime>0)*textgohere<<"End Time: "<<this->EndTime<<std::endl;
-	*textgohere<<this->RunTime<<",";//std::endl;
-	//*textgohere<<"Erasing "<<(currentLBA*1.0/size)*100<<"% Complete"<<std::endl;
-	//*textgohere<<"ETA: "<<(eta/3600)<<"hours "<<((eta%3600)/60)<<" min(s) "<<(eta%60)<<"second(s)"<<std::endl;
+	*textgohere<<(ctime(&StartTime))<<",";//<<endl;
+	//if(EndTime>0)*textgohere<<"End Time: "<<this->EndTime<<endl;
+	*textgohere<<this->RunTime<<",";//endl;
+	//*textgohere<<"Erasing "<<(currentLBA*1.0/size)*100<<"% Complete"<<endl;
+	//*textgohere<<"ETA: "<<(eta/3600)<<"hours "<<((eta%3600)/60)<<" min(s) "<<(eta%60)<<"second(s)"<<endl;
 	//if(this->Exception!="none"){
 	*textgohere<<this->Exception<<",";
-		//*textgohere<<"Last/Current Command :" << this->CmdString<<std::endl;
-		//*textgohere<<"Last Output : "<<this->LastOutput<<std::endl;
-		//*textgohere<<"Exit Status : "<<this->LastExitStatus<<std::endl;	
+		//*textgohere<<"Last/Current Command :" << this->CmdString<<endl;
+		//*textgohere<<"Last Output : "<<this->LastOutput<<endl;
+		//*textgohere<<"Exit Status : "<<this->LastExitStatus<<endl;	
 	*textgohere
 		<<ResultTToString(this->Status)
 		<<","
-		<<std::endl;
+		<<endl;
 }
 //*/
-void HDD::log(std::string * batch){
-	std::string filename="/home/hdd-test-server/HDD_logs/"
+void HDD::log(string * batch){
+	string filename="/home/hdd-test-server/HDD_logs/"
 		+(*batch)+".csv";
 	this->PresentTask="Writing to the log file:"+filename;	
 	std::fstream* LogFile= new std::fstream(filename,std::ios::app);
 	print_csv(LogFile);
-	*dstream<<this->path<<" :  "<<this->PresentTask<<std::endl;
-	*dstream<<this->path<<" : log file is open:"<<LogFile->is_open()<<std::endl;
+	*dstream<<this->path<<" :  "<<this->PresentTask<<endl;
+	*dstream<<this->path<<" : log file is open:"<<LogFile->is_open()<<endl;
 	//print(dstream);
 	//print(LogFile);
 }
