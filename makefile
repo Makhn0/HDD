@@ -25,11 +25,6 @@ Editor:=gedit
 del:=sudo rm -rf
 endif
 
-
-<<<<<<< HEAD
-=======
-
->>>>>>> master
 #all: $(binName) $(src)
 $(BinName): lib/main.o lib/HDD.o lib/main_help.o lib/methods.o
 	$(CXX) $(CPFLAGS) $(args) $(Win) -o $(BinName) -Iinclude  lib/main.o lib/HDD.o lib/methods.o 
@@ -39,14 +34,9 @@ lib/HDD.o : src/HDD.cpp
 lib/main.o : src/main.cpp
 	$(CXX) -c $(CPFLAGS) $(args) $(Win) -Iinclude -o lib/main.o src/main.cpp 
 lib/main_help.o : src/main_help.cpp
-<<<<<<< HEAD
-	$(CXX) -c $(CPFLAGS) $(args) $(Win) -o lib/main_help.o src/main_help.cpp -Iinclude
-
-=======
 	$(CXX) -c $(CPFLAGS) $(args) $(Win) -Iinclude -o lib/main_help.o src/main_help.cpp 
 lib/methods.o : src/methods.cpp
 	$(CXX) -c $(CPFLAGS) $(args) $(Win) -Iinclude -o lib/methods.o src/methods.cpp
->>>>>>> master
 run : $(BinName)
 	$(sudo) $(BinName)
 edit :
