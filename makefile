@@ -1,10 +1,10 @@
 CPFLAGS=--std=c++0x -pthread -Wall
-src=main.cpp HDD.cpp Exceptions.h
-classes=Erasure.o HDD.o HDD_Base.o
-lib=methods.o
+
+src=src/methods.cpp src/HDD.cpp src/Erasure.cpp 
+
 Rargs="-D_Erase"
 
-BinName:=ewhde
+BinName:=bin/ewhde
 DebugName:=$(BinName)_Debug
 
 ifeq ($(OS),Windows_NT)
@@ -20,22 +20,21 @@ endif
 ifeq ($(OS),Linux)
 sudo:=sudo
 Editor:=gedit
-del:=sudo rm
+del:=sudo rm -f
 endif
 
-$(BinName): main.o HDD.o Erasure.o HDD_Base.o methods.o
-	$(CXX) $(CPFLAGS) $(args) $(Win) -o $(BinName) main.o $(classes) $(lib)
-	$(CXX) $(CPFLAGS) $(args) $(Win) -D_Debug -o $(DebugName) main.o $(classes) $(lib)
-main.o : main.cpp
-	$(CXX) -c $(CPFLAGS) $(args) $(Win) main.cpp 
-Erasure.o : Erasure.cpp 
-	$(CXX) -c $(CPFLAGS) $(args) $(Win) Erasure.cpp 
-HDD.o : HDD.cpp 
-	$(CXX) -c $(CPFLAGS) $(args) $(Win) HDD.cpp 
-HDD_Base.o : HDD_Base.cpp
-	$(CXX) -c $(CPFLAGS) $(args) $(Win) HDD_Base.cpp
-methods.o: methods.cpp
-	$(CXX) -c $(CPFLAGS) $(args) $(Win) methods.cpp
+
+#all: $(binName) $(src)
+$(BinName): lib/main.o lib/HDD.o lib/main_help.o
+	$(CXX) $(CPFLAGS) $(args) $(Win) -o $(BinName)  lib/main.o lib/HDD.o #lib/main_help.o
+	$(CXX) $(CPFLAGS) $(args) $(Win) -D_Debug -o $(DebugName) lib/main.o lib/HDD.o
+lib/HDD.o : src/HDD.cpp 
+	$(CXX) -c $(CPFLAGS) -o lib/HDD.o $(args) $(Win) src/HDD.cpp -Iinclude
+lib/main.o : src/main.cpp
+	$(CXX) -c $(CPFLAGS) $(args) $(Win) -o lib/main.o  src/main.cpp -Iinclude -Llib
+lib/main_help.o : src/main_help.cpp
+	$(CXX) -c $(CPFLAGS) $(args) $(Win) -o lib/main_help.o src/main_help.cpp -Iinclude
+
 run : $(BinName)
 	$(sudo) $(BinName)
 edit :
@@ -47,9 +46,8 @@ edit-all: edit
 	$(Editor) makefile &
 	$(Editor) homeupdate.zsh &
 clean-help:
-	$(del) *.o
-	$(del) $(BinName)
-	$(del) *~
+	$(del) lib/*
+	$(del) bin/*
 clean: 
 	$(sudo) make clean-help || echo 'already clean'
 update:
