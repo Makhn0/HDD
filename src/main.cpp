@@ -3,7 +3,7 @@
 #include <iostream>
 #include <thread>
 #include <stdlib.h>
-#include "HDD.h"
+
 #include <unistd.h>
 #include <time.h>
 #include <sstream>
@@ -11,7 +11,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <dirent.h>
-#include "main_help.h"
+#include "HDD.h"
+#include "main_help.cpp"
 
 //#include "methods.cpp"
 

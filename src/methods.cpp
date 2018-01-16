@@ -1,7 +1,3 @@
-#ifndef methods_cpp
-#define methods_cpp
-
-
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -87,4 +83,4 @@ int other(){
 	a->close();
 	return 0;
 }
-#endif
+
