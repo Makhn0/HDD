@@ -1,4 +1,20 @@
+
+#include <ostream>
+#include <fstream>
+#include <iostream>
+#include <thread>
+#include <stdlib.h>
+#include <unistd.h>
+#include <time.h>
+#include <sstream>
+#include <ctime>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <dirent.h>
+
+#include "HDD.h"
 #include "main_help.h"
+#include "methods.h"
 
 
 void printhelp(std::string a[], std::string b[],int n,int col)
@@ -41,30 +57,30 @@ void BuffClear(std::string a[],int size)
 }
 //reads from a up to H lines until special string or end of file is found, writes to buffer in strings of length col
 //returns number of lines read from stringstream i.e. the "height" of the text
-int getlines(std::stringstream *a,std::string buffer[],int H,int col){
+int getlines(std::stringstream *a,std::string buffer[],unsigned int H,int col){
 	std::string buf;
-	for(int i=0;i<H;)
-		{
-			getline(*a,buf);
-			//std::cout<<buf<<std::endl;
-			//if end of file or special line is reached,stops writing to buffer array 
-			if(buf=="##end##"||a->eof()){
-				return i;//passed to printhelp, so that extra blank lines aren't printed
-				break;
-			}
-			//std::cout<<buffer[i]<<std::endl;
-		//std::cout<<"0:"<<i<<std::endl;
-			//this while loop allows in-collumn word wrapping
-			int j=0;
-			while((j*col)<buf.size()){
-			//	std::cout<<j<<"j*col"<<(j*col)<<std::endl;
-				if((i+j)<H)buffer[i+j]=buf.substr(j*col,col);
-				else break;
-				j+=1;
-			}
-			i+=j;
-			buf="";
+	for(unsigned int i=0;i<H;)
+	{
+		getline(*a,buf);
+		//std::cout<<buf<<std::endl;
+		//if end of file or special line is reached,stops writing to buffer array 
+		if(buf=="##end##"||a->eof()){
+			return i;//passed to printhelp, so that extra blank lines aren't printed
+			break;
 		}
+		//std::cout<<buffer[i]<<std::endl;
+		//std::cout<<"0:"<<i<<std::endl;
+		//this while loop allows in-collumn word wrapping
+		unsigned int j=0;
+		while((j*col)<buf.size()){
+		//	std::cout<<j<<"j*col"<<(j*col)<<std::endl;
+			if((i+j)<H)buffer[i+j]=buf.substr(j*col,col);
+			else break;
+			j+=1;
+		}
+		i+=j;
+		buf="";
+	}
 }
 //prints the contents of a in two collumns of height H, and width 90
 void PrintToScreen(std::stringstream * a,int H=15,int col=90)

@@ -1,7 +1,7 @@
 
 #include "HDD.h"
 #include "Exceptions.h"
-#include "methods.cpp"
+#include "methods.h"
 #include <stdio.h>
 #include <fstream>
 #include <ostream>
@@ -145,7 +145,7 @@ void HDD::run_body(string* batch,char pattern){
 	//TODO stop already running smartctl?
 	//TODO handle (41) self test interrupted
 	smartctl_run();
-	bool a=false;
+	//bool a=false;
 	/* smart ctl*/
 	/*
 	while(smartctl_running()){

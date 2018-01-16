@@ -1,49 +1,52 @@
 CPFLAGS=--std=c++0x -pthread -Wall
 src=src/methods.cpp src/HDD.cpp src/Erasure.cpp 
 Rargs="-D_Erase"
-
-BinName:=bin/ewhde
+BinName:=bin/ewhde.exe
 DebugName:=$(BinName)_Debug
 
 ifeq ($(OS),Windows_NT)
 Editor:=notepad++
 del:=del
 Win:=-D_NT_
-
+BinName:=$(BinName).exe
+DebugName:=$(BinName)_Debug.exe
 else
+
 OS:=$(shell uname -s 2>/dev/null)
 args:=-D_test_
 endif
 
 ifeq ($(OS),Linux)
+
 sudo:=sudo
 Editor:=gedit
-del:=sudo rm -f
+del:=sudo rm -rf
 endif
 
+
+
 #all: $(binName) $(src)
-$(BinName): lib/main.o lib/HDD.o lib/main_help.o
-	$(CXX) $(CPFLAGS) $(args) $(Win) -o $(BinName)  lib/main.o lib/HDD.o #lib/main_help.o
-	$(CXX) $(CPFLAGS) $(args) $(Win) -D_Debug -o $(DebugName) lib/main.o lib/HDD.o
+$(BinName): lib/main.o lib/HDD.o lib/main_help.o lib/methods.o
+	$(CXX) $(CPFLAGS) $(args) $(Win) -o $(BinName) -Iinclude  lib/main.o lib/HDD.o lib/methods.o 
+	$(CXX) $(CPFLAGS) $(args) $(Win) -D_Debug -o $(DebugName) -Iinclude lib/main.o lib/HDD.o lib/methods.o 
 lib/HDD.o : src/HDD.cpp 
-	$(CXX) -c $(CPFLAGS) -o lib/HDD.o $(args) $(Win) src/HDD.cpp -Iinclude
+	$(CXX) -c $(CPFLAGS) $(args) $(Win) -Iinclude -o lib/HDD.o  src/HDD.cpp 
 lib/main.o : src/main.cpp
-	$(CXX) -c $(CPFLAGS) $(args) $(Win) -o lib/main.o  src/main.cpp -Iinclude -Llib
+	$(CXX) -c $(CPFLAGS) $(args) $(Win) -Iinclude -o lib/main.o src/main.cpp 
 lib/main_help.o : src/main_help.cpp
-	$(CXX) -c $(CPFLAGS) $(args) $(Win) -o lib/main_help.o src/main_help.cpp -Iinclude
+	$(CXX) -c $(CPFLAGS) $(args) $(Win) -Iinclude -o lib/main_help.o src/main_help.cpp 
+lib/methods.o : src/methods.cpp
+	$(CXX) -c $(CPFLAGS) $(args) $(Win) -Iinclude -o lib/methods.o src/methods.cpp
 run : $(BinName)
 	$(sudo) $(BinName)
 edit :
-	$(Editor) main.cpp &
-	$(Editor) HDD.cpp &
-	$(Editor) HDD.h &
-	$(Editor) methods.cpp
+	$(Editor) lib
+	$(Editor) src
 edit-all: edit
 	$(Editor) makefile &
-	$(Editor) homeupdate.zsh &
 clean-help:
-	$(del) lib/*
-	$(del) bin/*
+	$(del) lib
+	$(del) bin
 clean: 
 	$(sudo) make clean-help || echo 'already clean'
 update:
