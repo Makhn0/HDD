@@ -3,7 +3,7 @@ CPFLAGS=--std=c++0x -pthread -Wall
 src=src/methods.cpp src/HDD.cpp src/Erasure.cpp 
 
 Rargs="-D_Erase"
-BinName:=bin/ewhde.exe
+BinName:=bin/ewhde
 DebugName:=$(BinName)_Debug
 
 ifeq ($(OS),Windows_NT)
@@ -11,7 +11,7 @@ Editor:=notepad++
 del:=del
 Win:=-D_NT_
 BinName:=$(BinName).exe
-DebugName:=$(BinName)_Debug.exe
+DebugName:=$(DebugName).exe
 else
 
 OS:=$(shell uname -s 2>/dev/null)
