@@ -45,8 +45,8 @@ edit :
 edit-all: edit
 	$(Editor) makefile &
 clean-help:
-	$(del) lib
-	$(del) bin
+	$(del) include &
+	$(del) bin &
 clean: 
 	$(sudo) make clean-help || echo 'already clean'
 update:
