@@ -29,8 +29,12 @@ endif
 $(BinName): lib/main.o lib/HDD.o lib/main_help.o lib/methods.o
 	$(CXX) $(CPFLAGS) $(args) $(Win) -o $(BinName) -Iinclude  lib/main.o lib/HDD.o lib/methods.o 
 	$(CXX) $(CPFLAGS) $(args) $(Win) -D_Debug -o $(DebugName) -Iinclude lib/main.o lib/HDD.o lib/methods.o 
-lib/HDD.o : src/HDD.cpp 
+lib/HDD_Base.o : src/HDD_Base.cpp
+	$(CXX) -c $(CPFLAGS) $(args) $(Win) -Iinclude -o lib/HDD_Base.o  src/HDD_Base.cpp 
+lib/HDD.o : src/HDD.cpp lib/HDD_Base.o
 	$(CXX) -c $(CPFLAGS) $(args) $(Win) -Iinclude -o lib/HDD.o  src/HDD.cpp 
+lib/Erasure.o : src/Erasure.cpp
+	$(CXX) -c $(CPFLAGS) $(args) $(Win) -Iinclude -o lib/Erasure.o  src/Erasure.cpp 
 lib/main.o : src/main.cpp
 	$(CXX) -c $(CPFLAGS) $(args) $(Win) -Iinclude -o lib/main.o src/main.cpp 
 lib/main_help.o : src/main_help.cpp
