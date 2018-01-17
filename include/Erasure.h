@@ -5,18 +5,18 @@
 #include <time.h>
 
 class Erasure : public HDD{	
-	public:	
+	private:	
 		long currentLBA=0;
-		Result_t Status=Unfinished;
 
+	public:
 		long EraseStart=0;
 		long EraseEnd=0;
 		time_t eta;
-
+		Result_t Status=Unfinished;
 		Erasure(std::string pattern):HDD(pattern){
-			
 		}
-		
+		void run_body(std::string*,char);
+		void run(std::string*,char);
 		void PrintDate(std::string, tm * );
 		void erase(std::string*);
 		void erase(char);

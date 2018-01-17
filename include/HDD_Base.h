@@ -19,13 +19,11 @@ class HDD_Base{
 		//constructor
 		HDD_Base(std::string path) :path(path){}
 		//functions
+	
 		bool presence();
 		bool presence(bool);
-		void Presence_checker();
-		void Presence_checker(bool);
-
-
-
 		
+		void Presence_checker(bool);
+		std::string print();		
 };
 #endif

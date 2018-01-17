@@ -58,20 +58,26 @@ string HDD::StdOut(string cmd, bool throwing=true) {
     return data;
 }
 
+/* untested take out if bad */
+ostream * HDD::task(string task=""){
+	PresentTask=task;
+	return &(*dstream<<path<<" : "<<PresentTask<<endl);
+
+}
 
 void HDD::Command(string a,string task,bool throwing=true){
 	PresentTask=task;
 	*dstream<<path<<" : "<<PresentTask<<endl;
 	Command(a,throwing);
-	*dstream<<this->path<<" : "<<this->PresentTask<<" done "<<endl;
+	*dstream<<path<<" : "<<PresentTask<<" done "<<endl;
 }
 void HDD::Command(string a,bool throwing=true){
 	a.append(" 2>&1");
 	CmdString=a;
 	*dstream<<path<<" : Last Command:"<<CmdString<<endl;
-	this->LastOutput=StdOut(this->CmdString,throwing);
+	LastOutput=StdOut(CmdString,throwing);
 	
-	*dstream<<this->path<<" : Last Output:"<<this->LastOutput
+	*dstream<<path<<" : Last Output:"<<LastOutput
 	<<"_::exit status :"<<LastExitStatus<<endl;	
 }
 void HDD::exception_catch(exception e){
@@ -83,138 +89,36 @@ void HDD::exception_catch(const char *e){
 		exception_catch((string)e);
 }
 void HDD::exception_catch(string e){
-	this->Exception= e;
-	this->PresentTask= " Critical error, stopping. ";
-	this->Status=FinishedFail;		
-	*dstream<<this->path<<"#####################WARNING#####################"<<endl;
-	*dstream<<this->path<<" : Exception thrown : "<<this->Exception<<endl;	
-	*dstream<<this->path<<" : PresentTask : "<<this->PresentTask<<endl;
-	*dstream<<this->path<<" : LastCommand : "<<this->CmdString<<endl;	
-	*dstream<<this->path<<" : LastOutput : "<<this->LastOutput<<endl;
-	*dstream<<this->path<<"#################################################"<<endl;
+	Exception= e;
+	PresentTask= " Critical error, stopping. ";
+	Status=FinishedFail;		
+	*dstream<<path<<"#####################WARNING#####################"<<endl
+		<<path<<" : Exception thrown : "<<Exception<<endl	
+		<<path<<" : PresentTask : "<<PresentTask<<endl
+		<<path<<" : LastCommand : "<<CmdString<<endl
+		<<path<<" : LastOutput : "<<LastOutput<<endl
+		<<path<<"#################################################"<<endl;
 }
-void HDD::run(string* batch,char pattern){
-	//thread a(&HDD::presence_checker,this,false);
-	while(1){
-		*dstream<<this->path<<" : beginning running loop... "<< endl;
-		//sleep(1);
-		PresentTask="reseting";
-		*dstream<<this->path<<" : resetting... "<<endl;
-		reset();
-		PresentTask="waiting to detect...";
-		*dstream<<this->path<<" : "<<this->PresentTask<<endl;
-		while(!presence()){
-			sleep(5);
-		}
-		//PresentTask="reseting";
-		//*dstream<<this->path<<" : resetting... "<<endl;
-		//reset();
-		/*BEGIN TRY BLOCK*/
-		try{	
-			run_body(batch,pattern);
-			this->Status=FinishedSuccess;
-			print(dstream);
-			//log(batch);
-		}
-		catch(string e){
-			exception_catch(e);
-		}
-		catch(const char * e){
-			exception_catch(e);
-		}
-		catch(exception e){
-			exception_catch(e);
-		}
-		*dstream<<this->path<<"closing fd"<<endl;
-		close(fd);
-		/*END TRY BLOCK*/
-		*dstream<<this->path<<" : end of run_body"<<endl;
 
-		while(presence())
-		{
-				sleep(10);
-		}
-		//break;
-		*dstream<<this->path<<" : pulled out starting over..."<<endl<<endl;
-	}
-	*dstream<<path<<" : we did it out of the loop"<<endl;;
-}
-void HDD::run_body(string* batch,char pattern){
-	*dstream<<"beginning run_body"<<endl;
-	this->StartTime=time(0);
-	get_data();
-	if(!presence()){return ;}
-	#ifndef _Skip_Smart
-	//TODO stop already running smartctl?
-	//TODO handle (41) self test interrupted
-	smartctl_run();
-	//bool a=false;
-	/* smart ctl*/
-	/*
-	while(smartctl_running()){
-		if(!presence()){
-			a=true;
-			smartctl_kill();
-			break;
-		}
-		sleep(10);		
-	}
-	*/
-	while(presence(true))
-	{
-		sleep(5);
-		if(!smartctl_running()) {
-			break;
-		}
-		sleep(5);
-	}
-	
-
-	#endif
-	/* back blaze test*/
-	if(bb_test()) throw " >0 of smart 5;187;188;197;198 is >0  : drive likely to fail soon";
-
-	///* confirm read write
-	if(!this->presence()){return;}
-		this->dd(batch); //TODO add back in
-	if(!this->presence()){return;}
-	//*/
-	resolve_size();
-	if(!this->presence()){return;}
-	//erase
-	#ifdef _Erase
-	erase(pattern);		
-	if(!this->presence()){return;}
-	#endif
-
-	this->EndTime=time(0);
-	if(!this->presence()){return;}
-	*dstream<<this->path<<"closing fd.. "<<endl;
-	close(fd);
-	*dstream<<this->path<<" : end of erase: writing to logs"<<endl;
-	log(batch);
-
-
-}
 void HDD::reset(){
 	
-	this->SmartSupport=false;
-	this->Present=false;
-	if(Present) this->fd=open(path.c_str(),O_RDWR);//open?
-	this->Exception="none";
-	this->SerialNumber="";
-	this->Model="";
-	this->ModelFamily="";
-	this->size=0;
-this->SmartEta="";
+	SmartSupport=false;
+	Present=false;
+	if(Present) fd=open(path.c_str(),O_RDWR);//open?
+	Exception="none";
+	SerialNumber="";
+	Model="";
+	ModelFamily="";
+	size=0;
+	SmartEta="";
 	
-	this->StartTime=-1;//time(0);
-	this->EndTime=-1;
-	this->RunTime=0;
-	this->CmdString="";
-	this->LastOutput="";
-	this->LastExitStatus=0;
-	this->Status=Unfinished;
+	StartTime=-1;//time(0);
+	EndTime=-1;
+	RunTime=0;
+	CmdString="";
+	LastOutput="";
+	LastExitStatus=0;
+	Status=Unfinished;
 }
 
 void HDD::get_data(){
@@ -229,63 +133,63 @@ void HDD::get_data(){
 	if(Present) this->fd=open(path.c_str(),O_RDWR);//std::open?
 	Command(
 		"sudo smartctl -i "
-		+this->path
+		+path
 		+" | awk '/SMART support is:/' | sed -n '1,1p'"
 		,"getting data...",true
 	);
 	string temp= LastOutput.substr(18,9);
-	this->SmartSupport=(temp=="Available");	
+	SmartSupport=(temp=="Available");	
 	
-	*dstream<<this->path<<" : SmartSupport : "<<temp<<" : "<<this->SmartSupport<<endl; 
+	*dstream<<path<<" : SmartSupport : "<<temp<<" : "<<SmartSupport<<endl; 
 	 Command(
 		"sudo smartctl -i "
-		+this->path
+		+path
 		+" | awk '/Model Family:/'",true
 	);
 	if(LastOutput!=""){
-		this->ModelFamily=LastOutput.substr(18,35);
+		ModelFamily=LastOutput.substr(18,35);
 			
 	}
 	else
 	{
-		this->ModelFamily="none detected";
+		ModelFamily="none detected";
 	}
 
-	this->Model= StdOut(
+	Model= StdOut(
 		"sudo smartctl -i "
-		+this->path
+		+path
 		+" | awk '/Device Model:/'"
 	);
 	if(LastOutput!=""){	
-		this->Model= LastOutput.substr(18,35);	
+		Model= LastOutput.substr(18,35);	
 	}
 	else
 	{
-		this->Model=" none detected";
+		Model=" none detected";
 	}
 	Command(
 		"sudo smartctl -i "
-		+this->path
+		+path
 		+" | awk '/Serial Number:/'",true
 	);	
-	this->SerialNumber =LastOutput.substr(18,35);
+	SerialNumber =LastOutput.substr(18,35);
 
 	Command(
 		"sudo smartctl -i "
-		+this->path
+		+path
 		+" | awk '/User Capacity:/'",true
 	);
 	if(LastOutput!=""){
 		string a=LastOutput.substr(18,25);
-		this->size= myStol(a);
+		size= myStol(a);
 	}
 	else
 	{
-		this->size=-1;
+		size=-1;
 		throw " no capacity detected";
 	}
 	
-	trim(this->ModelFamily);
+	trim(ModelFamily);
 	trim(SerialNumber);
 	trim(Model);
 	*dstream<<"Data Extracted..."<<endl;
@@ -293,22 +197,22 @@ void HDD::get_data(){
 }
 void HDD::smartctl_run()
 {	
-	this->smartctl_kill();
+	smartctl_kill();
 	Command(
 		"sudo smartctl --device=auto --smart=on --saveauto=on --tolerance=normal --test=long "
 		//+" -C"// no longer need smartctl_running
-		+ this->path
+		+ path
 		,"Running Smart Control...",true
 	);
 	try{	
 
-		SmartEta=this->LastOutput.substr(LastOutput.find("Please wait"),90);
+		SmartEta=LastOutput.substr(LastOutput.find("Please wait"),90);
 	}
 	catch(exception e)
 	{
 
-		*dstream<<"oops bad substring"<<endl;
-		*dstream<<LastOutput.size()<<" : "<<LastOutput.find("Please Wait")<<endl;
+		*dstream<<"oops bad substring"<<endl
+				<<LastOutput.size()<<" : "<<LastOutput.find("Please Wait")<<endl;
 	}
 	sleep(2);
 }
@@ -316,7 +220,7 @@ void HDD::smartctl_run()
 bool HDD::smartctl_running()
 {
 	Command("sudo smartctl -a "
-		+this->path
+		+path
 		+" | awk '/Self-test execution status:/' "
 		,"Checking Smart Control is still running...",true
 	);
@@ -325,14 +229,14 @@ bool HDD::smartctl_running()
 	// it would return still running
 	if (code[0]==' '&&code[1]=='2'&& code[2]=='4') return true;
 	bool done=code=="   0";
-	*dstream<<this->path<<" : smartctl: "<<((!done)?"is running":" has stopped ")<<" code :"<<code<<endl;
+	*dstream<<path<<" : smartctl: "<<((!done)?"is running":" has stopped ")<<" code :"<<code<<endl;
 	if (done) return false;
 	throw " smartctl error test runtime  "+code;
 }
 void HDD::smartctl_kill()
 {
 	Command("sudo smartctl -X "
-		+this->path
+		+path
 		,"Checking Smart Control...",true
 	);
 }
@@ -369,14 +273,7 @@ bool HDD::bb_test(){
 	smart_var(smart_198,"198 Offline_Uncorrectable");
 	/*jsut for testing*///return 1;
 	return smart_5 || smart_187 || smart_188 || smart_197 || smart_198;
-	//returns 0 if passed 1 if failed
-/*
-	local bb_5="$(sudo smartctl -A /dev/${1} | awk '/5 Reallocated_Sector_Ct/' | awk '{print substr($0,85,6)}')";
-	local bb_187="$(sudo smartctl -A /dev/${1} | awk '/187 Reported_Uncorrect/' | awk '{print substr($0,85,6)}')";
-	local bb_188="$(sudo smartctl -A /dev/${1} | awk '/188 Command_Timeout/'| awk '{ print substr($0,85,6)}')";
-	local bb_197="$(sudo smartctl -A /dev/${1} | awk '/197 Current_Pending_Sector/'| awk '{ print substr($0,85,6)}')";
-	local bb_198="$(sudo smartctl -A /dev/${1} | awk '/198 Offline_Uncorrectable/' | awk '{ print substr($0,85,6)}')";
-*/
+
 }
 void HDD::dd(string * batch){
 	string hashfile="/tmp/"+*batch+"_"+path.substr(5,3)+"_File.dd";
@@ -388,7 +285,7 @@ void HDD::dd(string * batch){
 void HDD::dd_write(string* batch,string hashfile)
 {
 	if(access( hashfile.c_str(),0 )==0){
-		*dstream<<this->path<<" : old hash exists: "<<endl;
+		*dstream<<path<<" : old hash exists: "<<endl;
 		Command("sudo rm "
 			+hashfile
 			,"Erasing Old Hash File"
@@ -404,7 +301,7 @@ void HDD::dd_write(string* batch,string hashfile)
 	Command("sudo dd if="
 		+hashfile
 		+" of="
-		+this->path
+		+path
 		+" count=100KB "
 		,string("Copying Input File to Disk.."),true
 	);
@@ -412,7 +309,7 @@ void HDD::dd_write(string* batch,string hashfile)
 void HDD::dd_read(string* batch,string outputfile)
 {
 	Command("sudo dd if="
-		+this->path
+		+path
 		+" of="
 		+outputfile
 		+" count=100KB "
@@ -456,33 +353,36 @@ void HDD::resolve_size(){
 	PresentTask="Erasing ....";
 }
 //trouble with default pointer types; need to override function
-void HDD::print(ostream* textgohere=&cout){
-	UpdateRunTime();
-	//TODO add info on which client is running
-	*textgohere<<"Status of: "<<this->path<<endl;
-	*textgohere<<"Presence :    "<<((this->Present)?"detected":"undetected")<<endl;
-	*textgohere<<"Smart Support: "<<(this->SmartSupport?"available":"unavailable")<<endl;
-	*textgohere<<"Model Family: "<<this->ModelFamily<<endl;
-	*textgohere<<"Model  #: "<<this->Model<<endl;
-	*textgohere<<"Serial #: "<<this->SerialNumber<<endl;
-	*textgohere<<"User Capacity: "<<SizeToString(size)<<endl;
-	*textgohere<<"Present Task: "<<this->PresentTask<<endl;
-
-	if(PresentTask=="Running Smart Control..."||PresentTask=="Checking Smart Control is still running...")
-	{
-		*textgohere<<SmartEta<<endl;
-		*textgohere<<"Last Output : "<<this->LastOutput<<endl;
-	}
-	else if(this->Exception!="none"){
-		*textgohere<<"Last Exception : "<<this->Exception<<endl;
-		*textgohere<<"Last/Current Command :" << this->CmdString<<endl;
-		*textgohere<<"Last Output : "<<this->LastOutput<<endl;
-		*textgohere<<"Exit Status : "<<this->LastExitStatus<<endl;	
-	}
+void HDD::print_help2(ostream* textgohere){
 	*textgohere<<"Result: "
 		<<ResultTToString(this->Status)
-		<<endl;			*textgohere<<"______________________________________"<<endl;
-	*textgohere<<"##end##"<<endl;
+		<<endl;			*textgohere<<"______________________________________"<<endl
+		<<"##end##"<<endl;
+}
+void HDD::print_help(ostream* textgohere){
+	if(PresentTask=="Running Smart Control..."||PresentTask=="Checking Smart Control is still running...")
+	{
+		*textgohere<<SmartEta<<endl
+			<<"Last Output : "<<LastOutput<<endl;
+	}
+	else if(this->Exception!="none"){
+		*textgohere<<"Last Exception : "<<this->Exception<<endl
+			<<"Last/Current Command :" << CmdString<<endl
+			<<"Last Output : "<<LastOutput<<endl
+			<<"Exit Status : "<<LastExitStatus<<endl;	
+	}
+	print_help2(textgohere);
+
+}
+void HDD::print(ostream* textgohere=&cout){
+	
+	UpdateRunTime();
+	//TODO add info on which client is running
+	*textgohere<<HDD_Base::print()
+		<<"Present Task: "<<PresentTask<<endl;
+	print_help(textgohere);
+	print_help2(textgohere);
+	
 
 }
 ///*
@@ -496,27 +396,27 @@ void HDD::print_csv(std::fstream * textgohere){
 	/* format is client HomePath,Model fam,model,serial,capacity,client,start time,percent complete,runtime,errors/n*/
 
 
-	//*textgohere<<"Status of: "<<this->path<<endl;
-	//*textgohere<<"Presence :    "<<((this->Present)?"detected":"undetected")<<endl;
-	//*textgohere<<"Smart Support: "<<(this->SmartSupport?"available":"unavailable")<<endl;
-	*textgohere<<this->HomePath<<",";	
-	*textgohere<<this->ModelFamily<<",";
-	*textgohere<<this->Model<<",";
-	*textgohere<<this->SerialNumber<<",";
-	*textgohere<<this->size<<",";
-//	*textgohere<<this->PresentTask<<",";
+	//*textgohere<<"Status of: "<<path<<endl;
+	//*textgohere<<"Presence :    "<<((Present)?"detected":"undetected")<<endl;
+	//*textgohere<<"Smart Support: "<<(SmartSupport?"available":"unavailable")<<endl;
+	*textgohere<<HomePath<<","
+		<<ModelFamily<<","
+		<<Model<<","
+		<<SerialNumber<<","
+		<<size<<",";
+//	*textgohere<<PresentTask<<",";
 
-	*textgohere<<(ctime(&StartTime))<<",";//<<endl;
+	*textgohere<<(ctime(&StartTime))<<","
+	//<<endl;
 	//if(EndTime>0)*textgohere<<"End Time: "<<this->EndTime<<endl;
-	*textgohere<<this->RunTime<<",";//endl;
+		<<RunTime<<","//endl;
 	//*textgohere<<"Erasing "<<(currentLBA*1.0/size)*100<<"% Complete"<<endl;
 	//*textgohere<<"ETA: "<<(eta/3600)<<"hours "<<((eta%3600)/60)<<" min(s) "<<(eta%60)<<"second(s)"<<endl;
 	//if(this->Exception!="none"){
-	*textgohere<<this->Exception<<",";
-		//*textgohere<<"Last/Current Command :" << this->CmdString<<endl;
-		//*textgohere<<"Last Output : "<<this->LastOutput<<endl;
-		//*textgohere<<"Exit Status : "<<this->LastExitStatus<<endl;	
-	*textgohere
+		<<this->Exception<<","
+		//*textgohere<<"Last/Current Command :" << CmdString<<endl;
+		//*textgohere<<"Last Output : "<<LastOutput<<endl;
+		//*textgohere<<"Exit Status : "<<LastExitStatus<<endl;	
 		<<ResultTToString(this->Status)
 		<<","
 		<<endl;
@@ -525,11 +425,11 @@ void HDD::print_csv(std::fstream * textgohere){
 void HDD::log(string * batch){
 	string filename="/home/hdd-test-server/HDD_logs/"
 		+(*batch)+".csv";
-	this->PresentTask="Writing to the log file:"+filename;	
+	PresentTask="Writing to the log file:"+filename;	
 	std::fstream* LogFile= new std::fstream(filename,std::ios::app);
 	print_csv(LogFile);
-	*dstream<<this->path<<" :  "<<this->PresentTask<<endl;
-	*dstream<<this->path<<" : log file is open:"<<LogFile->is_open()<<endl;
+	*dstream<<path<<" :  "<<PresentTask<<endl
+			<<path<<" : log file is open:"<<LogFile->is_open()<<endl;
 	//print(dstream);
 	//print(LogFile);
 }

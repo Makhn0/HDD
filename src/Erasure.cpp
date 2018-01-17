@@ -1,7 +1,3 @@
-#ifndef Erasure_cpp
-#define Erasure_cpp
-
-
 #include <iostream>
 #include <time.h>
 #include <string>
@@ -80,42 +76,16 @@ class Timer{
 		}
 };
 void Erasure::print(std::ostream* textgohere=&std::cout){
-	UpdateRunTime();
-	//TODO add info on which client is running
-	*textgohere<<"Status of: "<<this->path<<std::endl;
-	*textgohere<<"Presence :    "<<((this->Present)?"detected":"undetected")<<std::endl;
-	*textgohere<<"Smart Support: "<<(this->SmartSupport?"available":"unavailable")<<std::endl;
-	*textgohere<<"Model Family: "<<this->ModelFamily<<std::endl;
-	*textgohere<<"Model  #: "<<this->Model<<std::endl;
-	*textgohere<<"Serial #: "<<this->SerialNumber<<std::endl;
-	*textgohere<<"User Capacity: "<<SizeToString(size)<<std::endl;
-	*textgohere<<"Present Task: "<<this->PresentTask<<std::endl;
-
+	HDD::print(textgohere);
 	if(PresentTask=="Erasing..."){
 		*textgohere<<"Start Time: "<<(ctime(&StartTime));//<<std::endl;
-		if(EndTime>0)*textgohere<<"End Time: "<<this->EndTime<<std::endl;
-		*textgohere<<"Run Time: "<<(this->RunTime/3600)<<"hours "<<((this->RunTime%3600)/60)<<" min(s) "<<(this->RunTime%60)<<"second(s)"<<std::endl;
-		//*textgohere<<"Run Time: "<<this->RunTime<<std::endl;
+		if(EndTime>0)*textgohere<<"End Time: "<<EndTime<<std::endl;
+		*textgohere<<"Run Time: "<<(RunTime/3600)<<"hours "<<((RunTime%3600)/60)<<" min(s) "<<(RunTime%60)<<"second(s)"<<std::endl;
+		//*textgohere<<"Run Time: "<<RunTime<<std::endl;
 		*textgohere<<"Erasing "<<(currentLBA*1.0/size)*100<<"% Complete"<<std::endl;
 		*textgohere<<"ETA: "<<(eta/3600)<<"hours "<<((eta%3600)/60)<<" min(s) "<<(eta%60)<<"second(s)"<<std::endl;
-	}
-
-	else if(PresentTask=="Running Smart Control..."||PresentTask=="Checking Smart Control is still running...")
-	{
-		*textgohere<<SmartEta<<std::endl;
-		*textgohere<<"Last Output : "<<this->LastOutput<<std::endl;
-	}
-
-	else if(this->Exception!="none"){
-		*textgohere<<"Last Exception : "<<this->Exception<<std::endl;
-		*textgohere<<"Last/Current Command :" << this->CmdString<<std::endl;
-		*textgohere<<"Last Output : "<<this->LastOutput<<std::endl;
-		*textgohere<<"Exit Status : "<<this->LastExitStatus<<std::endl;	
-	}
-	*textgohere<<"Result: "
-		<<ResultTToString(this->Status)
-		<<std::endl;			*textgohere<<"______________________________________"<<std::endl;
-*textgohere<<"##end##"<<std::endl;
+	}else print_help(textgohere);
+	print_help2(textgohere);
 
 }
 void Erasure::erase(std::string * method)
@@ -141,10 +111,7 @@ void Erasure::erase(char pattern)
 {
 	///*
 	try{
-		//erase_c(pattern);
 		erase_n(0x00);
-//		erase(new std::string("zero");
-		//this->erase_debrief();
 	}
 	catch(std::string e){
 		*dstream<<path<<" : string thrown"<<std::endl;
@@ -156,11 +123,8 @@ void Erasure::erase(char pattern)
 		this->erase_debrief();
 		throw e;
 	}
-
-	
 	//*/
 }
-
 void Erasure::Write_All( char pattern =0x00,long begin=0,long end=0){
 	if(!end)end=size;
 	std::ofstream drive(path.c_str(),std::ostream::out);
@@ -340,7 +304,7 @@ bool Erasure::Long_Verify(unsigned char pattern =0x00,long begin=0, long end=0){
 
 		if(i%50000000==0) {
 	
-*dstream<<path<< " : checking : "<<(i-begin)/1000000<<" MB "<<"/"<<(end-begin)/1000000<<" MB : "<<((i-begin+1)*1.0/(end+1))*100<<" char :"<<buffer<<":";}
+			*dstream<<path<< " : checking : "<<(i-begin)/1000000<<" MB "<<"/"<<(end-begin)/1000000<<" MB : "<<((i-begin+1)*1.0/(end+1))*100<<" char :"<<buffer<<":";}
 		if(buffer[0]!=pattern) {
 			fail= true;
 			break;
@@ -601,4 +565,104 @@ void Erasure::erase_debrief(){
 	}
 	Command("sudo rm "+TempLogFileName, "erasing temporay log file...",false);
 }
-#endif
+void Erasure::run(string* batch,char pattern){
+	//thread a(&HDD::presence_checker,this,false);
+	while(1){
+		*dstream<<path<<" : beginning running loop... "<< endl;
+		//sleep(1);
+		PresentTask="reseting";
+		*dstream<<path<<" : resetting... "<<endl;
+		reset();
+		PresentTask="waiting to detect...";
+		*dstream<<path<<" : "<<PresentTask<<endl;
+		while(!presence()){
+			sleep(5);
+		}
+		//PresentTask="reseting";
+		//*dstream<<path<<" : resetting... "<<endl;
+		//reset();
+		/*BEGIN TRY BLOCK*/
+		try{	
+			run_body(batch,pattern);
+			Status=FinishedSuccess;
+			print(dstream);
+			//log(batch);
+		}
+		catch(string e){
+			exception_catch(e);
+		}
+		catch(const char * e){
+			exception_catch(e);
+		}
+		catch(exception e){
+			exception_catch(e);
+		}
+		*dstream<<path<<"closing fd"<<endl;
+		close(fd);
+		/*END TRY BLOCK*/
+		*dstream<<path<<" : end of run_body"<<endl;
+
+		while(presence())
+		{
+				sleep(10);
+		}
+		//break;
+		*dstream<<path<<" : pulled out starting over..."<<endl<<endl;
+	}
+	*dstream<<path<<" : we did it out of the loop"<<endl;;
+}
+void Erasure::run_body(string* batch,char pattern){
+	*dstream<<"beginning run_body"<<endl;
+	StartTime=time(0);
+	get_data();
+	if(!presence()){return ;}
+	#ifndef _Skip_Smart
+	//TODO stop already running smartctl?
+	//TODO handle (41) self test interrupted
+	smartctl_run();
+	//bool a=false;
+	/* smart ctl*/
+	/*
+	while(smartctl_running()){
+		if(!presence()){
+			a=true;
+			smartctl_kill();
+			break;
+		}
+		sleep(10);		
+	}
+	*/
+	while(presence(true))
+	{
+		sleep(5);
+		if(!smartctl_running()) {
+			break;
+		}
+		sleep(5);
+	}
+	
+
+	#endif
+	/* back blaze test*/
+	if(bb_test()) throw " >0 of smart 5;187;188;197;198 is >0  : drive likely to fail soon";
+
+	///* confirm read write
+	if(!presence()){return;}
+		dd(batch); //TODO add back in
+	if(!presence()){return;}
+	//*/
+	resolve_size();
+	if(!presence()){return;}
+	//erase
+	#ifdef _Erase
+	erase(pattern);		//compile w/ -d_Erase
+	if(!presence()){return;}
+	#endif
+
+	EndTime=time(0);
+	if(!presence()){return;}
+	*dstream<<path<<"closing fd.. "<<endl;
+	close(fd);
+	*dstream<<path<<" : end of erase: writing to logs"<<endl;
+	log(batch);
+}

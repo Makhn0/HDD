@@ -63,16 +63,18 @@ class HDD: public HDD_Base {
 		void hash_check(std::string*,std::string,std::string);
 		void resolve_size();
 
-
+		std::ostream* task(std::string);
 		void exception_catch(std::exception);
 		void exception_catch(std::string);
 		void exception_catch(const char *);
 		void log(std::string*);
 		void print(std::ostream *);
+		void print_help(std::ostream *);
+		void print_help2(std::ostream *);
 		void print();
 		void print_csv(std::fstream* );
-		void run_body(std::string*,char);
-		void run(std::string*,char);
+
+		void erase (char);
 
 };
 #endif
