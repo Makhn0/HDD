@@ -12,8 +12,6 @@ enum Result_t{Unfinished,FinishedSuccess,FinishedFail,Incomplete};
 class HDD: public HDD_Base {
 	public:
 		static int instances;
-		
-
 
 		//run properties
 		Result_t Status=Unfinished;

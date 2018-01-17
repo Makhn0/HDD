@@ -9,13 +9,10 @@ class Erasure : public HDD{
 		long currentLBA=0;
 		Result_t Status=Unfinished;
 
-		
 		long EraseStart=0;
 		long EraseEnd=0;
 		time_t eta;
 
-
-		
 		Erasure(std::string pattern):HDD(pattern){
 			
 		}

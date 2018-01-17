@@ -14,6 +14,7 @@
 #include "HDD.h"
 #include "Erasure.h"
 #include "methods.h"
+using namespace std;
 void Erasure::print(std::ostream* textgohere=&std::cout){
 	UpdateRunTime();
 	//TODO add info on which client is running
@@ -291,40 +292,69 @@ bool Erasure::Long_Verify(unsigned char pattern =0x00,long begin=0, long end=0){
 	idrive.close();
 	return !fail;//TODO change to return in for loop;
 }
-void Erasure::erase_c(char pattern){
-	//Working
-	PresentTask="Resolving sizes...";
-	
-	/* make sure that program can access whole drive*/
-	std::ifstream in(path.c_str(),std::istream::in);
-	in.seekg(0,std::ios_base::end);
-	long size1 =in.tellg();
-	in.close();
 
-	if(size!=size1) throw "cannot resolve size";	
+class Timer{
+	private:
+/*
+		time_t begin_t=;
+		tm * date=localtime(&begin_t);
+		tm * date=localtime(&begin_t)
+*/
+		time_t begin_t;
+		time_t current_t;
+		time_t end_t;
+		ostream * stream;
+		
+	public:
+		Timer(ostream * astream=&cout) : begin_t(time(0)),current_t(begin_t),stream(astream){}
+		void set(){
+			current_t=time(0);	
+		}
+		void reset(){
+			begin_t=time(0);
+			current_t=begin_t;
+			end_t=0;
+		}
+		void end(){
+			end_t=time(0);
+ 		}
+		void print_out(string msg,tm * date){
 
-	*dstream<<path <<" : sizes detected: "<<size<< " : "<<size1<<std::endl;
-	/* proceed with wiping*/
-	/**/
-	/* writes all single character*/
-	//97=a currently d0
-	PresentTask="Erasing ....";
-	this->Write_All(pattern,0,size);
-	
-}
+			*stream<<msg//include path in message
+			<<(1900+ date->tm_year)
+			<<"/"
+			<<month(date->tm_mon)
+			<<"/"
+			<<(1+date->tm_mday)<<"  | "	
+			<<date->tm_hour<<":"
+			<<date->tm_min<<":"
+			<<date->tm_sec<<endl;
+		}
+		void print_begin(string msg){
+			print_out(msg,localtime(&begin_t));
+		}
+		void print_current(string msg){
+			print_out(msg,localtime(&current_t));
+		}
+		void print_elapsed(string msg){
+			time_t time_elapsed=current_t-begin_t;
+			print_out( msg,localtime(&time_elapsed));
+		}
+		void print_full(string msg){
+			if(end_t){
+				time_t diff= end_t-begin_t;
+				print_out(msg,localtime(&diff));
+			}
+			else *stream<<"end_t not set"<<endl	;		
+		}
+};
 void Erasure::erase_n(char pattern){
-	//fastest time recorded currently being used
+	PresentTask="Erasing...";
+	Timer * timer_i = new Timer(dstream); //timer_instance
+	timer_i->print_begin(path+" :start erasing w/erase_n:");
 	time_t begin_t=time(0);
-	tm * date=localtime(&begin_t);
-	*dstream<<path<<" :start erasing w/erase_n:  "
-		<<(1900+ date->tm_year)
-		<<"/"
-		<<month(date->tm_mon)
-		<<"/"
-		<<(1+date->tm_mday)<<"  | "	
-		<<date->tm_hour<<":"
-		<<date->tm_min<<":"
-		<<date->tm_sec<<std::endl;
+	tm * date;
+
 /* The result holder. */
 	int r;
 
@@ -341,39 +371,39 @@ void Erasure::erase_n(char pattern){
 	char* p;
 
 	/* The output buffer window offset. */
-	int w = 0;
+	int w= 0;
 
 	/* The number of bytes remaining in the pass. */
-	unsigned long z =size; //originally unsigned long long in nwipe
+	unsigned long z=size; //originally unsigned long long in nwipe
 	int errors=0; 		//should use long long for size everywhere?
-	fd=open(path.c_str(),O_RDWR);//just incase reset didn't get it because of no presence or somethign
+	this->fd=open(path.c_str(),O_RDWR);//just incase reset didn't get it because of no presence or somethign
 //* tottaly copy pasted from nwipe's github
 	
 	/*if( pattern == NULL )
 	{
 		// Caught insanity. 
-		*dstream<<"null pattern pointer"<<std::endl;
+		*dstream<<"null pattern pointer"<<endl;
 		return -1;
 	}
 	*///will never happen pattern not pointer in this code
 	/*if( pattern->length <= 0 )
 	{
 		// Caught insanity. 
-		*dstream<<"__FUNCTION__: The pattern length member is "<<, pattern->length<<std::endl ;
+		*dstream<<"__FUNCTION__: The pattern length member is "<<, pattern->length<<endl ;
 		return -1;
 	}*///will never happen
 
 	// Create the output buffer. 
-	b = (char *) malloc( blocksize  +2 );
+	b= (char *) malloc( blocksize  +2 );
 
 	// Check the memory allocation. 
 	if( ! b )
 	{
-		*dstream<<"unable to create buffer"<<std::endl;
-		return;//return -1;
+		*dstream<<"unable to create buffer"<<endl;
+		throw "unable to create buffer" ;//return;//return -1;
 	}
 
-	for( p = b ; p < b + 512  + 1 ; p += 1 )
+	for( p= b ; p < b + 512  + 1 ; p += 1 )
 	{
 		// Fill the output buffer with the pattern.
 		//memcpy( p, pattern, 1 ); 
@@ -381,41 +411,41 @@ void Erasure::erase_n(char pattern){
 	}
 ///
 	// Reset the file pointer. 
-	*dstream<<"filedescriptor int fd = "<<fd<<std::endl;
-	offset = lseek( fd, 0, SEEK_SET );
+	*dstream<<"filedescriptor int fd = "<<fd<<endl;
+	offset= lseek( fd, 0, SEEK_SET );
 
 	// Reset the pass byte counter. 
 	//c->pass_done = 0; don't need for copy
 
-	if( offset == (off64_t)-1 )
+	if( offset== (off64_t)-1 )
 	{
 		//nwipe_perror( errno, __FUNCTION__, "lseek" );
 		//nwipe_log( NWIPE_LOG_FATAL, "Unable to reset the '%s' file offset.", c->device_name );
-		*dstream<<"unable to reset offset"<<std::endl;
-		return ;//return -1;
+		*dstream<<"unable to reset offset"<<endl;
+		throw " unable to reset ofset";//return ;//return -1;
 	}
 
-	if( offset != 0 )
+	if( offset!= 0 )
 	{
 		//* This is system insanity. 
 		//nwipe_log( NWIPE_LOG_SANITY, "__FUNCTION__: lseek() returned a bogus offset on '%s'.", c->device_name );
-		*dstream<<"lseek returned bad offset"<<std::endl;
-		return ;//return -1;
+		*dstream<<"lseek returned bad offset"<<endl;
+		throw "lseek returned bad offset";//return ;//return -1;
 	}
 
-	*dstream<<"actually erasing part"<<std::endl;
+	*dstream<<"actually erasing part"<<endl;
 	while( z > 0 )
 	{
 		if( 512 <= z )
 		{
-			blocksize = 512 ;
+			blocksize= 512 ;
 		}
 		else
 		{
 			//* This is a seatbelt for buggy drivers and programming errors because 
 			//* the device size should always be an even multiple of its blocksize. 
-			blocksize = z;
-			*dstream<<"the size of "<< path<< " is not a multiple of block size "<<blocksize<<std::endl;
+			blocksize= z;
+			*dstream<<"the size of "<< path<< " is not a multiple of block size "<<blocksize<<endl;
 			//nwipe_log( NWIPE_LOG_WARNING,
 			//  "%s: The size of '%s' is not a multiple of its block size %i.",
 		//	  __FUNCTION__, c->device_name, c->device_stat.st_blksize );
@@ -424,15 +454,15 @@ void Erasure::erase_n(char pattern){
 		//* Fill the output buffer with the random pattern. 
 		//* Write the next block out to the device. 
 		//
-		r = write( fd, &b[w], blocksize );
+		r= write( fd, &b[w], blocksize );
 
 		//* Check the result for a fatal error. 
 		if( r < 0 )
 		{
 			//nwipe_perror( errno, __FUNCTION__, "write" );
 			//nwipe_log( NWIPE_LOG_FATAL, "Unable to write to '%s'.", c->device_name );
-			*dstream<<" unable to write fully to"<<path<<std::endl;
-			return ; //return -1;
+			*dstream<<" unable to write fully to"<<path<<endl;
+			throw "unable to write fully";//return ; //return -1;
 		}
 
 		//* Check for a partial write. 
@@ -442,22 +472,22 @@ void Erasure::erase_n(char pattern){
 			//* TODO: Handle a partial write. 
 
 			//* The number of bytes that were not written. 
-			int s = blocksize - r;
+			int s= blocksize - r;
 			
 			//* Increment the error count. 
-			errors += s;
+			errors+= s;
 
-			*dstream <<"partial write errors = "<<errors<<std::endl;
+			*dstream <<"partial write errors = "<<errors<<endl;
 
 			//* Bump the file pointer to the next block. 
-			offset = lseek( fd, s, SEEK_CUR );
+			offset= lseek( fd, s, SEEK_CUR );
 
-			if( offset == (off64_t)-1 )
+			if( offset== (off64_t)-1 )
 			{
 				//nwipe_perror( errno, __FUNCTION__, "lseek" );
 				//nwipe_log( NWIPE_LOG_ERROR, "Unable to bump the '%s' file offset after a partial write.", c->device_name );
-				*dstream<<"unable to bump the file offset after a partial write"<<std::endl;
-				return ;//return -1;
+				*dstream<<"unable to bump the file offset after a partial write"<<endl;
+				throw "unable to bump the file offset after a partial write";//return ;//return -1;
 			}
 
 		} //* partial write 
@@ -517,7 +547,7 @@ void Erasure::erase_n(char pattern){
 		<<(1+date->tm_mday)<<"  | "	
 		<<date->tm_hour<<":"
 		<<date->tm_min<<":"
-		<<date->tm_sec<<std::endl;
+		<<date->tm_sec<<endl;
 	date=localtime(&end_t);
 	*dstream<<path<<" :ended erasing:  "
 		<<(1900+ date->tm_year)
@@ -527,13 +557,13 @@ void Erasure::erase_n(char pattern){
 		<<(1+date->tm_mday)<<"  | "	
 		<<date->tm_hour<<":"
 		<<date->tm_min<<":"
-		<<date->tm_sec<<std::endl;
+		<<date->tm_sec<<endl;
 	time_t diff_t=end_t-begin_t;
 	date=localtime(&diff_t);
 	*dstream<<path<<" erased"<<(size)<<" bytes w/erase_n in... :time elapsed:  "	
 		<<date->tm_hour<<":"
 		<<date->tm_min<<":"
-		<<date->tm_sec<<std::endl;
+		<<date->tm_sec<<endl;
 
 }
 void Erasure::erase_dd(){
