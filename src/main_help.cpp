@@ -59,7 +59,8 @@ void BuffClear(std::string a[],int size)
 //returns number of lines read from stringstream i.e. the "height" of the text
 int getlines(std::stringstream *a,std::string buffer[],unsigned int H,int col){
 	std::string buf;
-	for(unsigned int i=0;i<H;)
+	unsigned int j=0;
+	for(unsigned int i=0;i<H;i+=j)
 	{
 		getline(*a,buf);
 		//std::cout<<buf<<std::endl;
@@ -71,16 +72,17 @@ int getlines(std::stringstream *a,std::string buffer[],unsigned int H,int col){
 		//std::cout<<buffer[i]<<std::endl;
 		//std::cout<<"0:"<<i<<std::endl;
 		//this while loop allows in-collumn word wrapping
-		unsigned int j=0;
+		j=0;
 		while((j*col)<buf.size()){
 		//	std::cout<<j<<"j*col"<<(j*col)<<std::endl;
 			if((i+j)<H)buffer[i+j]=buf.substr(j*col,col);
 			else break;
 			j+=1;
 		}
-		i+=j;
+		
 		buf="";
 	}
+	return -1;
 }
 //prints the contents of a in two collumns of height H, and width 90
 void PrintToScreen(std::stringstream * a,int H=15,int col=90)

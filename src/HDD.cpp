@@ -28,7 +28,7 @@ struct Exception : public exception{
 }
 */
 
-string ResultTToString(Result_t a)
+string HDD::ResultTToString(Result_t a)
 {
 	switch(a)
 	{
@@ -39,6 +39,9 @@ string ResultTToString(Result_t a)
 		default: return "Unfinished";
 	}
 	return "Unfinished";
+}
+void HDD::UpdateRunTime(){
+	RunTime=time(0);
 }
 string HDD::StdOut(string cmd, bool throwing=true) {
     string data;
