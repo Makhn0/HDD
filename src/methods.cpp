@@ -83,4 +83,3 @@ int other(){
 	a->close();
 	return 0;
 }
-

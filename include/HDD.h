@@ -75,6 +75,4 @@ class HDD: public HDD_Base {
 		void run(std::string*,char);
 
 };
-
 #endif
-

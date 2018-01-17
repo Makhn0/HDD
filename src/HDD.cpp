@@ -533,4 +533,3 @@ void HDD::log(string * batch){
 	//print(dstream);
 	//print(LogFile);
 }
-

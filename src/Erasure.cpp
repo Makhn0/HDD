@@ -11,10 +11,74 @@
 #include <sys/types.h>//open();close()[ithink];
 #include <stdint.h>//u64 in nwipe_static_pass?
 #include <fcntl.h>
-#include "HDD.h"
 #include "Erasure.h"
 #include "methods.h"
 using namespace std;
+class Timer{
+	private:
+/*
+		time_t begin_t=;
+		tm * date=localtime(&begin_t);
+		tm * date=localtime(&begin_t)
+*/
+		time_t begin_t;
+		time_t current_t;
+		time_t end_t;
+		ostream * stream;
+		
+	public:
+		Timer(ostream * astream=&cout) : begin_t(time(0)),current_t(begin_t),stream(astream){}
+		void set(){
+			current_t=time(0);	
+		}
+		void reset(){
+			begin_t=time(0);
+			current_t=begin_t;
+			end_t=-1;
+		}
+		void end(){
+			end_t=time(0);
+ 		}
+		void print_time(tm * date){
+			*stream<<date->tm_hour<<":"
+				   <<date->tm_min<<":"
+				   <<date->tm_sec<<endl;
+		}
+		tm * date(){
+			return localtime(&current_t);
+		}
+		void print_out(string msg,tm * date){
+
+			*stream<<msg//include path in message
+				<<(1900+ date->tm_year)
+				<<"/"
+				<<month(date->tm_mon)
+				<<"/"
+				<<(1+date->tm_mday)<<"  | "	;
+			print_time(date);
+			
+		}
+		void print_begin(string msg){
+			print_out(msg,localtime(&begin_t));
+		}
+		void print_end(string msg){
+			print_out(msg,localtime(&end_t));
+		}
+		void print_current(string msg){
+			print_out(msg,localtime(&current_t));
+		}
+		void print_elapsed(string msg){
+			time_t time_elapsed=current_t-begin_t;
+			print_out( msg,localtime(&time_elapsed));
+		}
+		void print_full(){
+			if(end_t){
+				time_t diff= end_t-begin_t;
+				print_time(localtime(&diff));
+			}
+			else *stream<<"end_t not set"<<endl	;		
+		}
+};
 void Erasure::print(std::ostream* textgohere=&std::cout){
 	UpdateRunTime();
 	//TODO add info on which client is running
@@ -97,19 +161,6 @@ void Erasure::erase(char pattern)
 	//*/
 }
 
-void Erasure::PrintDate(std::string message,tm * date){
-	*dstream
-		<<path
-		<<message
-		<<(1900+ date->tm_year)
-		<<"/"
-		<<month(date->tm_mon)
-		<<"/"
-		<<(1+date->tm_mday)<<"  | "	
-		<<date->tm_hour<<":"
-		<<date->tm_min<<":"
-		<<date->tm_sec<<std::endl;
-}
 void Erasure::Write_All( char pattern =0x00,long begin=0,long end=0){
 	if(!end)end=size;
 	std::ofstream drive(path.c_str(),std::ostream::out);
@@ -124,10 +175,12 @@ void Erasure::Write_All( char pattern =0x00,long begin=0,long end=0){
 	(*dstream).write(block,bs);
 	*dstream<<":end"
 		<<std::endl;
+	Timer * timer_i=new Timer(dstream);
+	timer_i->print_begin("started erasing");
+	
 	time_t begin_t=time(0);
 	tm * date=localtime(&begin_t);
-	PrintDate(" :start erasing:  ",date);
-	
+	time_t end_t=-1;
 	long lastLBA=-1;
 	time_t Last_t=time(0)-1;
 	time_t current_t=time(0);
@@ -252,19 +305,24 @@ void Erasure::Write_All( char pattern =0x00,long begin=0,long end=0){
 	drive.close();
 	*dstream<<"closed"<<std::endl;
 	
-	time_t end_t=time(0);
-	*dstream<<"time(0);"<<std::endl;
-	date=localtime(&begin_t);
-	*dstream<<"date=local..;"<<std::endl;
-	PrintDate(" :started eraseing:  ",date);
+	timer_i->end();
+	//time_t end_t=time(0);
+//	*dstream<<"time(0);"<<std::endl;
+	//date=localtime(&begin_t);
+	//*dstream<<"date=local..;"<<std::endl;
+	//PrintDate(" :started eraseing:  ",date);
+	timer_i->print_begin(" :started erasing : ");
+	timer_i->print_full();
 	date=localtime(&end_t);
-	PrintDate(" :ended erasing:  ",date);
-	time_t diff_t=end_t-begin_t;
-	date=localtime(&diff_t);
+	*dstream<<" :ended erasing:";
+	//PrintDate(" :ended erasing:  ",date);
+	//time_t diff_t=end_t-begin_t;
+	//date=localtime(&diff_t);
+	timer_i->print_full();/*
 	*dstream<<path<<" erased"<<(begin-end)<<" bytes in... :time elapsed:  "	
 		<<date->tm_hour<<":"
 		<<date->tm_min<<":"
-		<<date->tm_sec<<std::endl;
+		<<date->tm_sec<<std::endl; */
 }
 bool Erasure::Long_Verify(unsigned char pattern =0x00,long begin=0, long end=0){
 	if(!end)end=size;
@@ -293,61 +351,7 @@ bool Erasure::Long_Verify(unsigned char pattern =0x00,long begin=0, long end=0){
 	return !fail;//TODO change to return in for loop;
 }
 
-class Timer{
-	private:
-/*
-		time_t begin_t=;
-		tm * date=localtime(&begin_t);
-		tm * date=localtime(&begin_t)
-*/
-		time_t begin_t;
-		time_t current_t;
-		time_t end_t;
-		ostream * stream;
-		
-	public:
-		Timer(ostream * astream=&cout) : begin_t(time(0)),current_t(begin_t),stream(astream){}
-		void set(){
-			current_t=time(0);	
-		}
-		void reset(){
-			begin_t=time(0);
-			current_t=begin_t;
-			end_t=0;
-		}
-		void end(){
-			end_t=time(0);
- 		}
-		void print_out(string msg,tm * date){
 
-			*stream<<msg//include path in message
-			<<(1900+ date->tm_year)
-			<<"/"
-			<<month(date->tm_mon)
-			<<"/"
-			<<(1+date->tm_mday)<<"  | "	
-			<<date->tm_hour<<":"
-			<<date->tm_min<<":"
-			<<date->tm_sec<<endl;
-		}
-		void print_begin(string msg){
-			print_out(msg,localtime(&begin_t));
-		}
-		void print_current(string msg){
-			print_out(msg,localtime(&current_t));
-		}
-		void print_elapsed(string msg){
-			time_t time_elapsed=current_t-begin_t;
-			print_out( msg,localtime(&time_elapsed));
-		}
-		void print_full(string msg){
-			if(end_t){
-				time_t diff= end_t-begin_t;
-				print_out(msg,localtime(&diff));
-			}
-			else *stream<<"end_t not set"<<endl	;		
-		}
-};
 void Erasure::erase_n(char pattern){
 	PresentTask="Erasing...";
 	Timer * timer_i = new Timer(dstream); //timer_instance
@@ -537,6 +541,13 @@ void Erasure::erase_n(char pattern){
  //return 0; 
 
 //*/
+	//timer_i.set();
+	timer_i->end();
+	timer_i->print_begin(" :started erasing: ");
+	timer_i->print_end(" :ended erasing:   ");
+	*dstream<<" : erased"<<size<<" bytes w/erase_n in ... :time elapsed:  ";
+	timer_i->print_full();
+	/*
 	time_t end_t=time(0);
 	date=localtime(&begin_t);
 	*dstream<<path<<" :started erasing:  "
@@ -564,7 +575,8 @@ void Erasure::erase_n(char pattern){
 		<<date->tm_hour<<":"
 		<<date->tm_min<<":"
 		<<date->tm_sec<<endl;
-
+    //
+	*/
 }
 void Erasure::erase_dd(){
 	Command(
