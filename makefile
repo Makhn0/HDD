@@ -1,10 +1,10 @@
-CPFLAGS=--std=c++0x -pthread -Wall
-
-src=src/methods.cpp src/HDD.cpp src/Erasure.cpp 
-
-Rargs="-D_Erase"
+#ECHO on
 BinName:=bin/ewhde
+CPFLAGS=--std=c++0x -pthread -Wall
 DebugName:=$(BinName)_Debug
+OS:=$(shell uname -s 2>/dev/null)
+Rargs="-D_Erase"
+src=src/methods.cpp src/HDD.cpp src/Erasure.cpp 
 
 ifeq ($(OS),Windows_NT)
 Editor:=notepad++
@@ -13,20 +13,16 @@ Win:=-D_NT_
 BinName:=$(BinName).exe
 DebugName:=$(DebugName).exe
 else
-
-OS:=$(shell uname -s 2>/dev/null)
-args:=-D_test_
 endif
 
 ifeq ($(OS),Linux)
-
 sudo:=sudo
 Editor:=gedit
 del:=sudo rm -rf
+
 endif
 
-#all: $(binName) $(src)
-$(BinName): lib/main.o lib/HDD.o lib/main_help.o lib/methods.o lib/Erasure.o
+$(BinName) : lib/main.o lib/HDD.o lib/main_help.o lib/methods.o lib/Erasure.o
 	$(CXX) $(CPFLAGS) $(args) $(Win) -Iinclude -o $(BinName) \
 		lib/main.o lib/methods.o lib/HDD_Base.o lib/HDD.o lib/Erasure.o 
 	$(CXX) $(CPFLAGS) $(args) $(Win) -Iinclude -D_Debug -o $(DebugName) \
@@ -45,14 +41,15 @@ lib/methods.o : src/methods.cpp
 	$(CXX) -c $(CPFLAGS) $(args) $(Win) -Iinclude -o lib/methods.o src/methods.cpp
 run : $(BinName)
 	$(sudo) $(BinName)
-edit-scripts :
-	$(Editor) scripts &
 edit :
 	$(Editor) include
 	$(Editor) src
-edit-all: edit edit-scripts
+edit-scripts :
+	$(Editor) scripts &
+edit-all : edit edit-scripts
 	$(Editor) makefile &
-clean-help:
+clean-help :
+	@echo omg $(OS)
 	$(del) lib &
 	$(del) bin &
 clean: 
@@ -72,9 +69,5 @@ load: $(BinName)
 	$(sudo) ./homeupdate.zsh  1>/dev/null
 push:
 	$(sudo) make clean
-	$(sudo) git commit -am "$(commit)"
-	$(sudo) git push #only for master
-test: test.cpp
-	$(CXX) --std=c++0x $(args) -o $(TestName) test.cpp
-open-test:
-	$(Editor) test.cpp
+	$(sudo) git commit -am "$(commit)"#commit
+	$(sudo) git push
