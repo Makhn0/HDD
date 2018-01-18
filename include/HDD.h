@@ -44,7 +44,9 @@ class HDD: public HDD_Base {
 		std::string ResultTToString(Result_t a);
 		
 		void UpdateRunTime();
-		std::string StdOut(std::string , bool);
+		std::ostream* task(std::string);
+		std::string StdOut(std::string , bool);	
+
 		void Command(std::string ,std::string ,bool );
 		void Command(std::string ,bool );
 
@@ -63,7 +65,7 @@ class HDD: public HDD_Base {
 		void hash_check(std::string*,std::string,std::string);
 		void resolve_size();
 
-		std::ostream* task(std::string);
+
 		void exception_catch(std::exception);
 		void exception_catch(std::string);
 		void exception_catch(const char *);

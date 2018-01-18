@@ -20,7 +20,7 @@
 
 int main(int argc, char * argv[]){
 
-	PrintToScreen_test();
+	printToScreen_test();
 	return 0;
 	///*
 	

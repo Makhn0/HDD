@@ -22,7 +22,6 @@ class HDD_Base{
 	
 		bool presence();
 		bool presence(bool);
-		
 		void Presence_checker(bool);
 		std::string print();		
 };

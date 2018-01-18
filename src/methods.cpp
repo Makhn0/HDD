@@ -22,8 +22,7 @@ std::string trim(std::string &a){
 	return a;
 }
 
-
-std::string StdOut0(std::string cmd) {
+std::string stdOut0(std::string cmd) {
     std::string data;
     FILE * stream;
     const int max_buffer = 256;
@@ -55,10 +54,7 @@ std::string month(int i){
 	}
 }
 
-
-
-
-std::string SizeToString(long a){
+std::string sizeToString(long a){
 	if(a<1000){
 		return std::to_string(a)+" Bytes";
 	}
@@ -72,9 +68,9 @@ std::string SizeToString(long a){
 int other(){
 	std::string url="dates.csv";
 	std::fstream *a=new std::fstream(url,std::ios::out);
-	std::string data=StdOut0("echo ~");
+	std::string data=stdOut0("echo ~");
 	trim(data);
-	data+=" , "+StdOut0("date");
+	data+=" , "+stdOut0("date");
 	trim(data);
 	std::cout<<data<<std::endl;
 	//a.open();

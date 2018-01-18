@@ -59,17 +59,15 @@ string HDD::StdOut(string cmd, bool throwing=true) {
 }
 
 /* untested take out if bad */
-ostream * HDD::task(string task=""){
+std::ostream * HDD::task(string task=""){
 	PresentTask=task;
 	return &(*dstream<<path<<" : "<<PresentTask<<endl);
-
 }
 
 void HDD::Command(string a,string task,bool throwing=true){
-	PresentTask=task;
-	*dstream<<path<<" : "<<PresentTask<<endl;
+	this->task(task);
 	Command(a,throwing);
-	*dstream<<path<<" : "<<PresentTask<<" done "<<endl;
+	*this->task(task)<<" :done"<<endl;
 }
 void HDD::Command(string a,bool throwing=true){
 	a.append(" 2>&1");
@@ -78,7 +76,7 @@ void HDD::Command(string a,bool throwing=true){
 	LastOutput=StdOut(CmdString,throwing);
 	
 	*dstream<<path<<" : Last Output:"<<LastOutput
-	<<"_::exit status :"<<LastExitStatus<<endl;	
+			<<"_::exit status :"<<LastExitStatus<<endl;	
 }
 void HDD::exception_catch(exception e){
 	exception_catch(e.what());
@@ -120,7 +118,6 @@ void HDD::reset(){
 	LastExitStatus=0;
 	Status=Unfinished;
 }
-
 void HDD::get_data(){
 	/*  gets
 	SmartSupport
@@ -188,7 +185,6 @@ void HDD::get_data(){
 		size=-1;
 		throw " no capacity detected";
 	}
-	
 	trim(ModelFamily);
 	trim(SerialNumber);
 	trim(Model);
@@ -205,12 +201,10 @@ void HDD::smartctl_run()
 		,"Running Smart Control...",true
 	);
 	try{	
-
 		SmartEta=LastOutput.substr(LastOutput.find("Please wait"),90);
 	}
 	catch(exception e)
 	{
-
 		*dstream<<"oops bad substring"<<endl
 				<<LastOutput.size()<<" : "<<LastOutput.find("Please Wait")<<endl;
 	}
@@ -423,9 +417,10 @@ void HDD::print_csv(std::fstream * textgohere){
 }
 //*/
 void HDD::log(string * batch){
+	//don't believe that the program will be able to access this
 	string filename="/home/hdd-test-server/HDD_logs/"
 		+(*batch)+".csv";
-	PresentTask="Writing to the log file:"+filename;	
+	this->task("Writing to the log file:"+filename);	
 	std::fstream* LogFile= new std::fstream(filename,std::ios::app);
 	print_csv(LogFile);
 	*dstream<<path<<" :  "<<PresentTask<<endl

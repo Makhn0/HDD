@@ -34,6 +34,6 @@ std::string HDD_Base::print(){
 	<<"Model Family: "<<ModelFamily<<endl
 	<<"Model  #: "<<Model<<endl
 	<<"Serial #: "<<SerialNumber<<endl
-	<<"User Capacity: "<<SizeToString(size)<<endl;
+	<<"User Capacity: "<<sizeToString(size)<<endl;
 	return s.str();
 }

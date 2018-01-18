@@ -15,150 +15,8 @@
 #include "main_help.h"
 #include "methods.h"
 
-
-void printhelp(std::string a[], std::string b[],int n,int col)
-{
-	//prints two collumns of output side by side, a in first collumn
-	//b in second, n is length of arrays, col is width of the collums
-	bool eos=false;
-	
-	//std::cout<<"printhelp start"<<std::endl;
-	for(int i =0; i<n;i++){
-		//std::cout<<i<<":";
-		for(int j=0;j<col;j++){
-			if(!eos){
-				if(a[i][j])std::cout<<(a[i][j]);
-				else eos=true;			
-			}//pad till end of collumn
-			else std::cout<<" ";
-		}
-		eos=false;
-		//separate collumns
-		std::cout<<"  ";
-		for(int j=0;j<col;j++){
-			if(!eos){
-				if(b[i][j])std::cout<<(b[i][j]);
-				else eos=true;			
-			}
-			else{break;} //std::cout<<" "<<std::endl;
-		}
-		std::cout<<std::endl;
-		eos=false;		
-	}
-
-}
-void BuffClear(std::string a[],int size)
-{
-	for(int i=0;i<size;i++)
-	{
-		a[i].clear();
-	}
-}
-//reads from a up to H lines until special string or end of file is found, writes to buffer in strings of length col
-//returns number of lines read from stringstream i.e. the "height" of the text
-int getlines(std::stringstream *a,std::string buffer[],unsigned int H,int col){
-	std::string buf;
-	unsigned int j=0;
-	for(unsigned int i=0;i<H;i+=j)
-	{
-		getline(*a,buf);
-		//std::cout<<buf<<std::endl;
-		//if end of file or special line is reached,stops writing to buffer array 
-		if(buf=="##end##"||a->eof()){
-			return i;//passed to printhelp, so that extra blank lines aren't printed
-			break;
-		}
-		//std::cout<<buffer[i]<<std::endl;
-		//std::cout<<"0:"<<i<<std::endl;
-		//this while loop allows in-collumn word wrapping
-		j=0;
-		while((j*col)<buf.size()){
-		//	std::cout<<j<<"j*col"<<(j*col)<<std::endl;
-			if((i+j)<H)buffer[i+j]=buf.substr(j*col,col);
-			else break;
-			j+=1;
-		}
-		
-		buf="";
-	}
-	return -1;
-}
-//prints the contents of a in two collumns of height H, and width 90
-void PrintToScreen(std::stringstream * a,int H=15,int col=90)
-{
-	if(col==-1)
-	{
-		std::cout<<a->str();
-		return;
-	}
-	std::string buffer[H];
-	std::string buffer1[H];
-	
-	int h=H;
-	int h1=H;
-	//std::cout<<" printing to screen"<<std::endl;
-	while(!(a->eof())){
-		h=H;
-		h1=H;
-		h=getlines(a,buffer,H,col);
-		//std::cout<<"got first buffer"<<std::endl;
-		if(a->eof()) break;
-		h1=getlines(a,buffer1,H,col);	
-		printhelp(buffer,buffer1,((h<h1)?h1:h),col);
-		BuffClear(buffer,H);
-		BuffClear(buffer1,H);
-	}
-	if((a->rdstate()&(std::ifstream::badbit|std::ifstream::failbit))!=0)a->clear();
-
-	//*/
-}
-void print(HDD * HDDs[], int length)
-{
-	std::cout<<printstream->str()<<std::endl;;
-	std::cout<<"Welcome to Eric's Wonderful Hard Drive Eraser !!! :D \n";
-	std::cout<<"running on:"<<StdOut0("pwd");
-	std::cout<<"BatchName : "<<BatchName<<std::endl;
-	std::cout<<"total HDDs  : "<<HDD::instances<<std::endl;
-	std::cout<<"########################################################\n\n";
-	static int count;
-	count++;
-	std::cout<<count<<std::endl;
-	for(int i=0;i<length;i++)	
-	{
-		
-		if(HDDs[i]->Present)
-			HDDs[i]->print(
-			printstream
-			//&std::cout
-			);
-	}
-	//std::cout<<printstream->str();
-	PrintToScreen(printstream,0,-1);
-	
-	//std::cout<<"end"<<std::endl;
-}
-void contPrint(HDD * HDDs[], int length)
-{
-	while(true)
-	{
-		system("clear||cls");
-		print(HDDs,length);
-		std::this_thread::sleep_for(std::chrono::milliseconds(5000));
-	}
-}
-void printhelptest(){
-	std::string a[3];
-	a[0]="look ma";
-	a[2]="no hands";
-	a[1]="no more";
-	std::string b[3];
-	b[0]="look m5a";
-	b[2]="no hands";
-	b[1]="no more";
-	printhelp(a,b,4,10);
-}
 void preamble(){	printstream=new std::stringstream;
-	std::string csvpath=StdOut0("echo ~");
+	std::string csvpath=stdOut0("echo ~");
 	std::cout<<"client home =" <<csvpath<<std::endl; 
 	csvpath.append("/batch_csv");
 	std::cout<<"checking for directory ~/batch_csv viz. "<< csvpath<<std::endl;
@@ -176,7 +34,7 @@ void preamble(){	printstream=new std::stringstream;
 	}
 	std::cout<<" syncing clocks "<<std::endl;
 	//TODO uncomment time sync
-	//std::cout<<StdOut0(" sudo ntpdate 192.168.1.1 ; date ")<<std::endl;
+	//std::cout<<stdOut0(" sudo ntpdate 192.168.1.1 ; date ")<<std::endl;
 		
 	//*/
 	sleep(1);	
@@ -204,9 +62,151 @@ void preamble(){	printstream=new std::stringstream;
 	else{
 		BatchName="default";
 	}
+}
+void printHelp(std::string a[], std::string b[],int n,int col)
+{
+	//prints two collumns of output side by side, a in first collumn
+	//b in second, n is length of arrays, col is width of the collums
+	bool eos=false;
+	
+	//std::cout<<"printHelp start"<<std::endl;
+	for(int i =0; i<n;i++){
+		//std::cout<<i<<":";
+		for(int j=0;j<col;j++){
+			if(!eos){
+				if(a[i][j])std::cout<<(a[i][j]);
+				else eos=true;			
+			}//pad till end of collumn
+			else std::cout<<" ";
+		}
+		eos=false;
+		//separate collumns
+		std::cout<<"  ";
+		for(int j=0;j<col;j++){
+			if(!eos){
+				if(b[i][j])std::cout<<(b[i][j]);
+				else eos=true;			
+			}
+			else{break;} //std::cout<<" "<<std::endl;
+		}
+		std::cout<<std::endl;
+		eos=false;		
 	}
-void PrintToScreen_test(){
-	std::cout<<"PrintToScreen_test():"<<std::endl;
+
+}
+void buffClear(std::string a[],int size)
+{
+	for(int i=0;i<size;i++)
+	{
+		a[i].clear();
+	}
+}
+//reads from a up to H lines until special string or end of file is found, writes to buffer in strings of length col
+//returns number of lines read from stringstream i.e. the "height" of the text
+int getLines(std::stringstream *a,std::string buffer[],unsigned int H,int col){
+	std::string buf;
+	unsigned int j=0;
+	for(unsigned int i=0;i<H;i+=j)
+	{
+		getline(*a,buf);
+		//std::cout<<buf<<std::endl;
+		//if end of file or special line is reached,stops writing to buffer array 
+		if(buf=="##end##"||a->eof()){
+			return i;//passed to printHelp, so that extra blank lines aren't printed
+			break;
+		}
+		//std::cout<<buffer[i]<<std::endl;
+		//std::cout<<"0:"<<i<<std::endl;
+		//this while loop allows in-collumn word wrapping
+		j=0;
+		while((j*col)<buf.size()){
+		//	std::cout<<j<<"j*col"<<(j*col)<<std::endl;
+			if((i+j)<H)buffer[i+j]=buf.substr(j*col,col);
+			else break;
+			j+=1;
+		}
+		
+		buf="";
+	}
+	return -1;
+}
+//prints the contents of a in two collumns of height H, and width 90
+void printToScreen(std::stringstream * a,int H=15,int col=90)
+{
+	if(col==-1)
+	{
+		std::cout<<a->str();
+		return;
+	}
+	std::string buffer[H];
+	std::string buffer1[H];
+	
+	int h=H;
+	int h1=H;
+	//std::cout<<" printing to screen"<<std::endl;
+	while(!(a->eof())){
+		h=H;
+		h1=H;
+		h=getLines(a,buffer,H,col);
+		//std::cout<<"got first buffer"<<std::endl;
+		if(a->eof()) break;
+		h1=getLines(a,buffer1,H,col);	
+		printHelp(buffer,buffer1,((h<h1)?h1:h),col);
+		buffClear(buffer,H);
+		buffClear(buffer1,H);
+	}
+	if((a->rdstate()&(std::ifstream::badbit|std::ifstream::failbit))!=0)a->clear();
+
+	//*/
+}
+void print(HDD * HDDs[], int length)
+{
+	std::cout<<printstream->str()<<std::endl;;
+	std::cout<<"Welcome to Eric's Wonderful Hard Drive Eraser !!! :D \n";
+	std::cout<<"running on:"<<stdOut0("pwd");
+	std::cout<<"BatchName : "<<BatchName<<std::endl;
+	std::cout<<"total HDDs  : "<<HDD::instances<<std::endl;
+	std::cout<<"########################################################\n\n";
+	static int count;
+	count++;
+	std::cout<<count<<std::endl;
+	for(int i=0;i<length;i++)	
+	{
+		
+		if(HDDs[i]->Present)
+			HDDs[i]->print(
+			printstream
+			//&std::cout
+			);
+	}
+	//std::cout<<printstream->str();
+	printToScreen(printstream,0,-1);
+	
+	//std::cout<<"end"<<std::endl;
+}
+void contPrint(HDD * HDDs[], int length)
+{
+	while(true)
+	{
+		system("clear||cls");
+		print(HDDs,length);
+		std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+	}
+}
+void printHelpTest(){
+	std::string a[3];
+	a[0]="look ma";
+	a[2]="no hands";
+	a[1]="no more";
+	std::string b[3];
+	b[0]="look m5a";
+	b[2]="no hands";
+	b[1]="no more";
+	printHelp(a,b,4,10);
+}
+
+void printToScreen_test(){
+	std::cout<<"printToScreen_test():"<<std::endl;
 	std::string stuff="first line\n second line\n33333333333\n4444444444444\n wh5at??\n666132456789012345678901234567980123456790123456790123456790123456790123456790123456790\nwhat in tarnation\nbut what theremare \n ohaas\n even more\thats righ\n o yea \nothing to see here \n one more\n end";
 	HDD * a=new HDD("/dev/sdf");
 	HDD*b=new HDD("/dev/sdg");
@@ -217,13 +217,13 @@ void PrintToScreen_test(){
 	a->print(s);
 	b->print(s);
  	*s<<stuff<<std::endl;
-	PrintToScreen(s,15,-1);
+	printToScreen(s,15,-1);
 ///*	
 	s->str("");s->flush();s->sync();
 	a->print(s);
 	b->print(s);
-	std::cout<<"second PrintToScreen call"<<std::endl;
-	PrintToScreen(s,1000,-1);
+	std::cout<<"second printToScreen call"<<std::endl;
+	printToScreen(s,1000,-1);
 	std::cout<<"end"<<std::endl;
 	//*/
 }

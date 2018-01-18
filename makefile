@@ -27,9 +27,9 @@ endif
 
 #all: $(binName) $(src)
 $(BinName): lib/main.o lib/HDD.o lib/main_help.o lib/methods.o lib/Erasure.o
-	$(CXX) $(CPFLAGS) $(args) $(Win) -o $(BinName) -Iinclude \
+	$(CXX) $(CPFLAGS) $(args) $(Win) -Iinclude -o $(BinName) \
 		lib/main.o lib/methods.o lib/HDD_Base.o lib/HDD.o lib/Erasure.o 
-	$(CXX) $(CPFLAGS) $(args) $(Win) -D_Debug -o $(DebugName) -Iinclude \
+	$(CXX) $(CPFLAGS) $(args) $(Win) -Iinclude -D_Debug -o $(DebugName) \
 		lib/main.o lib/methods.o lib/HDD_Base.o lib/HDD.o lib/Erasure.o 
 lib/HDD_Base.o : src/HDD_Base.cpp
 	$(CXX) -c $(CPFLAGS) $(args) $(Win) -Iinclude -o lib/HDD_Base.o src/HDD_Base.cpp 
