@@ -45,10 +45,12 @@ lib/methods.o : src/methods.cpp
 	$(CXX) -c $(CPFLAGS) $(args) $(Win) -Iinclude -o lib/methods.o src/methods.cpp
 run : $(BinName)
 	$(sudo) $(BinName)
+edit-scripts :
+	$(Editor) scripts &
 edit :
 	$(Editor) include
 	$(Editor) src
-edit-all: edit
+edit-all: edit edit-scripts
 	$(Editor) makefile &
 clean-help:
 	$(del) lib &
