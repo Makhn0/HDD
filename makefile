@@ -1,25 +1,17 @@
-<<<<<<< HEAD
-#ECHO on
 BinName:=bin/ewhde
 CPFLAGS=--std=c++0x -pthread -Wall
 DebugName:=$(BinName)_Debug
-OS:=$(shell uname -s 2>/dev/null)
 Rargs="-D_Erase"
 src=src/methods.cpp src/HDD.cpp src/Erasure.cpp 
-=======
-BinName:=bin/ewhde
-CPFLAGS=--std=c++0x -pthread -Wall
-DebugName:=$(BinName)_Debu
-src=src/methods.cpp src/HDD.cpp src/Erasure.cpp 
-Rargs="-D_Erase"
->>>>>>> detached_head
 
 ifeq ($(OS),Windows_NT)
+
 Editor:=notepad++
-del:=del
+del:=del /F /Q
 Win:=-D_NT_
 BinName:=$(BinName).exe
 DebugName:=$(DebugName).exe
+
 else
 
 @ needs to be after ifeq
@@ -28,6 +20,7 @@ OS:=$(shell uname -s 2>/dev/null)
 endif
 
 ifeq ($(OS),Linux)
+
 sudo:=sudo
 Editor:=gedit
 del:=sudo rm -rf
@@ -60,12 +53,9 @@ edit-scripts :
 	$(Editor) scripts &
 edit-all : edit edit-scripts
 	$(Editor) makefile &
-clean-help :
-	@echo omg $(OS)
-	$(del) lib &
-	$(del) bin &
-clean: 
-	$(sudo) make clean-help || echo 'already clean'
+clean:
+	$(del) lib 
+	$(del) bin 
 update:
 	$(sudo) git pull
 	$(sudo) make all args=$(Rargs)
@@ -81,10 +71,5 @@ load: $(BinName)
 	$(sudo) ./homeupdate.zsh  1>/dev/null
 push:
 	$(sudo) make clean
-<<<<<<< HEAD
 	$(sudo) git commit -am "$(commit)"#commit
 	$(sudo) git push
-=======
-	$(sudo) git commit -am "$(commit)"
-	$(sudo) git push #only for master
->>>>>>> detached_head
