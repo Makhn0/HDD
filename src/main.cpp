@@ -17,9 +17,9 @@
 
 //#include "methods.cpp"
 
-
+using namespace std;
 int main(int argc, char * argv[]){
-
+	cout<<"main"<<endl;
 	printToScreen_test();
 	return 0;
 	///*
@@ -28,13 +28,13 @@ int main(int argc, char * argv[]){
 	//debugstream=&std::cerr;
 	//printstream= new std::stringstream("");
 	#ifdef _Debug
-		*printstream<<"Debug Mode"<<std::endl;
+		*printstream<<"Debug Mode"<<endl;
 		*debugstream<< "making dev path prefix =";
 	#endif
-	std::string devPath="/dev/sd";
+	string devPath="/dev/sd";
 	#ifdef _Debug
-		*debugstream<<devPath<<std::endl;
-		std::cout<<"BatchName :"<<BatchName<<std::endl;
+		*debugstream<<devPath<<endl;
+		cout<<"BatchName :"<<BatchName<<endl;
 		const int DriveNum=1;
 	#endif
 
@@ -44,22 +44,22 @@ int main(int argc, char * argv[]){
 	Erasure* HDDs[DriveNum];
 	std::thread * Threads[DriveNum];
 	
-	std::cout<<"Start Instances : "<<HDD::instances<<std::endl;
+	cout<<"Start Instances : "<<HDD::instances<<endl;
 	for(int i =0;i<DriveNum;i++)
 	{
 		HDDs[i]= new Erasure(devPath+(char)('a'+i));
 		Threads[i]=new std::thread(&Erasure::run, HDDs[i],&BatchName,pattern);	
 		sleep(1);
-		std::cout<<i<<" in loop count "<<HDD::instances<<std::endl;
+		cout<<i<<" in loop count "<<HDD::instances<<endl;
 	}
 	
 	#ifdef _Debug
-		*printstream<<"ended instantiating "<<HDD::instances<<" HDD objects"<<std::endl;
+		*printstream<<"ended instantiating "<<HDD::instances<<" HDD objects"<<endl;
 	#endif
 
 	#ifndef _Debug
 		//A/	if(argv[2][1]!='n'){
-		std::cout<<"Begining Printer..."<<std::endl;
+		cout<<"Begining Printer..."<<endl;
 		std::thread * printer;
 		printer= new std::thread			
 			(&contPrint,(HDD**)HDDs,DriveNum

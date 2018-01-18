@@ -78,24 +78,24 @@ class Timer{
 void Erasure::print(std::ostream* textgohere=&std::cout){
 	HDD::print(textgohere);
 	if(PresentTask=="Erasing..."){
-		*textgohere<<"Start Time: "<<(ctime(&StartTime));//<<std::endl;
-		if(EndTime>0)*textgohere<<"End Time: "<<EndTime<<std::endl;
-		*textgohere<<"Run Time: "<<(RunTime/3600)<<"hours "<<((RunTime%3600)/60)<<" min(s) "<<(RunTime%60)<<"second(s)"<<std::endl;
-		//*textgohere<<"Run Time: "<<RunTime<<std::endl;
-		*textgohere<<"Erasing "<<(currentLBA*1.0/size)*100<<"% Complete"<<std::endl;
-		*textgohere<<"ETA: "<<(eta/3600)<<"hours "<<((eta%3600)/60)<<" min(s) "<<(eta%60)<<"second(s)"<<std::endl;
+		*textgohere<<"Start Time: "<<(ctime(&StartTime));//<<endl;
+		if(EndTime>0)*textgohere<<"End Time: "<<EndTime<<endl;
+		*textgohere<<"Run Time: "<<(RunTime/3600)<<"hours "<<((RunTime%3600)/60)<<" min(s) "<<(RunTime%60)<<"second(s)"<<endl;
+		//*textgohere<<"Run Time: "<<RunTime<<endl;
+		*textgohere<<"Erasing "<<(currentLBA*1.0/size)*100<<"% Complete"<<endl;
+		*textgohere<<"ETA: "<<(eta/3600)<<"hours "<<((eta%3600)/60)<<" min(s) "<<(eta%60)<<"second(s)"<<endl;
 	}else print_help(textgohere);
 	print_help2(textgohere);
 
 }
-void Erasure::erase(std::string * method)
+void Erasure::erase(string * method)
 {  	
-	std::string TempName("");
+	string TempName("");
 	TempName.append("Temp_");
 	TempName.append( path.substr(path.size()-1,1) );
 	TempName.append(".txt");
 	TempLogFileName=TempName;
-	*dstream<<"templogfilename : "<<TempLogFileName<<std::endl;
+	*dstream<<"templogfilename : "<<TempLogFileName<<endl;
 	Command("sudo rm "+TempLogFileName, "erasing old temporay log file, if it exists",false);
 	Command("sudo touch "+TempLogFileName, "touching new temporary log file",true);
 	Command("sudo ./nwipe --autonuke --nogui --method="
@@ -113,13 +113,13 @@ void Erasure::erase(char pattern)
 	try{
 		erase_n(0x00);
 	}
-	catch(std::string e){
-		*dstream<<path<<" : string thrown"<<std::endl;
+	catch(string e){
+		*dstream<<path<<" : string thrown"<<endl;
 		this->erase_debrief();
 		throw e;
 	}
 	catch(std::exception e){
-		*dstream<<path<<" : exception thrown"<<std::endl;
+		*dstream<<path<<" : exception thrown"<<endl;
 		this->erase_debrief();
 		throw e;
 	}
@@ -131,14 +131,13 @@ void Erasure::Write_All( char pattern =0x00,long begin=0,long end=0){
 	if(!drive) throw "cannot open HDD";
 	//watch out for this line
 	else *dstream<<path<<" : opened drive and writing "
-		<<(pattern!=0?(const char *)&pattern:"zero")<<"s from "<<begin<<" to "<<end<<std::endl;
+		<<(pattern!=0?(const char *)&pattern:"zero")<<"s from "<<begin<<" to "<<end<<endl;
 	const long bs=512;
 	char block[bs];
 	for(int i=0;i<bs;i++) block[i]=pattern;
-	*dstream<<"block declared:"<<std::endl	;
+	*dstream<<"block declared:"<<endl	;
 	(*dstream).write(block,bs);
-	*dstream<<":end"
-		<<std::endl;
+	*dstream<<":end"<<endl;
 	Timer * timer_i=new Timer(dstream);
 	timer_i->print_begin("started erasing");
 	
@@ -166,7 +165,7 @@ void Erasure::Write_All( char pattern =0x00,long begin=0,long end=0){
 	    )
 	{
 		//ERASE HERE TODO uncomment to erase
-		//*dstream<<"beginL"<<std::endl;
+		//*dstream<<"beginL"<<endl;
 		drive.seekp(currentLBA);
 		//drive<<block;
 		drive.write(block,bs);
@@ -175,7 +174,7 @@ void Erasure::Write_All( char pattern =0x00,long begin=0,long end=0){
 		{	
 			if(!presence())throw "pulled out while erasing";
 			if(currentLBA/bs<9)	
-				*dstream<<"beggining blocks :"<<currentLBA<<" tellp "<<drive.tellp()<<std::endl;
+				*dstream<<"beggining blocks :"<<currentLBA<<" tellp "<<drive.tellp()<<endl;
 			current_t=time(0);	
 			delta_t=current_t-Last_t; 
 			elapsed_t=current_t-begin_t;
@@ -193,7 +192,7 @@ void Erasure::Write_All( char pattern =0x00,long begin=0,long end=0){
 				<<"MB /"<<(end-begin)/1000000
 				<<" MB : "
 				<<((currentLBA-begin)*1.0/(end-begin))*100
-				<<" percent done"<<std::endl;
+				<<" percent done"<<endl;
 			*dstream<<path<< " : Ave speed : ";
 			*dstream<<aV
 				<<"LBA/sec : inst. speed "
@@ -206,16 +205,16 @@ void Erasure::Write_All( char pattern =0x00,long begin=0,long end=0){
 				<<" min(s)"<<(ieta%60)<<" sec ";
 			*dstream<<" avbased eta: "
 				<<(aeta/60)
-				<<" min(s)"<<(aeta%60)<<" sec "<<std::endl;
+				<<" min(s)"<<(aeta%60)<<" sec "<<endl;
 			eta=aeta;
 			Last_t=current_t;
 			lastLBA=currentLBA;
-			//*dstream<<"end of if"<<std::endl;
+			//*dstream<<"end of if"<<endl;
 		}
 	
-		//*dstream<<"endL :"<<currentLBA<<std::endl;
+		//*dstream<<"endL :"<<currentLBA<<endl;
 	}
-	*dstream<<"out"<<std::endl;
+	*dstream<<"out"<<endl;
 	/*get end LBA's just in case remainder modulo bs!=0*/
 	currentLBA-=bs;
 	for(
@@ -229,7 +228,7 @@ void Erasure::Write_All( char pattern =0x00,long begin=0,long end=0){
 		
 		if(currentLBA%check==0)
 		{	
-			std::cout<<"tellg = "<<drive.tellp()<<std::endl;
+			cout<<"tellg = "<<drive.tellp()<<endl;
 			current_t=time(0);	
 			delta_t=current_t-Last_t; 
 			elapsed_t=current_t-begin_t;
@@ -244,14 +243,14 @@ void Erasure::Write_All( char pattern =0x00,long begin=0,long end=0){
 				<<"MB /"<<(end-begin)/1000000
 				<<" MB : "
 				<<((currentLBA-begin)*1.0/(end-begin))*100
-				<<" percent done"<<std::endl;
+				<<" percent done"<<endl;
 			*dstream<<path<<" delta_t: "<<delta_t<< "s : Ave speed : ";
 			*dstream<<((currentLBA-begin)/elapsed_t)
 				<<"LBA/sec : inst. speed "
 				<<v;
 			*dstream<<"LBA/sec  inst. based eta : "	
 				<<(eta/60)<<" min"
-				<<(eta%60)<<" sec"<<std::endl;
+				<<(eta%60)<<" sec"<<endl;
 			
 			Last_t=current_t;
 			lastLBA=currentLBA;
@@ -259,21 +258,21 @@ void Erasure::Write_All( char pattern =0x00,long begin=0,long end=0){
 		}
 		
 	}
-	*dstream<<path<<" out coda"<<std::endl;
+	*dstream<<path<<" out coda"<<endl;
 
 	*dstream<<path<< " : erasing : "
 		<<currentLBA/1000000<<" MB /32,000 MB : "
-		<<((currentLBA-begin)*1.0/(end-begin))*100<<std::endl;
+		<<((currentLBA-begin)*1.0/(end-begin))*100<<endl;
 	*dstream<<"finished erasing... obstensibly... closing file"
-		<<std::endl;
+		<<endl;
 	drive.close();
-	*dstream<<"closed"<<std::endl;
+	*dstream<<"closed"<<endl;
 	
 	timer_i->end();
 	//time_t end_t=time(0);
-//	*dstream<<"time(0);"<<std::endl;
+//	*dstream<<"time(0);"<<endl;
 	//date=localtime(&begin_t);
-	//*dstream<<"date=local..;"<<std::endl;
+	//*dstream<<"date=local..;"<<endl;
 	//PrintDate(" :started eraseing:  ",date);
 	timer_i->print_begin(" :started erasing : ");
 	timer_i->print_full();
@@ -286,13 +285,13 @@ void Erasure::Write_All( char pattern =0x00,long begin=0,long end=0){
 	*dstream<<path<<" erased"<<(begin-end)<<" bytes in... :time elapsed:  "	
 		<<date->tm_hour<<":"
 		<<date->tm_min<<":"
-		<<date->tm_sec<<std::endl; */
+		<<date->tm_sec<<endl; */
 }
 bool Erasure::Long_Verify(unsigned char pattern =0x00,long begin=0, long end=0){
 	if(!end)end=size;
 	std::ifstream idrive(path.c_str(),std::istream::in);
 	if(!idrive) throw "cannot open HDD to read";
-	else *dstream<<path<<" : opened drive and verifying all  "<<pattern<<"from "<<begin <<" to "<<end<<std::endl;
+	else *dstream<<path<<" : opened drive and verifying all  "<<pattern<<"from "<<begin <<" to "<<end<<endl;
 	char buffer[1];
 	bool fail;
 	for(long i=begin//*3199/3200
@@ -568,20 +567,15 @@ void Erasure::erase_debrief(){
 void Erasure::run(string* batch,char pattern){
 	//thread a(&HDD::presence_checker,this,false);
 	while(1){
-		*dstream<<path<<" : beginning running loop... "<< endl;
+		task(" : beginning running loop... ");
 		//sleep(1);
-		PresentTask="reseting";
-		*dstream<<path<<" : resetting... "<<endl;
+		task("resetting...");
 		reset();
-		PresentTask="waiting to detect...";
-		*dstream<<path<<" : "<<PresentTask<<endl;
+		task("waiting to detect...");
 		while(!presence()){
 			sleep(5);
 		}
-		//PresentTask="reseting";
-		//*dstream<<path<<" : resetting... "<<endl;
-		//reset();
-		/*BEGIN TRY BLOCK*/
+
 		try{	
 			run_body(batch,pattern);
 			Status=FinishedSuccess;
@@ -597,22 +591,25 @@ void Erasure::run(string* batch,char pattern){
 		catch(exception e){
 			exception_catch(e);
 		}
-		*dstream<<path<<"closing fd"<<endl;
+		task("closing fd");
+		
 		close(fd);
 		/*END TRY BLOCK*/
-		*dstream<<path<<" : end of run_body"<<endl;
+		task(" : end of run_body");
 
 		while(presence())
 		{
 				sleep(10);
 		}
 		//break;
-		*dstream<<path<<" : pulled out starting over..."<<endl<<endl;
+		*(task(" : pulled out starting over..."))<<endl;
 	}
-	*dstream<<path<<" : we did it out of the loop"<<endl;;
+	
+	task(" : we did it out of the loop");
 }
 void Erasure::run_body(string* batch,char pattern){
-	*dstream<<"beginning run_body"<<endl;
+	
+	task("beginning run_body");
 	StartTime=time(0);
 	get_data();
 	if(!presence()){return ;}
@@ -640,12 +637,9 @@ void Erasure::run_body(string* batch,char pattern){
 		}
 		sleep(5);
 	}
-	
-
 	#endif
 	/* back blaze test*/
 	if(bb_test()) throw " >0 of smart 5;187;188;197;198 is >0  : drive likely to fail soon";
-
 	///* confirm read write
 	if(!presence()){return;}
 		dd(batch); //TODO add back in
@@ -655,14 +649,14 @@ void Erasure::run_body(string* batch,char pattern){
 	if(!presence()){return;}
 	//erase
 	#ifdef _Erase
-	erase(pattern);		//compile w/ -d_Erase
-	if(!presence()){return;}
+		erase(pattern);		//compile w/ -d_Erase
+		if(!presence()){return;}
 	#endif
 
 	EndTime=time(0);
 	if(!presence()){return;}
-	*dstream<<path<<"closing fd.. "<<endl;
+	task("closing fd.. ");
 	close(fd);
-	*dstream<<path<<" : end of erase: writing to logs"<<endl;
+	task(" : end of erase: writing to logs");
 	log(batch);
 }

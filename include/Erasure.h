@@ -13,8 +13,7 @@ class Erasure : public HDD{
 		long EraseEnd=0;
 		time_t eta;
 		Result_t Status=Unfinished;
-		Erasure(std::string pattern):HDD(pattern){
-		}
+		Erasure(std::string pattern):HDD(pattern){}
 		void run_body(std::string*,char);
 		void run(std::string*,char);
 		void PrintDate(std::string, tm * );

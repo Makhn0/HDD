@@ -30,11 +30,10 @@ class HDD: public HDD_Base {
 		///* learn how to make constructor in src*/
 		HDD(std::string path) : HDD_Base(path), StartTime(time(0)){
 			
-			//TODO define client
-			/*
-			Command("echo ~");
-			HomePath=LastOutput;
-			//*/
+			#ifndef _NT_
+				Command("echo ~");
+				HomePath=LastOutput;
+			#endif
 			instances++;
 		}
 		//*/
@@ -73,7 +72,6 @@ class HDD: public HDD_Base {
 		void print(std::ostream *);
 		void print_help(std::ostream *);
 		void print_help2(std::ostream *);
-		void print();
 		void print_csv(std::fstream* );
 
 		void erase (char);

@@ -119,13 +119,7 @@ void HDD::reset(){
 	Status=Unfinished;
 }
 void HDD::get_data(){
-	/*  gets
-	SmartSupport
-	ModelFamily
-	Model
-	Serial #
-	Capacity
-		*/
+
 	//fd is in reset() as well, this is just in case it changes;
 	if(Present) this->fd=open(path.c_str(),O_RDWR);//std::open?
 	Command(
@@ -349,8 +343,8 @@ void HDD::resolve_size(){
 //trouble with default pointer types; need to override function
 void HDD::print_help2(ostream* textgohere){
 	*textgohere<<"Result: "
-		<<ResultTToString(this->Status)
-		<<endl;			*textgohere<<"______________________________________"<<endl
+		<<ResultTToString(this->Status)<<endl
+		<<"______________________________________"<<endl
 		<<"##end##"<<endl;
 }
 void HDD::print_help(ostream* textgohere){
@@ -365,52 +359,27 @@ void HDD::print_help(ostream* textgohere){
 			<<"Last Output : "<<LastOutput<<endl
 			<<"Exit Status : "<<LastExitStatus<<endl;	
 	}
-	print_help2(textgohere);
-
 }
-void HDD::print(ostream* textgohere=&cout){
-	
+void HDD::print(ostream* textgohere=&cout){	
 	UpdateRunTime();
 	//TODO add info on which client is running
 	*textgohere<<HDD_Base::print()
 		<<"Present Task: "<<PresentTask<<endl;
 	print_help(textgohere);
 	print_help2(textgohere);
-	
-
-}
-///*
-void HDD::print(){
-	print(&cout);
 }
 void HDD::print_csv(std::fstream * textgohere){
-
 	/* appends csv file of batch file*/
+	/* format is client HomePath,fam,model,serial,capacity,client,start time,percent complete,runtime,errors/n*/
 
-	/* format is client HomePath,Model fam,model,serial,capacity,client,start time,percent complete,runtime,errors/n*/
-
-
-	//*textgohere<<"Status of: "<<path<<endl;
-	//*textgohere<<"Presence :    "<<((Present)?"detected":"undetected")<<endl;
-	//*textgohere<<"Smart Support: "<<(SmartSupport?"available":"unavailable")<<endl;
 	*textgohere<<HomePath<<","
 		<<ModelFamily<<","
 		<<Model<<","
 		<<SerialNumber<<","
 		<<size<<",";
-//	*textgohere<<PresentTask<<",";
-
 	*textgohere<<(ctime(&StartTime))<<","
-	//<<endl;
-	//if(EndTime>0)*textgohere<<"End Time: "<<this->EndTime<<endl;
-		<<RunTime<<","//endl;
-	//*textgohere<<"Erasing "<<(currentLBA*1.0/size)*100<<"% Complete"<<endl;
-	//*textgohere<<"ETA: "<<(eta/3600)<<"hours "<<((eta%3600)/60)<<" min(s) "<<(eta%60)<<"second(s)"<<endl;
-	//if(this->Exception!="none"){
-		<<this->Exception<<","
-		//*textgohere<<"Last/Current Command :" << CmdString<<endl;
-		//*textgohere<<"Last Output : "<<LastOutput<<endl;
-		//*textgohere<<"Exit Status : "<<LastExitStatus<<endl;	
+		<<RunTime<<","
+		<<this->Exception<<","	
 		<<ResultTToString(this->Status)
 		<<","
 		<<endl;

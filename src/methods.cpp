@@ -2,8 +2,8 @@
 #include <fstream>
 #include <string>
 #include <stdio.h>
-
-long myStol(std::string a){
+using namespace std;
+long myStol(string a){
 	long output=0;
 	const char * data =a.c_str();
 	for(unsigned int i=0;i<a.length();i++)
@@ -16,14 +16,14 @@ long myStol(std::string a){
 	}
 	return output;
 }
-std::string trim(std::string &a){
+string trim(string &a){
 	if(a[a.length()-1]=='\n')
 		a.erase(a.length()-1);
 	return a;
 }
 
-std::string stdOut0(std::string cmd) {
-    std::string data;
+string stdOut0(string cmd) {
+    string data;
     FILE * stream;
     const int max_buffer = 256;
     char buffer[max_buffer];
@@ -32,11 +32,11 @@ std::string stdOut0(std::string cmd) {
         while(!feof(stream)/*&& Present*/)
             if(fgets(buffer, max_buffer, stream) != NULL) data.append(buffer);
 	//LastExitStatus=pclose(stream);
-      //  if ((LastExitStatus!=0)&&throwing)throw (std::string) "Critical error stopping";
+      //  if ((LastExitStatus!=0)&&throwing)throw (string) "Critical error stopping";
     }
     return trim(data);
 }
-std::string month(int i){
+string month(int i){
 	switch(i){
 		case 0:return "Jan";
 		case 1:return "Feb";
@@ -54,7 +54,7 @@ std::string month(int i){
 	}
 }
 
-std::string sizeToString(long a){
+string sizeToString(long a){
 	if(a<1000){
 		return std::to_string(a)+" Bytes";
 	}
@@ -66,16 +66,16 @@ std::string sizeToString(long a){
 	return std::to_string(a)+" Bytes";
 }
 int other(){
-	std::string url="dates.csv";
+	string url="dates.csv";
 	std::fstream *a=new std::fstream(url,std::ios::out);
-	std::string data=stdOut0("echo ~");
+	string data=stdOut0("echo ~");
 	trim(data);
 	data+=" , "+stdOut0("date");
 	trim(data);
-	std::cout<<data<<std::endl;
+	cout<<data<<endl;
 	//a.open();
-	std::cout<<"ok  a: "<<a->is_open()<<std::endl;
-	*a<<data<<std::endl;
+	cout<<"ok  a: "<<a->is_open()<<endl;
+	*a<<data<<endl;
 	a->close();
 	return 0;
 }
