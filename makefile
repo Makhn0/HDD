@@ -1,10 +1,8 @@
-CPFLAGS=--std=c++0x -pthread -Wall
-
-src=src/methods.cpp src/HDD.cpp src/Erasure.cpp 
-
-Rargs="-D_Erase"
 BinName:=bin/ewhde
-DebugName:=$(BinName)_Debug
+CPFLAGS=--std=c++0x -pthread -Wall
+DebugName:=$(BinName)_Debu
+src=src/methods.cpp src/HDD.cpp src/Erasure.cpp 
+Rargs="-D_Erase"
 
 ifeq ($(OS),Windows_NT)
 Editor:=notepad++
@@ -13,13 +11,11 @@ Win:=-D_NT_
 BinName:=$(BinName).exe
 DebugName:=$(DebugName).exe
 else
-
+@ needs to be after ifeq
 OS:=$(shell uname -s 2>/dev/null)
-args:=-D_test_
 endif
 
 ifeq ($(OS),Linux)
-
 sudo:=sudo
 Editor:=gedit
 del:=sudo rm -rf
@@ -74,7 +70,3 @@ push:
 	$(sudo) make clean
 	$(sudo) git commit -am "$(commit)"
 	$(sudo) git push #only for master
-test: test.cpp
-	$(CXX) --std=c++0x $(args) -o $(TestName) test.cpp
-open-test:
-	$(Editor) test.cpp
