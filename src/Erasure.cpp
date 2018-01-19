@@ -1,12 +1,12 @@
 #include <iostream>
-#include <time.h>
+//#include <time.h>
 #include <string>
 #include <fstream>
 #include <unistd.h>
-#include <sys/stat.h>//O_RDWR?
-#include <sys/types.h>//open();close()[ithink];
-#include <stdint.h>//u64 in nwipe_static_pass?
-#include <fcntl.h>
+//#include <sys/stat.h>
+//#include <sys/types.h>//open();close()[ithink];
+//#include <stdint.h>//u64 in nwipe_static_pass?
+#include <fcntl.h>//O_RDWR
 #include "Erasure.h"
 #include "methods.h"
 using namespace std;
@@ -74,6 +74,9 @@ class Timer{
 			}
 			else *stream<<"end_t not set"<<endl	;		
 		}
+};
+class Tracker : public Timer{
+
 };
 void Erasure::print(std::ostream* textgohere=&std::cout){
 	HDD::print(textgohere);
@@ -172,7 +175,7 @@ void Erasure::Write_All( char pattern =0x00,long begin=0,long end=0){
 		
 		if(currentLBA%check==0||currentLBA/bs<9)
 		{	
-			if(!presence())throw "pulled out while erasing";
+			if(!presence_check())throw "pulled out while erasing";
 			if(currentLBA/bs<9)	
 				*dstream<<"beggining blocks :"<<currentLBA<<" tellp "<<drive.tellp()<<endl;
 			current_t=time(0);	
@@ -565,14 +568,14 @@ void Erasure::erase_debrief(){
 	Command("sudo rm "+TempLogFileName, "erasing temporay log file...",false);
 }
 void Erasure::run(string* batch,char pattern){
-	//thread a(&HDD::presence_checker,this,false);
+	//thread a(&HDD::presence_check_checker,this,false);
 	while(1){
 		task(" : beginning running loop... ");
 		//sleep(1);
 		task("resetting...");
 		reset();
 		task("waiting to detect...");
-		while(!presence()){
+		while(!presence_check()){
 			sleep(5);
 		}
 
@@ -597,7 +600,7 @@ void Erasure::run(string* batch,char pattern){
 		/*END TRY BLOCK*/
 		task(" : end of run_body");
 
-		while(presence())
+		while(presence_check())
 		{
 				sleep(10);
 		}
@@ -612,7 +615,7 @@ void Erasure::run_body(string* batch,char pattern){
 	task("beginning run_body");
 	StartTime=time(0);
 	get_data();
-	if(!presence()){return ;}
+	if(!presence_check()){return ;}
 	#ifndef _Skip_Smart
 	//TODO stop already running smartctl?
 	//TODO handle (41) self test interrupted
@@ -621,7 +624,7 @@ void Erasure::run_body(string* batch,char pattern){
 	/* smart ctl*/
 	/*
 	while(smartctl_running()){
-		if(!presence()){
+		if(!presence_check()){
 			a=true;
 			smartctl_kill();
 			break;
@@ -629,7 +632,7 @@ void Erasure::run_body(string* batch,char pattern){
 		sleep(10);		
 	}
 	*/
-	while(presence(true))
+	while(presence_check())
 	{
 		sleep(5);
 		if(!smartctl_running()) {
@@ -641,20 +644,20 @@ void Erasure::run_body(string* batch,char pattern){
 	/* back blaze test*/
 	if(bb_test()) throw " >0 of smart 5;187;188;197;198 is >0  : drive likely to fail soon";
 	///* confirm read write
-	if(!presence()){return;}
+	if(!presence_check()){return;}
 		dd(batch); //TODO add back in
-	if(!presence()){return;}
+	if(!presence_check()){return;}
 	//*/
 	resolve_size();
-	if(!presence()){return;}
+	if(!presence_check()){return;}
 	//erase
 	#ifdef _Erase
 		erase(pattern);		//compile w/ -d_Erase
-		if(!presence()){return;}
+		if(!presence_check()){return;}
 	#endif
 
 	EndTime=time(0);
-	if(!presence()){return;}
+	if(!presence_check()){return;}
 	task("closing fd.. ");
 	close(fd);
 	task(" : end of erase: writing to logs");

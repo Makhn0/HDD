@@ -14,7 +14,7 @@ DebugName:=$(DebugName).exe
 
 else
 
-@ needs to be after ifeq
+# needs to be after 
 OS:=$(shell uname -s 2>/dev/null)
 
 endif
@@ -23,39 +23,45 @@ ifeq ($(OS),Linux)
 
 sudo:=sudo
 Editor:=gedit
-del:=sudo rm -rf
+del:=sudo rm -f
 
 endif
 
-$(BinName) : lib/main.o lib/HDD.o lib/main_help.o lib/methods.o lib/Erasure.o
+$(BinName) : lib/main.o lib/main_help.o lib/methods.o lib/Console.o lib/HDD_Base.o lib/HDD.o lib/Erasure.o 
 	$(CXX) $(CPFLAGS) $(args) $(Win) -Iinclude -o $(BinName) \
-		lib/main.o lib/methods.o lib/HDD_Base.o lib/HDD.o lib/Erasure.o 
+		lib/main.o \
+		 lib/methods.o lib/Console.o lib/HDD_Base.o lib/HDD.o lib/Erasure.o 
 	$(CXX) $(CPFLAGS) $(args) $(Win) -Iinclude -D_Debug -o $(DebugName) \
-		lib/main.o lib/methods.o lib/HDD_Base.o lib/HDD.o lib/Erasure.o 
+		lib/main.o \
+		 lib/methods.o lib/Console.o lib/HDD_Base.o lib/HDD.o lib/Erasure.o 
+lib/Console.o : src/Console.cpp
+	$(CXX) -c $(CPFLAGS) $(args) $(Win) -Iinclude -o lib/Console.o src/Console.cpp
 lib/HDD_Base.o : src/HDD_Base.cpp
 	$(CXX) -c $(CPFLAGS) $(args) $(Win) -Iinclude -o lib/HDD_Base.o src/HDD_Base.cpp 
 lib/HDD.o : src/HDD.cpp lib/HDD_Base.o
 	$(CXX) -c $(CPFLAGS) $(args) $(Win) -Iinclude -o lib/HDD.o src/HDD.cpp 
 lib/Erasure.o : src/Erasure.cpp
 	$(CXX) -c $(CPFLAGS) $(args) $(Win) -Iinclude -o lib/Erasure.o src/Erasure.cpp 
-lib/main.o : src/main.cpp
+lib/main.o: src/main.cpp
 	$(CXX) -c $(CPFLAGS) $(args) $(Win) -Iinclude -o lib/main.o src/main.cpp 
-lib/main_help.o : src/main_help.cpp
+lib/main_help.o: src/main_help.cpp
 	$(CXX) -c $(CPFLAGS) $(args) $(Win) -Iinclude -o lib/main_help.o src/main_help.cpp 
-lib/methods.o : src/methods.cpp
+lib/methods.o: src/methods.cpp
 	$(CXX) -c $(CPFLAGS) $(args) $(Win) -Iinclude -o lib/methods.o src/methods.cpp
-run : $(BinName)
+
+run: $(BinName)
 	$(sudo) $(BinName)
-edit :
-	$(Editor) include
-	$(Editor) src
-edit-scripts :
+edit:
+	$(Editor) include/*
+	$(Editor) src/*
+edit-scripts:
 	$(Editor) scripts &
-edit-all : edit edit-scripts
+edit-all: edit edit-scripts
 	$(Editor) makefile &
 clean:
-	$(del) lib 
-	$(del) bin 
+	#without /* didn't work on linux
+	$(del) lib/*
+	$(del) bin/*
 update:
 	$(sudo) git pull
 	$(sudo) make all args=$(Rargs)

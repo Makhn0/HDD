@@ -1,25 +1,25 @@
 
 #include "HDD.h"
-#include "Exceptions.h"
-#include "methods.h"
-#include <stdio.h>
+//#include "Exceptions.h"
+//#include "methods.h"
+//#include <stdio.h>
 #include <fstream>
-#include <ostream>
-#include <iostream>
-#include <thread>
-#include <exception>
-#include <string>
-#include <unistd.h> //write()
-#include <sys/stat.h>//O_RDWR?
-#include <sys/types.h>//open();close()[ithink];
+//#include <ostream>
+//#include <iostream>
+//#include <thread>
+//#include <exception>
+//#include <string>
+#include <unistd.h> //access()/// sleep()
 
-#include <stdint.h>//u64 in nwipe_static_pass?
-#include <fcntl.h>
-#include <time.h>
+
+#include <fcntl.h> //O_RDWR? // yes
+//#include <stdint.h>//u64 in nwipe_static_pass?
+
+//#include <time.h>
 
 using namespace std;
 
-int HDD::instances;
+
 /* // might be more usefull than throwing strings
 struct Exception : public exception{
 	const char * what() const throw(){
@@ -43,41 +43,12 @@ string HDD::ResultTToString(Result_t a)
 void HDD::UpdateRunTime(){
 	RunTime=time(0);
 }
-string HDD::StdOut(string cmd, bool throwing=true) {
-    string data;
-    FILE * stream;
-    const int max_buffer= 256;
-    char buffer[max_buffer];
-    stream= popen(cmd.c_str(), "r");
-    if(stream) {
-        while(!feof(stream)&& Present)
-            if(fgets(buffer, max_buffer, stream) != NULL) data.append(buffer);
-	LastExitStatus=pclose(stream);
-        if ((LastExitStatus!=0)&&throwing)throw  "Last System call returned not 0";
-    }
-    return data;
-}
+
 
 /* untested take out if bad */
-std::ostream * HDD::task(string task=""){
-	PresentTask=task;
-	return &(*dstream<<path<<" : "<<PresentTask<<endl);
-}
 
-void HDD::Command(string a,string task,bool throwing=true){
-	this->task(task);
-	Command(a,throwing);
-	*this->task(task)<<" :done"<<endl;
-}
-void HDD::Command(string a,bool throwing=true){
-	a.append(" 2>&1");
-	CmdString=a;
-	*dstream<<path<<" : Last Command:"<<CmdString<<endl;
-	LastOutput=StdOut(CmdString,throwing);
-	
-	*dstream<<path<<" : Last Output:"<<LastOutput
-			<<"_::exit status :"<<LastExitStatus<<endl;	
-}
+
+
 void HDD::exception_catch(exception e){
 	exception_catch(e.what());
 }
@@ -118,73 +89,7 @@ void HDD::reset(){
 	LastExitStatus=0;
 	Status=Unfinished;
 }
-void HDD::get_data(){
 
-	//fd is in reset() as well, this is just in case it changes;
-	if(Present) this->fd=open(path.c_str(),O_RDWR);//std::open?
-	Command(
-		"sudo smartctl -i "
-		+path
-		+" | awk '/SMART support is:/' | sed -n '1,1p'"
-		,"getting data...",true
-	);
-	string temp= LastOutput.substr(18,9);
-	SmartSupport=(temp=="Available");	
-	
-	*dstream<<path<<" : SmartSupport : "<<temp<<" : "<<SmartSupport<<endl; 
-	 Command(
-		"sudo smartctl -i "
-		+path
-		+" | awk '/Model Family:/'",true
-	);
-	if(LastOutput!=""){
-		ModelFamily=LastOutput.substr(18,35);
-			
-	}
-	else
-	{
-		ModelFamily="none detected";
-	}
-
-	Model= StdOut(
-		"sudo smartctl -i "
-		+path
-		+" | awk '/Device Model:/'"
-	);
-	if(LastOutput!=""){	
-		Model= LastOutput.substr(18,35);	
-	}
-	else
-	{
-		Model=" none detected";
-	}
-	Command(
-		"sudo smartctl -i "
-		+path
-		+" | awk '/Serial Number:/'",true
-	);	
-	SerialNumber =LastOutput.substr(18,35);
-
-	Command(
-		"sudo smartctl -i "
-		+path
-		+" | awk '/User Capacity:/'",true
-	);
-	if(LastOutput!=""){
-		string a=LastOutput.substr(18,25);
-		size= myStol(a);
-	}
-	else
-	{
-		size=-1;
-		throw " no capacity detected";
-	}
-	trim(ModelFamily);
-	trim(SerialNumber);
-	trim(Model);
-	*dstream<<"Data Extracted..."<<endl;
-	print(dstream);
-}
 void HDD::smartctl_run()
 {	
 	smartctl_kill();
@@ -363,7 +268,7 @@ void HDD::print_help(ostream* textgohere){
 void HDD::print(ostream* textgohere=&cout){	
 	UpdateRunTime();
 	//TODO add info on which client is running
-	*textgohere<<HDD_Base::print()
+	*textgohere<<HDD_Base::str()
 		<<"Present Task: "<<PresentTask<<endl;
 	print_help(textgohere);
 	print_help2(textgohere);

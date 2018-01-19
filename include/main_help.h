@@ -1,11 +1,11 @@
 #ifndef main_help_h
 #define main_help_h
-
 std::string BatchName;
 std::string argPath;
 std::stringstream * printstream;
 std::ostream * debugstream;
 char pattern = 0x00;
+
 
 extern std::string month(int i);
 extern std::string stdOut0(std::string i);//needs methods link?
