@@ -13,9 +13,9 @@ using namespace std;
 bool HDD_Base::presence_check (){
 	/* stores and returns presence of harddrive */
 	//print for explicit
-	//if(print) *dstream<<path<<" : checking presence... "<<std::endl;
+	//if(print) *p()<<" : checking presence... "<<std::endl;
 	Present= access( path.c_str(),0 )==0;	
-	//if(print) *dstream<<path<<" : presence "<<((Present)?"detected":"not detected")<<std::endl;
+	//if(print) *p()<<" : presence "<<((Present)?"detected":"not detected")<<std::endl;
 	//if(!Present) close(this->fd);//do i need this?
 	return Present;
 }
@@ -40,7 +40,7 @@ void HDD_Base::get_data(){
 	string temp= LastOutput.substr(18,9);
 	SmartSupport=(temp=="Available");	
 	
-	*dstream<<path<<" : SmartSupport : "<<temp<<" : "<<SmartSupport<<endl; 
+	*p()<<" : SmartSupport : "<<temp<<" : "<<SmartSupport<<endl; 
 	 Command(
 		"sudo smartctl -i "
 		+path

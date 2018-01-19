@@ -8,7 +8,7 @@
 #include "HDD_Base.h"
 
 enum Result_t{Unfinished,FinishedSuccess,FinishedFail,Incomplete};
-
+/*begins the testing procedure before erasing */
 class HDD: public HDD_Base {
 	public:
 		
@@ -17,25 +17,13 @@ class HDD: public HDD_Base {
 		bool Running;
 		Result_t Status=Unfinished;
 		std::string SmartEta="";
-
 		std::string Exception="none";
-		//printing commands
-
-
-		//TODO write different classes for these groups of data
-		
 		time_t StartTime=0;
 		long EndTime=0;
 		long RunTime;
 	
-		///* learn how to make constructor in src*/
-		HDD(std::string path) : HDD_Base(path), StartTime(time(0)){
-
-		}
-		//*/
-		~HDD(){
-			instances--;
-		}
+		HDD(std::string path);
+		
 		std::string ResultTToString(Result_t a);
 		
 		void UpdateRunTime();

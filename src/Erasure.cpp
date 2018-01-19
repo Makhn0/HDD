@@ -11,7 +11,9 @@
 #include "methods.h"
 using namespace std;
 class Timer{
+	/*measures run time of erase functions*/
 	private:
+	
 /*
 		time_t begin_t=;
 		tm * date=localtime(&begin_t);
@@ -44,7 +46,6 @@ class Timer{
 			return localtime(&current_t);
 		}
 		void print_out(string msg,tm * date){
-
 			*stream<<msg//include path in message
 				<<(1900+ date->tm_year)
 				<<"/"
@@ -117,12 +118,12 @@ void Erasure::erase(char pattern)
 		erase_n(0x00);
 	}
 	catch(string e){
-		*dstream<<path<<" : string thrown"<<endl;
+		puts(" : string thrown");
 		this->erase_debrief();
 		throw e;
 	}
 	catch(std::exception e){
-		*dstream<<path<<" : exception thrown"<<endl;
+		puts(" : exception thrown");
 		this->erase_debrief();
 		throw e;
 	}
@@ -133,12 +134,12 @@ void Erasure::Write_All( char pattern =0x00,long begin=0,long end=0){
 	std::ofstream drive(path.c_str(),std::ostream::out);
 	if(!drive) throw "cannot open HDD";
 	//watch out for this line
-	else *dstream<<path<<" : opened drive and writing "
+	else *p()<<" : opened drive and writing "
 		<<(pattern!=0?(const char *)&pattern:"zero")<<"s from "<<begin<<" to "<<end<<endl;
 	const long bs=512;
 	char block[bs];
 	for(int i=0;i<bs;i++) block[i]=pattern;
-	*dstream<<"block declared:"<<endl	;
+	*dstream<<"block declared:"<<endl;
 	(*dstream).write(block,bs);
 	*dstream<<":end"<<endl;
 	Timer * timer_i=new Timer(dstream);
@@ -189,18 +190,17 @@ void Erasure::Write_All( char pattern =0x00,long begin=0,long end=0){
 			ieta=(end-currentLBA)/v;
 			aeta=(end-currentLBA)/aV;
 			//dividing by: elapsed_t,v and constants
-			*dstream<<path;
-			*dstream<< " : erasing : ";
-			*dstream<<(currentLBA/1000000)
+			*p()<< " : erasing : "
+				<<(currentLBA/1000000)
 				<<"MB /"<<(end-begin)/1000000
 				<<" MB : "
 				<<((currentLBA-begin)*1.0/(end-begin))*100
-				<<" percent done"<<endl;
-			*dstream<<path<< " : Ave speed : ";
-			*dstream<<aV
+				<<" percent done"<<endl
+				<< " : Ave speed : "
+				<<aV
 				<<"LBA/sec : inst. speed "
-				<<v;
-			*dstream<<"LBA/sec  inst. based eta : "	;
+				<<v
+				<<"LBA/sec  inst. based eta : "	;
 			if(int a=(ieta/3600))
 				*dstream<<(a)
 					<<" hours ";
@@ -217,7 +217,7 @@ void Erasure::Write_All( char pattern =0x00,long begin=0,long end=0){
 	
 		//*dstream<<"endL :"<<currentLBA<<endl;
 	}
-	*dstream<<"out"<<endl;
+	*p()<<"out"<<endl;
 	/*get end LBA's just in case remainder modulo bs!=0*/
 	currentLBA-=bs;
 	for(
@@ -240,18 +240,17 @@ void Erasure::Write_All( char pattern =0x00,long begin=0,long end=0){
 			if(!v)v++;
 			
 			//dividing by: elapsed_t,v and constants
-			*dstream<<path;
-			*dstream<< " : erasing : ";
-			*dstream<<(currentLBA/1000000)
+			*p()<< " : erasing : "
+				<<(currentLBA/1000000)
 				<<"MB /"<<(end-begin)/1000000
 				<<" MB : "
 				<<((currentLBA-begin)*1.0/(end-begin))*100
 				<<" percent done"<<endl;
-			*dstream<<path<<" delta_t: "<<delta_t<< "s : Ave speed : ";
-			*dstream<<((currentLBA-begin)/elapsed_t)
+			*p()<<" delta_t: "<<delta_t<< "s : Ave speed : "
+				<<((currentLBA-begin)/elapsed_t)
 				<<"LBA/sec : inst. speed "
-				<<v;
-			*dstream<<"LBA/sec  inst. based eta : "	
+				<<v
+				<<"LBA/sec  inst. based eta : "	
 				<<(eta/60)<<" min"
 				<<(eta%60)<<" sec"<<endl;
 			
@@ -261,9 +260,9 @@ void Erasure::Write_All( char pattern =0x00,long begin=0,long end=0){
 		}
 		
 	}
-	*dstream<<path<<" out coda"<<endl;
+	*p()<<" out coda"<<endl;
 
-	*dstream<<path<< " : erasing : "
+	*p()<< " : erasing : "
 		<<currentLBA/1000000<<" MB /32,000 MB : "
 		<<((currentLBA-begin)*1.0/(end-begin))*100<<endl;
 	*dstream<<"finished erasing... obstensibly... closing file"
@@ -285,7 +284,7 @@ void Erasure::Write_All( char pattern =0x00,long begin=0,long end=0){
 	//time_t diff_t=end_t-begin_t;
 	//date=localtime(&diff_t);
 	timer_i->print_full();/*
-	*dstream<<path<<" erased"<<(begin-end)<<" bytes in... :time elapsed:  "	
+	*p()<<" erased"<<(begin-end)<<" bytes in... :time elapsed:  "	
 		<<date->tm_hour<<":"
 		<<date->tm_min<<":"
 		<<date->tm_sec<<endl; */
@@ -294,7 +293,7 @@ bool Erasure::Long_Verify(unsigned char pattern =0x00,long begin=0, long end=0){
 	if(!end)end=size;
 	std::ifstream idrive(path.c_str(),std::istream::in);
 	if(!idrive) throw "cannot open HDD to read";
-	else *dstream<<path<<" : opened drive and verifying all  "<<pattern<<"from "<<begin <<" to "<<end<<endl;
+	else *p()<<" : opened drive and verifying all  "<<pattern<<"from "<<begin <<" to "<<end<<endl;
 	char buffer[1];
 	bool fail;
 	for(long i=begin//*3199/3200
@@ -306,7 +305,7 @@ bool Erasure::Long_Verify(unsigned char pattern =0x00,long begin=0, long end=0){
 
 		if(i%50000000==0) {
 	
-			*dstream<<path<< " : checking : "<<(i-begin)/1000000<<" MB "<<"/"<<(end-begin)/1000000<<" MB : "<<((i-begin+1)*1.0/(end+1))*100<<" char :"<<buffer<<":";}
+			*p()<< " : checking : "<<(i-begin)/1000000<<" MB "<<"/"<<(end-begin)/1000000<<" MB : "<<((i-begin+1)*1.0/(end+1))*100<<" char :"<<buffer<<":";}
 		if(buffer[0]!=pattern) {
 			fail= true;
 			break;
@@ -516,7 +515,7 @@ void Erasure::erase_n(char pattern){
 	/*
 	time_t end_t=time(0);
 	date=localtime(&begin_t);
-	*dstream<<path<<" :started erasing:  "
+	*p()<<" :started erasing:  "
 		<<(1900+ date->tm_year)
 		<<"/"
 		<<month(date->tm_mon)
@@ -526,7 +525,7 @@ void Erasure::erase_n(char pattern){
 		<<date->tm_min<<":"
 		<<date->tm_sec<<endl;
 	date=localtime(&end_t);
-	*dstream<<path<<" :ended erasing:  "
+	*p()<<" :ended erasing:  "
 		<<(1900+ date->tm_year)
 		<<"/"
 		<<month(date->tm_mon)
@@ -537,7 +536,7 @@ void Erasure::erase_n(char pattern){
 		<<date->tm_sec<<endl;
 	time_t diff_t=end_t-begin_t;
 	date=localtime(&diff_t);
-	*dstream<<path<<" erased"<<(size)<<" bytes w/erase_n in... :time elapsed:  "	
+	*p()<<" erased"<<(size)<<" bytes w/erase_n in... :time elapsed:  "	
 		<<date->tm_hour<<":"
 		<<date->tm_min<<":"
 		<<date->tm_sec<<endl;

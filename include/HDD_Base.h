@@ -23,9 +23,7 @@ class HDD_Base: public Console{
 		//constructor
 		HDD_Base(std::string path) :Console(path){}
 		//member funcitons
-	
 		bool presence_check();
-
 		void Presence_checker(bool);// continuosly checks to see if hard drive is plugged in
 		void get_data();
 		std::string str();

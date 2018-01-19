@@ -19,7 +19,7 @@
 
 using namespace std;
 
-
+HDD::HDD(std::string path) : HDD_Base(path), StartTime(time(0)){}
 /* // might be more usefull than throwing strings
 struct Exception : public exception{
 	const char * what() const throw(){
@@ -54,14 +54,14 @@ void HDD::exception_catch(exception e){
 }
 void HDD::exception_catch(const char *e){
 		//string * a= new string(*e);
-		*dstream<<path<<"const char thrown :"<<e<<endl;
+		*p()<<"const char thrown :"<<e<<endl;
 		exception_catch((string)e);
 }
 void HDD::exception_catch(string e){
 	Exception= e;
 	PresentTask= " Critical error, stopping. ";
 	Status=FinishedFail;		
-	*dstream<<path<<"#####################WARNING#####################"<<endl
+	*p()<<"#####################WARNING#####################"<<endl
 		<<path<<" : Exception thrown : "<<Exception<<endl	
 		<<path<<" : PresentTask : "<<PresentTask<<endl
 		<<path<<" : LastCommand : "<<CmdString<<endl
@@ -122,7 +122,7 @@ bool HDD::smartctl_running()
 	// it would return still running
 	if (code[0]==' '&&code[1]=='2'&& code[2]=='4') return true;
 	bool done=code=="   0";
-	*dstream<<path<<" : smartctl: "<<((!done)?"is running":" has stopped ")<<" code :"<<code<<endl;
+	*p()<<" : smartctl: "<<((!done)?"is running":" has stopped ")<<" code :"<<code<<endl;
 	if (done) return false;
 	throw " smartctl error test runtime  "+code;
 }
@@ -178,7 +178,7 @@ void HDD::dd(string * batch){
 void HDD::dd_write(string* batch,string hashfile)
 {
 	if(access( hashfile.c_str(),0 )==0){
-		*dstream<<path<<" : old hash exists: "<<endl;
+		puts(" : old hash exists: ");
 		Command("sudo rm "
 			+hashfile
 			,"Erasing Old Hash File"
@@ -224,7 +224,7 @@ void HDD::hash_check(string* batch,string hashfile,string outputfile)
 	if(MainHash!=ReadHash){
 		throw  "hash rw failure...";
 	}
-	else{*dstream<<path<<" : Hashes are the Same"<<endl;}
+	else{*p()<<" : Hashes are the Same"<<endl;}
 	Command("sudo rm "+hashfile+" "+outputfile," Erasing Output and Input files...", true);
 }
 void HDD::resolve_size(){
@@ -238,7 +238,7 @@ void HDD::resolve_size(){
 
 	if(size!=size1) throw "cannot resolve size";	
 
-	*dstream<<path <<" : sizes detected: "<<size<< " : "<<size1<<endl;
+	*p() <<" : sizes detected: "<<size<< " : "<<size1<<endl;
 	/* proceed with wiping*/
 	/**/
 	/* writes all single character*/
@@ -297,7 +297,7 @@ void HDD::log(string * batch){
 	this->task("Writing to the log file:"+filename);	
 	std::fstream* LogFile= new std::fstream(filename,std::ios::app);
 	print_csv(LogFile);
-	*dstream<<path<<" :  "<<PresentTask<<endl
+	*p()<<" :  "<<PresentTask<<endl
 			<<path<<" : log file is open:"<<LogFile->is_open()<<endl;
 	//print(dstream);
 	//print(LogFile);

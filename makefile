@@ -4,6 +4,7 @@ DebugName:=$(BinName)_Debug
 Rargs="-D_Erase"
 src=src/methods.cpp src/HDD.cpp src/Erasure.cpp 
 
+OBJ:= lib/Console.o lib/HDD_Base.o lib/HDD.o lib/Erasure.o 
 ifeq ($(OS),Windows_NT)
 
 Editor:=notepad++
@@ -27,13 +28,13 @@ del:=sudo rm -f
 
 endif
 
-$(BinName) : lib/main.o lib/main_help.o lib/methods.o lib/Console.o lib/HDD_Base.o lib/HDD.o lib/Erasure.o 
+$(BinName) : $(OBJ) lib/main.o lib/main_help.o lib/methods.o
 	$(CXX) $(CPFLAGS) $(args) $(Win) -Iinclude -o $(BinName) \
-		lib/main.o \
-		 lib/methods.o lib/Console.o lib/HDD_Base.o lib/HDD.o lib/Erasure.o 
+		lib/main.o lib/methods.o\
+		  $(OBJ)
 	$(CXX) $(CPFLAGS) $(args) $(Win) -Iinclude -D_Debug -o $(DebugName) \
-		lib/main.o \
-		 lib/methods.o lib/Console.o lib/HDD_Base.o lib/HDD.o lib/Erasure.o 
+		lib/main.o lib/methods.o\
+		  $(OBJ)
 lib/Console.o : src/Console.cpp
 	$(CXX) -c $(CPFLAGS) $(args) $(Win) -Iinclude -o lib/Console.o src/Console.cpp
 lib/HDD_Base.o : src/HDD_Base.cpp
@@ -48,7 +49,13 @@ lib/main_help.o: src/main_help.cpp
 	$(CXX) -c $(CPFLAGS) $(args) $(Win) -Iinclude -o lib/main_help.o src/main_help.cpp 
 lib/methods.o: src/methods.cpp
 	$(CXX) -c $(CPFLAGS) $(args) $(Win) -Iinclude -o lib/methods.o src/methods.cpp
-
+lib/obs.a : $(OBJ)
+	ar rvs lib/obs.a $(OBJ)
+testing: lib/obs.a lib/main.o lib/main_help.o lib/methods.o
+	$(CXX) $(CPFLAGS) $(args) $(Win) -Iinclude -o testing \
+		 lib/methods.o  lib/main.o lib/obs.a
+		  
+	
 run: $(BinName)
 	$(sudo) $(BinName)
 edit:

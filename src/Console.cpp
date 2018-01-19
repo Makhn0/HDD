@@ -11,6 +11,7 @@ Console::Console(std::string path):path(path){
 	#endif
 	instances++;
 }
+Console::~Console(){instances--;}
 string Console::StdOut(string cmd, bool throwing) {
     string data;
     FILE * stream;
@@ -33,13 +34,19 @@ void Console::Command(string a,string task,bool throwing){
 void Console::Command(string a,bool throwing){
 	a.append(" 2>&1");
 	CmdString=a;
-	*dstream<<path<<" : Last Command:"<<CmdString<<endl;
+	*p()<<" : Last Command:"<<CmdString<<endl;
 	LastOutput=StdOut(CmdString,throwing);
 	
-	*dstream<<path<<" : Last Output:"<<LastOutput
+	*p()<<" : Last Output:"<<LastOutput
 			<<"_::exit status :"<<LastExitStatus<<endl;	
 }
 std::ostream * Console::task(string task=""){
 	PresentTask=task;
-	return &(*dstream<<path<<" : "<<PresentTask<<endl);
+	return &(*p()<<" : "<<PresentTask<<endl);
+}
+ostream * Console::p(string msg){
+	return &(*dstream<<path<<msg);
+}
+ostream * Console::puts(string msg){
+	return &(*p()<<msg<<endl);
 }

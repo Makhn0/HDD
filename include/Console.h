@@ -11,11 +11,14 @@ class Console{
 		std::string CmdString;
 		std::string LastOutput;
 		Console(std::string);
+		~Console();
 		int LastExitStatus;
 		/*do i need constructor?*/
 		std::ostream* task(std::string);
 		std::string StdOut(std::string , bool=true);	
 		void Command(std::string ,std::string ,bool=true );
 		void Command(std::string ,bool=true );
+		std::ostream* p(std::string ="");
+		std::ostream* puts(std::string="");
 };
 #endif
