@@ -90,12 +90,12 @@ void HDD::reset(){
 	Status=Unfinished;
 }
 
-void HDD::smartctl_run()
+void HDD::smartctl_start()
 {	
 	smartctl_kill();
 	Command(
 		"sudo smartctl --device=auto --smart=on --saveauto=on --tolerance=normal --test=long "
-		//+" -C"// no longer need smartctl_running
+		//+" -C"// no longer need smartctl _startning
 		+ path
 		,"Running Smart Control...",true
 	);
@@ -110,7 +110,7 @@ void HDD::smartctl_run()
 	sleep(2);
 }
 
-bool HDD::smartctl_running()
+bool HDD::smartctl_check()
 {
 	Command("sudo smartctl -a "
 		+path

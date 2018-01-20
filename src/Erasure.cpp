@@ -1,6 +1,7 @@
 #include <iostream>
 //#include <time.h>
 #include <string>
+#include <sstream>
 #include <fstream>
 #include <unistd.h>
 //#include <sys/stat.h>
@@ -12,7 +13,7 @@
 using namespace std;
 class Timer{
 	/*measures run time of erase functions*/
-	private:
+	protected:
 	
 /*
 		time_t begin_t=;
@@ -25,7 +26,15 @@ class Timer{
 		ostream * stream;
 		
 	public:
-		Timer(ostream * astream=&cout) : begin_t(time(0)),current_t(begin_t),stream(astream){}
+		Timer(ostream * astream=&cerr,bool begin=false) : stream(astream){
+			if(begin){
+			begin_t=current_t=time(0);
+			//current_t=begin_t;
+			}
+		}
+		void begin(){
+			begin_t=time(0);
+		}
 		void set(){
 			current_t=time(0);	
 		}
@@ -37,23 +46,29 @@ class Timer{
 		void end(){
 			end_t=time(0);
  		}
-		void print_time(tm * date){
-			*stream<<date->tm_hour<<":"
-				   <<date->tm_min<<":"
-				   <<date->tm_sec<<endl;
-		}
 		tm * date(){
 			return localtime(&current_t);
 		}
-		void print_out(string msg,tm * date){
-			*stream<<msg//include path in message
-				<<(1900+ date->tm_year)
+		string time_str(tm * date){
+			stringstream s;
+			s<<date->tm_hour<<":"
+				   <<date->tm_min<<":"
+				   <<date->tm_sec<<endl;
+			return s.str();
+		}
+		string date_str(tm * date){
+			stringstream s;
+			s<<(1900+ date->tm_year)
 				<<"/"
 				<<month(date->tm_mon)
 				<<"/"
 				<<(1+date->tm_mday)<<"  | "	;
-			print_time(date);
-			
+			return s.str();
+		}
+		void print_out(string msg,tm * date){
+			*stream<<msg//include path in message
+				<<date_str(date)
+				<<time_str(date);
 		}
 		void print_begin(string msg){
 			print_out(msg,localtime(&begin_t));
@@ -71,13 +86,98 @@ class Timer{
 		void print_full(){
 			if(end_t){
 				time_t diff= end_t-begin_t;
-				print_time(localtime(&diff));
+				*stream<<time_str((localtime(&diff)));
 			}
 			else *stream<<"end_t not set"<<endl	;		
 		}
 };
-class Tracker : public Timer{
+class Tracker : public Timer{//could be template, but who has the time?
+	public:
+		time_t last_t;
+		long current_x;
+		long last_x;
+		long total_x;
+		Tracker(long x,ostream* stream=&std::cerr): Timer(stream),total_x(x){}
+		string eta_str(){return "";}
+		void update_time(){
+			last_t=current_t;
+			current_t=time(0);
+		}
+		void set_x(long x){
+			last_x=current_x;
+			current_x=x;
+		}
+		void update(long x){
+			set_x(x);
+			update_time();
+		}
+		long inst_v_l(long x=0){
+			if(x)update(x);
+			return (current_x-last_x)/(last_t-current_t);
+		}
+		long ave_v_l(long x=0){
+			if(x) update(x);
+			return (current_x)/(last_t-begin_t);
+		}
 
+		long ieta_l(long x=0){
+			if(x) update(x);
+			return (total_x-current_x)/(inst_v_l());// type problems?
+		}
+		long aeta_l(long x=0){
+			if(x) update(x);
+			return (total_x-current_x)/(ave_v_l());
+		}
+		double inst_v_d(long x=0)
+		{	
+			if(x) update(x);
+			return (current_x-last_x)*1.0/(last_t-current_t);
+		}
+		double ave_v_d(long x=0)
+		{	
+			if(x) update(x);
+			return (current_x)*1.0/(last_t-begin_t);
+		}
+		double ieta_d(long x=0){
+			if(x) update(x);
+			return (total_x-current_x)*1.0/(inst_v_l());// type problems?
+		}
+		double aeta_d(long x=0){
+			if(x) update(x);
+			return (total_x-current_x)*1.0/(ave_v_l());
+		}
+		string report(long x = 0){
+			if(x) update(x);
+			stringstream s;
+			s<< " : erasing : "
+				<<(current_x/1000000)
+				<<"MB /"<<(total_x)/1000000
+				<<" MB : "
+				<<((current_x)*1.0/(total_x))*100
+				<<" percent done"<<endl
+				<< " : Ave speed : "
+				<<ave_v_l()
+				<<"LBA/sec : inst. speed "
+				<<inst_v_l()
+				<<"LBA/sec  inst. based eta : "	;
+				
+			s<<report_precise();
+			return s.str();
+			
+		}
+		string report_precise(){
+			stringstream s;
+			
+			if(int a=(ieta_l()/3600))  s<<(a)<<" hours ";
+			s<<(ieta_l()/60)
+				<<" min(s)"	
+				<<(ieta_l()%60)<<" sec ";
+			if(int b=aeta_l()/36000)  s<<(b)<<" hours ";
+			s<<" avbased eta: "
+				<<(aeta_l()/60)
+				<<" min(s)"<<(aeta_l()%60)<<" sec "<<endl;
+				return s.str();
+		}
 };
 void Erasure::print(std::ostream* textgohere=&std::cout){
 	HDD::print(textgohere);
@@ -142,7 +242,7 @@ void Erasure::Write_All( char pattern =0x00,long begin=0,long end=0){
 	*dstream<<"block declared:"<<endl;
 	(*dstream).write(block,bs);
 	*dstream<<":end"<<endl;
-	Timer * timer_i=new Timer(dstream);
+	Tracker * timer_i=new Tracker(size,dstream);
 	timer_i->print_begin("started erasing");
 	
 	time_t begin_t=time(0);
@@ -616,9 +716,8 @@ void Erasure::run_body(string* batch,char pattern){
 	get_data();
 	if(!presence_check()){return ;}
 	#ifndef _Skip_Smart
-	//TODO stop already running smartctl?
 	//TODO handle (41) self test interrupted
-	smartctl_run();
+	smartctl_start();
 	//bool a=false;
 	/* smart ctl*/
 	/*
@@ -634,7 +733,7 @@ void Erasure::run_body(string* batch,char pattern){
 	while(presence_check())
 	{
 		sleep(5);
-		if(!smartctl_running()) {
+		if(!smartctl_check()) {
 			break;
 		}
 		sleep(5);

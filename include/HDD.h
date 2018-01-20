@@ -25,27 +25,23 @@ class HDD: public HDD_Base {
 		HDD(std::string path);
 		
 		std::string ResultTToString(Result_t a);
-		
 		void UpdateRunTime();
-		
-
-
-		/*why defaults no work?*/
 		void reset();
-		
-		
-		void smartctl_run();
-		bool smartctl_running();
+		/*check harddrive integrity*/
+		void smartctl_start();
+		bool smartctl_check();
 		int smart_var(int&,std::string);
 		bool bb_test();
 		void smartctl_kill();
+		/*make sure harddrive can be written to and read*/
 		void dd(std::string*);
 		void dd_write(std::string*,std::string);
 		void dd_read(std::string*,std::string);
+
 		void hash_check(std::string*,std::string,std::string);
+		/*make sure size is correct*/
 		void resolve_size();
-
-
+		/*miscellaneous */	
 		void exception_catch(std::exception);
 		void exception_catch(std::string);
 		void exception_catch(const char *);

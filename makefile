@@ -59,16 +59,17 @@ testing: lib/obs.a lib/main.o lib/main_help.o lib/methods.o
 run: $(BinName)
 	$(sudo) $(BinName)
 edit:
-	$(Editor) include/*
-	$(Editor) src/*
+	$(Editor) include/* &
+	$(Editor) src/* &
 edit-scripts:
 	$(Editor) scripts &
 edit-all: edit edit-scripts
 	$(Editor) makefile &
 clean:
-	#without /* didn't work on linux
-	$(del) lib/*
-	$(del) bin/*
+#without /* didn't work on linux
+#didn't work with it on windows
+	$(del) lib/* &
+	$(del) bin/* &
 update:
 	$(sudo) git pull
 	$(sudo) make all args=$(Rargs)
