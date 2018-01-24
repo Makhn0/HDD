@@ -693,9 +693,9 @@ main(){
 			while true; do
 				for Disk in $HDDs; do
 					find_hdd $Disk;
-                    if (( $Presence[$Disk] == 1 )) && (( $DriveLoggedOut[$Disk] == 0 )) && (( $DriveDataCollected[$Disk] == 1 )); then
+                   			if (( $Presence[$Disk] == 1 )) && (( $DriveLoggedOut[$Disk] == 0 )) && (( $DriveDataCollected[$Disk] == 1 )); then
 						queue_job_control $Disk;
-                    elif (( $Presence[$Disk] == 1 )) && (( $DriveLoggedOut[$Disk] == 0 )) && (( $DriveDataCollected[$Disk] == 0 )); then
+                   			elif (( $Presence[$Disk] == 1 )) && (( $DriveLoggedOut[$Disk] == 0 )) && (( $DriveDataCollected[$Disk] == 0 )); then
 						get_hdd_data $Disk;
 						queue_job_control $Disk;
 					elif (( $Presence[$Disk] == 1 )) && (( $DriveLoggedOut[$Disk] == 1 )); then
