@@ -65,12 +65,13 @@ function logfile_to_g(){
 	#takes the nwipe logfile, and calls find_n for sd[a-h], N many times to extract all the erasures data into a readable csv file
 	file=${1}
 	name=sda
+	>&2 echo extracting data from $file
 	while true; do
-		>&2 echo "finding all $name "
-		out=$(find_all $file $name )
-		>&2 echo out=$out
+		#>&2 echo "finding all $name "
+		out=$(find_all $file $name 2>/dev/null )
+		#>&2 echo out=$out
 		if [[ $out ]] ; then
-			>&2 echo PRINTINGOUT
+			#>&2 echo PRINTINGOUT
 			printf "%s" "$out"
 			printf "\n"
 	
@@ -82,5 +83,5 @@ function logfile_to_g(){
 	done
 }
 #find_all ${1} sda 2>/dev/null
-logfile_to_g ${1} 2>/dev/null
+logfile_to_g ${1} 
 
