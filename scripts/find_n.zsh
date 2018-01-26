@@ -26,6 +26,9 @@ function find_erase_between(){
 	if [[ -z $m ]]; then
 		m='$'
 	fi
+	if [[ -z $n ]]; then
+		n='$'
+	fi
 	sedcmd="${n},${m}p"
 	#>&2 echo here
 	#>&2 echo sedcmd=$sedcmd
@@ -44,6 +47,36 @@ function find_erase_between(){
 
 	echo $pass
 }
+function find_start_between(){
+	fname=${1}
+	n=${2}
+	m=${3}
+	if [[ -z $m ]]; then
+		m='$'
+	fi
+	if [[ -z $n ]]; then
+		n='$'
+	fi
+	sedcmd="${n},${m}p"
+	#>&2 echo sedcmd=$sedcmd
+	E=$(cat -n temp |sed -n $sedcmd | grep "nwipe: notice: Invoking method '.*' on device '$fname'")
+	echo $E
+}
+function find_size_between(){
+	fname=${1}
+	n=${2}
+	m=${3}
+	if [[ -z $m ]]; then
+		m='$'
+	fi
+	if [[ -z $n ]]; then
+		n='$'
+	fi
+	sedcmd="${n},${m}p"
+	#>&2 echo sedcmd=$sedcmd
+	size=$(cat -n temp |sed -n $sedcmd | grep "nwipe: info: Device '$fname' is size" | sed -n 1,1p | grep -oP "\s\d*.$" | grep -oP "\d*")
+	echo $size
+}
 function find_n(){
 	########################parses nwipe's output log file and puts it into a more readable and searchable csv format
 	#arguments are file namd ex. sda, N'th erasure
@@ -59,20 +92,27 @@ function find_n(){
 	#gets serial number from stdout
 	A=$(cat -n temp | grep "nwipe: info: Device $fname has serial number" | sed -n ${N},${N}p |grep -o "\S*$" )
 	
+	
 	A_n=$(cat -n temp | grep "nwipe: info: Device $fname has serial number"| sed -n ${N},${N}p | grep -oP "^\s*\d*\s" | grep -oP "\d*" )
 	#gets line number of next drive in put into sda along with
 	A_next_n=$(cat -n temp | grep "nwipe: info: Device $fname has serial number"| sed -n $((N+1)),$((N+1))p | grep -oP "^\s*\d*\s" | grep -oP "\d*" )
-	
+	E=$(find_start_between $fname $A_n $A_next_n)
+	#>&2 echo E=$E
 	#>&2 echo A=$A	
 	#>&2 echo n=$A_n
 	#>&2 echo m=$A_next_n
 
-	if [[ -z $A ]]
+	if [[ -z $A ]] 
 	then
 		return; #returns meaning it outputs nill, which signals to calling function to terminate
 	fi
+	if [[ -z $E ]]
+	then 
+		echo noerase; #echo's no erase to tell calling function to move onto finding next harddrive
+		return;
+	fi
 	#this is bad
-	#As=$(cat -n temp | grep "nwipe: info: Device '$fname' is size" | sed -n ${N},${N}p | grep -oP "\s\d*.$" | grep -oP "\d*")
+	As=$(find_size_between $fname $A_n $A_next_n)
 	#As_n=$(cat -n temp | grep "nwipe: info: Device '$fname' is size" |sed -n ${N},${N}p | grep -oP "^\s*\d*" | grep -oP "\d*" )
 
 	#print "AS="$As

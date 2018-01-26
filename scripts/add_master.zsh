@@ -10,43 +10,77 @@ function cycle(){
 	elif [[ ${1} == "sdc" ]] ;then
 		name=sdd
 	elif [[ ${1} == "sdd" ]] ;then
+		name=sde
+	elif [[ ${1} == "sde" ]] ;then
+		name=sdf
+	elif [[ ${1} == "sdf" ]] ;then
+		name=sdg
+	elif [[ ${1} == "sdg" ]] ;then
+		name=sdh
+	elif [[ ${1} == "sdh" ]] ;then
 		name=end
 	fi	
 	echo $name;
 }
-#echo start
-function master_stdout(){
-	a=begin
-	N=1
-	name=sda
-	#echo name=$name
+function number_of(){
+	##takes the logfile and filename and finds the number of erasures begum with that filename
+	#n=$(cat |
+	#echo $n
+	echo 100
+	return;
+}
+function find_all(){
+	###takes the logfile , finds all erasures from sdx=${2} and prints lines to stdout
+	file=${1}
+	fname=${2}
+	i=1
+	N=$(number_of $fname)
+	>&2 echo N=$N
 	while true; do
-		#echo "finding $name "
-		while true; do
-			a=$(cat ${1} | ./n_to_g.zsh $name $N);
-			
-			N=$((N+1))
-			#echo N=$Ncat
-			
-			if [[ $N == 10 ]]; then
-				#echo "timeout";
-				break ;
-			fi
-			if [[ -z $a ]]; then
-				#echo "a empty"
-				break;
-			fi
-			echo $a
-			#echo "end"
-		done
-
+		
+		>&2 echo $fname":i="$i
+		#out is csv line of Nth hd detection
+		out=$(cat $file  | ./find_n.zsh $fname $i)
+		if [[ $i == $N ]]; then
+			>&2 echo "timeout";
+			break ;
+		fi
+		if [[ -z $out ]]; then
+			>&2 echo "out empty"
+			break;
+		fi
+		if [[ $out == noerase ]]; then
+			>&2 echo noerase found;
+		else
+			printf "%s" "$out"
+			printf "\n"
+		fi
+		i=$((i+1))
+	done
+	>&2 echo "end of find_all"
+	return;
+}
+#echo start
+function logfile_to_g(){
+	#takes the nwipe logfile, and calls find_n for sd[a-h], N many times to extract all the erasures data into a readable csv file
+	file=${1}
+	name=sda
+	while true; do
+		>&2 echo "finding all $name "
+		out=$(find_all $file $name )
+		>&2 echo out=$out
+		if [[ $out ]] ; then
+			>&2 echo PRINTINGOUT
+			printf "%s" "$out"
+			printf "\n"
+	
+		fi
 		name=$(cycle $name);
-		N=1
-		#echo name=$name
 		if [[ $name == end ]]; then
 			break;
 		fi
 	done
 }
-master_stdout ${1} >> master.csv
+#find_all ${1} sda 2>/dev/null
+logfile_to_g ${1} 2>/dev/null
 
