@@ -1,6 +1,6 @@
 #!/bin/bash
 function createMaster(){
-
+	#retrieves all of the log data from all the clients' /nwipe_2018/log files, formats them with ./add_master redirects output to master.csv
 	server=/home/hdd-test-server
 	outfile=$server/nwipe_2018/master.csv
 	echo $outfile
@@ -29,4 +29,4 @@ function createMaster(){
 	done;		
 }
 
-createMaster
+createMaster 
