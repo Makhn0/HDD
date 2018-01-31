@@ -5,9 +5,9 @@ function updateClients(){
 		echo $Count;
 		#sudo cp /home/hdd-test-server/hdd_test.zsh /home/'test'$Count/;
 		#why singlel quotes?
-		sudo cp ~/HDD/scripts/hdd_test_smart.zsh /home/'test'$Count/;	
+		sudo cp ~/HDD/scripts/hdd_test_smart.zsh /home/'test'$Count/;	#step 1
 		sudo cp ~/HDD/scripts/hdd_test_smart0.zsh /home/'test'$Count/;	
-		sudo cp ~/HDD/scripts/erase_start.zsh /home/'test'$Count/;	
+		sudo cp ~/HDD/scripts/erase_start.zsh /home/'test'$Count/;	#step 2
 		#sudo cp -r /usr/sbin/nwipe /home/'test'$Count/nwipe;
 		sudo cp ~/HDD/bin/ewhde /home/'test'$Count/ewhde; #change to /usr/sbin?
 		#sudo cp ~/HDD/DateTest /home/'test'$Count/DateTest;
@@ -28,4 +28,4 @@ function createMaster(){
 		(( Count = $Count + 1 ));
 	done;		
 }
-updateClients() #()?
+updateClients

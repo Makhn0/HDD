@@ -2,18 +2,24 @@
 function testcond(){
 	echo "/home/test1"
 }
-if [[ $(testcond) =~ ^/home/test[1-5]?[0-9]$ ]]; then #minor bug: test0 passes
-	#sudo ./nwipe ${1} --autonuke --nogui -l$(pwd)/nwipe_2018
+if [[ $(pwd) =~ ^/home/test[1-5]?[0-9]$ ]]; then #minor bug: test0 passes
+	#sudo ./nwipe ${1} --autonuke --nogui -l$(pwd)/nwipe_2018./
 	opt=${1}
 	i=1
+	Narg=""
+	logfile=$(pwd)/nwipe_2018/Log
 	while [ $i -le ${#opt} ]
 	do
-		#sudo ./nwipe ${1} --autonuke --nogui -l$(pwd)/nwipe_2018
+		
 		char=$(echo ${opt} | cut -c ${i}-${i})
-		printf "%s\n" "erasing /dev/sd${char}"
-		##sudo ./nwipe /dev/sd${char} --autonuke --nogui -l$(pwd)/nwipe_2018
+		Narg=$Narg" /dev/sd"$char
 		(( i = i+1 ))
 	done
+	printf "erasing  %s\n" $Narg
+	printf "logFile: %s\n" $logfile
+
+	#sudo ./nwipe -l$logfile $Narg
+	printf "finished\n"
 	#printf "%s\n" "in "
 else
 	
