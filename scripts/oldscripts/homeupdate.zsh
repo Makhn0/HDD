@@ -13,7 +13,7 @@ function updateClients(){
 		#sudo cp ~/HDD/DateTest /home/'test'$Count/DateTest;
 		
 		sudo chown 'test'$Count -R /home/'test'$Count;
-		sudo ls -a /home/'test'$Count/;
+		#sudo ls -a /home/'test'$Count/;
 		(( Count = $Count + 1 ));
 	done;
 }

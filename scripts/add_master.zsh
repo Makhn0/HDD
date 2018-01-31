@@ -23,7 +23,7 @@ function cycle(){
 	echo $name;
 }
 function number_of(){
-	##takes the logfile and filename and finds the number of erasures begum with that filename
+	##takes the logfile and filename and finds the number of erasures begun with that filename
 	#n=$(cat |
 	#echo $n
 	#echo 100
@@ -31,10 +31,12 @@ function number_of(){
 	echo $(cat -n ${1} | grep "nwipe: info: Device /dev/${2} has serial number" | wc | grep -oP "^\s*\d*" | grep -oP "\d*")
 	#	return;
 }
+
 function find_all(){
-	###takes the logfile , finds all erasures from sdx=${2} and prints lines to stdout
+	###takes the logfile , finds all erasures from sdx=${2} ( needs to pass client name to ./find_n) and prints lines to stdout
 	file=${1}
 	fname=${2}
+	client=${3}
 	i=1
 	N=$(number_of $file $fname)
 	>&2 echo $fname": N="$N
@@ -42,8 +44,8 @@ function find_all(){
 		
 		>&2 echo $fname":i="$i
 		#out is csv line of Nth hd detection
-		out=$(cat $file  | ./find_n.zsh $fname $i)
-		if [[ $i == $N ]]; then
+		out=$(cat $file  | sudo ./find_n.zsh $fname $i $client)
+		if [[ $i -gt $N ]]; then
 			>&2 echo "timeout";
 			break ;
 		fi
@@ -64,13 +66,14 @@ function find_all(){
 }
 #echo start
 function logfile_to_g(){
-	#takes the nwipe logfile, and calls find_n for sd[a-h], N many times to extract all the erasures data into a readable csv file
+	#takes the nwipe logfile (${1}), and calls find_n for sd[a-h], N many times to extract all the erasures data into a readable csv file
 	file=${1}
+	client=$(echo $file |grep -oP "test\d{1,2}")
 	name=sda
 	>&2 echo extracting data from $file
 	while true; do
 		#>&2 echo "finding all $name "
-		out=$(find_all $file $name  2>/dev/null )
+		out=$(find_all $file $name $client  2>/dev/null )
 		#>&2 echo out=$out
 		if [[ $out ]] ; then
 			#>&2 echo PRINTINGOUT

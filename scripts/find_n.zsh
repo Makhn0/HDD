@@ -1,21 +1,4 @@
 #!/bin/bash
-function find_dev(){
-	
-
-	sudo cat > temp
-	client= $(pwd |grep -oP "test\d{1,2}")
-	N=0
-
-	A=/dev/sda
-	B=/dev/sda
-	C=/dev/sda
-	D=/dev/sda
-	A_sn=
-	A_s=
-	A_pass0=
-	A_pass1=
-	
-}
 function find_erase_between(){
 	#inputs are line number of target drive(n), line number of next drive(m) and file name(fname) ex. sda
 	#outputs passed if it can find lines verifying  erasure and reporting "blanked device" lines in between n, and m, otherwise outputs not passed
@@ -79,7 +62,7 @@ function find_size_between(){
 }
 function find_n(){
 	########################parses nwipe's output log file and puts it into a more readable and searchable csv format
-	#arguments are file namd ex. sda, N'th erasure
+	#arguments are file namd ex. sda, N'th erasure and name of client logfile is from
 	## intended to be piped into by cat logfile
 	N=${2}
 	
@@ -87,10 +70,10 @@ function find_n(){
 	#>&2 echo fname=$fname
 	sudo cat > temp
 
-	client= $(pwd |grep -oP "test\d{1,2}")
+	client=${3} #$(pwd |grep -oP "test\d{1,2}")
 	#client=$(pwd | grep -oP -e "scrip.{1,2}$")
 	#gets serial number from stdout
-	A=$(cat -n temp | grep "nwipe: info: Device $fname has serial number" | sed -n ${N},${N}p |grep -o "\S*$" )
+	A=$(cat -n temp | grep "nwipe: info: Device $fname has serial number" | sed -n ${N},${N}p |grep -o "\S*\s*$" ) #some times logfile prints extra spaces at the end
 	
 	
 	A_n=$(cat -n temp | grep "nwipe: info: Device $fname has serial number"| sed -n ${N},${N}p | grep -oP "^\s*\d*\s" | grep -oP "\d*" )
@@ -123,6 +106,6 @@ function find_n(){
 }
 
 
-find_n ${1} ${2}
+find_n ${1} ${2} ${3}
 
 
