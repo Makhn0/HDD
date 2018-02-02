@@ -35,7 +35,7 @@ void preamble(){	printstream=new std::stringstream;
 	}
 	cout<<" syncing clocks "<<endl;
 	//TODO uncomment time sync
-	cout<<stdOut0(" sudo ntpdate 192.168.1.1 ; date ")<<endl;
+	//cout<<stdOut0(" sudo ntpdate 192.168.1.1 ; date ")<<endl;
 		
 	//*/
 	sleep(1);	

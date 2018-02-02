@@ -8,6 +8,8 @@ function callNwipe(){
 
 	logfile=${2}
 	args=${3}
+	args="$args \
+		--method=zero"
 	i=1
 	Narg=""
 	while [ $i -le ${#opt} ]
@@ -26,7 +28,13 @@ function callNwipe(){
 	printf "finished\n"
 		#printf "%s\n" "in "
 }
+function time(){
+	date
+	sudo ntpdate 192.168.1.1
+	date
+}
 main(){
+	time
 	if [[ $(pwd) =~ ^/home/test[1-5]?[0-9]$ ]]; then #minor bug: test0 passes
 		#sudo ./nwipe ${1} --autonuke --nogui -l$(pwd)/nwipe_2018./
 		drives=${1}

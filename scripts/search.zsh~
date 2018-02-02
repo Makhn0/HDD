@@ -7,4 +7,10 @@ else
 	#>&2 echo ${1}
 	grep $master -e "${1}" \
 		--color
+	
+	if [[ -z $out ]]; then
+		printf "drive not found\n"
+	else
+		echo $out
+	fi
 fi
