@@ -71,15 +71,15 @@ function find_n(){
 	
 	#>&2 echo dname=$dname
 	sudo cat > temp
-	filen=temp
+	fname=temp
 	#$(pwd |grep -oP "test\d{1,2}")
 	#client=$(pwd | grep -oP -e "scrip.{1,2}$")
 	#gets serial number from stdout
 	
-	A=$( grep $filen -n -e "nwipe: info: Device $dname has serial number" | sed -n ${N},${N}p |grep -o "\S*\s*$" ) #some times logfile prints extra spaces at the end
-	A_n=$( grep $filen -n -e "nwipe: info: Device $dname has serial number"| sed -n ${N},${N}p | grep -oP "^\d*")
+	A=$( grep $fname -n -e "nwipe: info: Device $dname has serial number" | sed -n ${N},${N}p |grep -o "\S*\s*$" ) #some times logfile prints extra spaces at the end
+	A_n=$( grep $fname -n -e "nwipe: info: Device $dname has serial number"| sed -n ${N},${N}p | grep -oP "^\d*")
 	#gets line number of next drive in put into sda along with
-	A_next_n=$(grep $filen -n -e "nwipe: info: Device $dname has serial number"| sed -n $((N+1)),$((N+1))p | grep -oP "^\d*" )
+	A_next_n=$(grep $fname -n -e "nwipe: info: Device $dname has serial number"| sed -n $((N+1)),$((N+1))p | grep -oP "^\d*" )
 	E=$(find_start_between $dname $A_n $A_next_n)
 	#>&2 echo E=$E
 	#>&2 echo A=$A	
@@ -106,7 +106,7 @@ function find_n(){
 
 }
 
-#todo change cat -n temp | grep to grep filen -n etc.
+#todo change cat -n temp | grep to grep fname -n etc.
 find_n ${1} ${2} ${3}
 
 
