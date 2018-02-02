@@ -33,7 +33,7 @@ function time(){
 	sudo ntpdate 192.168.1.1
 	date
 }
-main(){
+function erase_main(){
 	time
 	if [[ $(pwd) =~ ^/home/test[1-5]?[0-9]$ ]]; then #minor bug: test0 passes
 		#sudo ./nwipe ${1} --autonuke --nogui -l$(pwd)/nwipe_2018./
@@ -60,4 +60,4 @@ main(){
 
 	fi
 }
-main ${1} ${2}  #sdx, optional args
+erase_main ${1} ${2}  #sdx, optional args
