@@ -1,50 +1,78 @@
-[2009/05/31 21:58:51] nwipe: notice: Opened entropy source '/dev/urandom'.
-[2009/05/31 21:58:57] nwipe: info: Device /dev/sda has serial number      WD-WMC1S7451918
-[2009/05/31 21:58:57] nwipe: info: Device '/dev/sda' has sector size 512.
-[2009/05/31 21:58:57] nwipe: warning: Changing '/dev/sda' block size from 4096 to 512.
-[2009/05/31 21:58:57] nwipe: info: Device '/dev/sda' is size 1000204886016.
-[2009/05/31 21:58:57] nwipe: info: Device /dev/sdb has serial number            64F8DBHMS
-[2009/05/31 21:58:57] nwipe: info: Device '/dev/sdb' has sector size 512.
-[2009/05/31 21:58:57] nwipe: warning: Changing '/dev/sdb' block size from 4096 to 512.
-[2009/05/31 21:58:57] nwipe: info: Device '/dev/sdb' is size 1000204886016.
-[2009/05/31 21:58:57] nwipe: notice: Invoking method 'DoD Short' on device '/dev/sda'.
-[2009/05/31 21:58:57] nwipe: notice: Starting round 1 of 1 on device '/dev/sda'.
-[2009/05/31 21:58:57] nwipe: notice: Starting pass 1 of 3, round 1 of 1, on device '/dev/sda'.
-[2009/05/31 21:58:57] nwipe: info: Device /dev/sdc has serial number S2SDJ9EBA00126      
-[2009/05/31 21:58:57] nwipe: info: Device '/dev/sdc' has sector size 512.
-[2009/05/31 21:58:57] nwipe: warning: Changing '/dev/sdc' block size from 4096 to 512.
-[2009/05/31 21:58:57] nwipe: info: Device '/dev/sdc' is size 1000204886016.
-[2009/05/31 21:58:57] nwipe: notice: Invoking method 'DoD Short' on device '/dev/sdb'.
-[2009/05/31 21:58:57] nwipe: notice: Starting round 1 of 1 on device '/dev/sdb'.
-[2009/05/31 21:58:57] nwipe: notice: Starting pass 1 of 3, round 1 of 1, on device '/dev/sdb'.
-[2009/05/31 21:58:57] nwipe: notice: Invoking method 'DoD Short' on device '/dev/sdc'.
-[2009/05/31 21:58:57] nwipe: notice: Starting round 1 of 1 on device '/dev/sdc'.
-[2009/05/31 21:58:57] nwipe: notice: Starting pass 1 of 3, round 1 of 1, on device '/dev/sdc'.
-[2009/05/31 22:03:30] nwipe: notice: Opened entropy source '/dev/urandom'.
-[2009/05/31 22:03:37] nwipe: info: Device /dev/sda has serial number      WD-WMC1S7451918
-[2009/05/31 22:03:37] nwipe: info: Device '/dev/sda' has sector size 512.
-[2009/05/31 22:03:37] nwipe: warning: Changing '/dev/sda' block size from 4096 to 512.
-[2009/05/31 22:03:37] nwipe: info: Device '/dev/sda' is size 1000204886016.
-[2009/05/31 22:03:37] nwipe: info: Device /dev/sdb has serial number            64F8DBHMS
-[2009/05/31 22:03:37] nwipe: info: Device '/dev/sdb' has sector size 512.
-[2009/05/31 22:03:37] nwipe: warning: Changing '/dev/sdb' block size from 4096 to 512.
-[2009/05/31 22:03:37] nwipe: info: Device '/dev/sdb' is size 1000204886016.
-[2009/05/31 22:03:37] nwipe: info: Device /dev/sdc has serial number S2SDJ9EBA00126      
-[2009/05/31 22:03:37] nwipe: info: Device '/dev/sdc' has sector size 512.
-[2009/05/31 22:03:37] nwipe: warning: Changing '/dev/sdc' block size from 4096 to 512.
-[2009/05/31 22:03:37] nwipe: info: Device '/dev/sdc' is size 1000204886016.
-[2009/05/31 22:03:37] nwipe: notice: Invoking method 'Quick Erase' on device '/dev/sdb'.
-[2009/05/31 22:03:37] nwipe: notice: Invoking method 'Quick Erase' on device '/dev/sda'.
-[2009/05/31 22:03:37] nwipe: notice: Starting round 1 of 1 on device '/dev/sda'.
-[2009/05/31 22:03:37] nwipe: notice: Finished round 1 of 1 on device '/dev/sda'.
-[2009/05/31 22:03:37] nwipe: notice: Blanking device '/dev/sda'.
-[2009/05/31 22:03:37] nwipe: notice: Starting round 1 of 1 on device '/dev/sdb'.
-[2009/05/31 22:03:37] nwipe: notice: Finished round 1 of 1 on device '/dev/sdb'.
-[2009/05/31 22:03:37] nwipe: notice: Blanking device '/dev/sdb'.
-[2009/05/31 22:03:37] nwipe: notice: Invoking method 'Quick Erase' on device '/dev/sdc'.
-[2009/05/31 22:03:37] nwipe: notice: Starting round 1 of 1 on device '/dev/sdc'.
-[2009/05/31 22:03:37] nwipe: notice: Finished round 1 of 1 on device '/dev/sdc'.
-[2009/05/31 22:03:37] nwipe: notice: Blanking device '/dev/sdc'.
-[2009/06/01 00:20:00] nwipe: notice: Verifying that '/dev/sdc' is empty.
-[2009/06/01 12:09:48] nwipe: notice: Verified that '/dev/sdc' is empty.
-[2009/06/01 12:09:48] nwipe: notice: Blanked device '/dev/sdc'.
+[2009/05/22 23:40:50] nwipe: notice: Opened entropy source '/dev/urandom'.
+[2009/05/22 23:40:55] nwipe: info: Device /dev/sda has serial number      WD-WMC1S7451918
+[2009/05/22 23:40:55] nwipe: info: Device '/dev/sda' has sector size 512.
+[2009/05/22 23:40:55] nwipe: warning: Changing '/dev/sda' block size from 4096 to 512.
+[2009/05/22 23:40:55] nwipe: info: Device '/dev/sda' is size 1000204886016.
+[2009/05/22 23:40:50] nwipe: notice: Opened entropy source '/dev/urandom'.
+[2009/05/22 23:40:55] nwipe: info: Device /dev/sda has serial number      WD-WMC1S7451918
+[2009/05/22 23:40:55] nwipe: info: Device '/dev/sda' has sector size 512.
+[2009/05/22 23:40:55] nwipe: warning: Changing '/dev/sda' block size from 4096 to 512.
+[2009/05/22 23:40:55] nwipe: info: Device '/dev/sda' is size 1000204886016.
+[2009/05/22 23:40:55] nwipe: notice: Invoking method 'Quick Erase' on device '/dev/sda'.
+[2009/05/22 23:40:55] nwipe: notice: Starting round 1 of 1 on device '/dev/sda'.
+[2009/05/22 23:40:55] nwipe: notice: Finished round 1 of 1 on device '/dev/sda'.
+[2009/05/22 23:40:55] nwipe: notice: Blanking device '/dev/sda'.
+[2009/05/23 01:35:05] nwipe: notice: Verifying that '/dev/sda' is empty.
+[2009/05/23 03:29:09] nwipe: notice: Verified that '/dev/sda' is empty.
+[2009/05/23 03:29:09] nwipe: notice: Blanked device '/dev/sda'.
+[2009/05/22 23:40:50] nwipe: notice: Opened entropy source '/dev/urandom'.
+[2009/05/22 23:40:55] nwipe: info: Device /dev/sda has serial number      WD-WMC1S7451918
+[2009/05/22 23:40:55] nwipe: info: Device '/dev/sda' has sector size 512.
+[2009/05/22 23:40:55] nwipe: warning: Changing '/dev/sda' block size from 4096 to 512.
+[2009/05/22 23:40:55] nwipe: info: Device '/dev/sda' is size 1000204886016.
+[2009/05/22 23:40:55] nwipe: notice: Invoking method 'Quick Erase' on device '/dev/sda'.
+[2009/05/22 23:40:55] nwipe: notice: Starting round 1 of 1 on device '/dev/sda'.
+[2009/05/22 23:40:55] nwipe: notice: Finished round 1 of 1 on device '/dev/sda'.
+[2009/05/22 23:40:55] nwipe: notice: Blanking device '/dev/sda'.
+[2009/05/23 01:35:05] nwipe: notice: Verifying that '/dev/sda' is empty.
+[2009/05/23 03:29:09] nwipe: notice: Verified that '/dev/sda' is empty.
+[2009/05/23 03:29:09] nwipe: notice: Blanked device '/dev/sda'.
+[2009/05/22 23:40:50] nwipe: notice: Opened entropy source '/dev/urandom'.
+[2009/05/22 23:40:55] nwipe: info: Device /dev/sda has serial number      WD-WMC1S7451918
+[2009/05/22 23:40:55] nwipe: info: Device '/dev/sda' has sector size 512.
+[2009/05/22 23:40:55] nwipe: warning: Changing '/dev/sda' block size from 4096 to 512.
+[2009/05/22 23:40:55] nwipe: info: Device '/dev/sda' is size 1000204886016.
+[2009/05/22 23:40:55] nwipe: notice: Invoking method 'Quick Erase' on device '/dev/sda'.
+[2009/05/22 23:40:55] nwipe: notice: Starting round 1 of 1 on device '/dev/sda'.
+[2009/05/22 23:40:55] nwipe: notice: Finished round 1 of 1 on device '/dev/sda'.
+[2009/05/22 23:40:55] nwipe: notice: Blanking device '/dev/sda'.
+[2009/05/23 01:35:05] nwipe: notice: Verifying that '/dev/sda' is empty.
+[2009/05/22 23:40:50] nwipe: notice: Opened entropy source '/dev/urandom'.
+[2009/05/22 23:40:55] nwipe: info: Device /dev/sda has serial number      WD-WMC1S7451918
+[2009/05/22 23:40:55] nwipe: info: Device '/dev/sda' has sector size 512.
+[2009/05/22 23:40:55] nwipe: warning: Changing '/dev/sda' block size from 4096 to 512.
+[2009/05/22 23:40:55] nwipe: info: Device '/dev/sda' is size 1000204886016.
+[2009/05/22 23:40:55] nwipe: notice: Invoking method 'Quick Erase' on device '/dev/sda'.
+[2009/05/22 23:40:55] nwipe: notice: Starting round 1 of 1 on device '/dev/sda'.
+[2009/05/22 23:40:55] nwipe: notice: Finished round 1 of 1 on device '/dev/sda'.
+[2009/05/22 23:40:55] nwipe: notice: Blanking device '/dev/sda'.
+[2009/05/23 01:35:05] nwipe: notice: Verifying that '/dev/sda' is empty.
+[2009/05/22 23:40:50] nwipe: notice: Opened entropy source '/dev/urandom'.
+[2009/05/22 23:40:55] nwipe: info: Device /dev/sda has serial number      WD-WMC1S7451918
+[2009/05/22 23:40:55] nwipe: info: Device '/dev/sda' has sector size 512.
+[2009/05/22 23:40:55] nwipe: warning: Changing '/dev/sda' block size from 4096 to 512.
+[2009/05/22 23:40:55] nwipe: info: Device '/dev/sda' is size 1000204886016.
+[2009/05/22 23:40:55] nwipe: notice: Invoking method 'Quick Erase' on device '/dev/sda'.
+[2009/05/22 23:40:55] nwipe: notice: Starting round 1 of 1 on device '/dev/sda'.
+[2009/05/22 23:40:55] nwipe: notice: Finished round 1 of 1 on device '/dev/sda'.
+[2009/05/22 23:40:55] nwipe: notice: Blanking device '/dev/sda'.
+[2009/05/23 01:35:05] nwipe: notice: Verifying that '/dev/sda' is empty.
+[2009/05/23 03:29:09] nwipe: notice: Verified that '/dev/sda' is empty.
+[2009/05/23 03:29:09] nwipe: notice: Blanked device '/dev/sda'.
+[2009/05/22 23:40:50] nwipe: notice: Opened entropy source '/dev/urandom'.
+[2009/05/22 23:40:55] nwipe: info: Device /dev/sda has serial number      WD-WMC1S7451918
+[2009/05/22 23:40:55] nwipe: info: Device '/dev/sda' has sector size 512.
+[2009/05/22 23:40:55] nwipe: warning: Changing '/dev/sda' block size from 4096 to 512.
+[2009/05/22 23:40:55] nwipe: info: Device '/dev/sda' is size 1000204886016.
+[2009/05/22 23:40:50] nwipe: notice: Opened entropy source '/dev/urandom'.
+[2009/05/22 23:40:55] nwipe: info: Device /dev/sda has serial number      WD-WMC1S7451918
+[2009/05/22 23:40:55] nwipe: info: Device '/dev/sda' has sector size 512.
+[2009/05/22 23:40:55] nwipe: warning: Changing '/dev/sda' block size from 4096 to 512.
+[2009/05/22 23:40:55] nwipe: info: Device '/dev/sda' is size 1000204886016.
+[2009/05/22 23:40:55] nwipe: notice: Invoking method 'Quick Erase' on device '/dev/sda'.
+[2009/05/22 23:40:55] nwipe: notice: Starting round 1 of 1 on device '/dev/sda'.
+[2009/05/22 23:40:55] nwipe: notice: Finished round 1 of 1 on device '/dev/sda'.
+[2009/05/22 23:40:55] nwipe: notice: Blanking device '/dev/sda'.
+[2009/05/23 01:35:05] nwipe: notice: Verifying that '/dev/sda' is empty.
+[2009/05/23 03:29:09] nwipe: notice: Verified that '/dev/sda' is empty.
+[2009/05/23 03:29:09] nwipe: notice: Blanked device '/dev/sda'.

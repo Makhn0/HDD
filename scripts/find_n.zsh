@@ -17,18 +17,18 @@ function find_erase_between(){
 	#>&2 echo sedcmd=$sedcmd
 	pass0=$(cat -n temp | sed -n $sedcmd | grep "nwipe: notice: Verified that '$dname' is empty.")
 	#>&2 echo pass0=$pass0
-	pass1=$(cat -n temp | sed -n $sedcmd | grep "nwipe: notice: Blanked device '$dname'."  )
+	pass1_t=$(cat -n temp | sed -n $sedcmd | grep "nwipe: notice: Blanked device '$dname'."| grep -oP -e "\[.*\]"  ) #sends time of blanked device
 	#>&2 echo pass1=$pass1
 	#pass1_n=$(cat -n temp | sed -n ${M},${m}p|grep "nwipe: notice: Blanked device '$dname'."  | grep -oP "^\s*\d*" | grep -oP "\d*")
-	if [[ -z $pass0 ]] || [[ -z $pass1 ]]
+	if [[ -z $pass0 ]] || [[ -z $pass1_t ]]
 	then 
 
-		pass="not passed"
+		pass="not passed" #echo nothing
 	else
-		pass="passed"
+		echo $pass1_t
 	fi
 
-	echo $pass
+	#echo $pass
 }
 function find_start_between(){
 	dname=${1}
@@ -75,9 +75,10 @@ function find_n(){
 	#$(pwd |grep -oP "test\d{1,2}")
 	#client=$(pwd | grep -oP -e "scrip.{1,2}$")
 	#gets serial number from stdout
-	
-	A=$( grep $fname -n -e "nwipe: info: Device $dname has serial number" | sed -n ${N},${N}p |grep -o "\S*\s*$" ) #some times logfile prints extra spaces at the end
-	A_n=$( grep $fname -n -e "nwipe: info: Device $dname has serial number"| sed -n ${N},${N}p | grep -oP "^\d*")
+	gstr="nwipe: info: Device $dname has serial number"
+	A=$( grep $fname -n -e "$gstr" | sed -n ${N},${N}p |grep -o "\S*\s*$" ) #some times logfile prints extra spaces at the end
+	A_t=$( grep $fname -n -e "$gstr" | sed -n ${N},${N}p | grep -oP -e "\[.*\]") 
+	A_n=$( grep $fname -n -e "$gstr" | sed -n ${N},${N}p | grep -oP "^\d*")
 	#gets line number of next drive in put into sda along with
 	A_next_n=$(grep $fname -n -e "nwipe: info: Device $dname has serial number"| sed -n $((N+1)),$((N+1))p | grep -oP "^\d*" )
 	E=$(find_start_between $dname $A_n $A_next_n)
@@ -100,8 +101,14 @@ function find_n(){
 	#As_n=$(cat -n temp | grep "nwipe: info: Device '$dname' is size" |sed -n ${N},${N}p | grep -oP "^\s*\d*" | grep -oP "\d*" )
 
 	#print "AS="$As
-	pass=$(find_erase_between $dname $A_n $A_next_n)
-	echo $client , $A, $As, $pass
+	pass_t=$(find_erase_between $dname $A_n $A_next_n)
+	#echo pass_t=$pass_t/
+	if [[ -z $pass_t ]]; then
+		pass="not passed"
+	else
+		pass="passed"
+	fi
+	echo $client, $A_t, $pass_t, $A, $As, $pass
 
 
 }
