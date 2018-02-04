@@ -117,5 +117,3 @@ function find_n(){
 
 #todo change cat -n temp | grep to grep fname -n etc.
 find_n ${1} ${2} ${3} ${4}
-
-
