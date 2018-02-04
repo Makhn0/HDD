@@ -28,23 +28,23 @@ function number_of(){
 	#echo $n
 	#echo 100
 	>&2 echo inputs ${1} ${2}
-	echo $(cat -n ${1} | grep "nwipe: info: Device /dev/${2} has serial number" | wc | grep -oP "^\s*\d*" | grep -oP "\d*")
+	echo $(	grep ${1} -e "nwipe: info: Device /dev/${2} has serial number" | wc | grep -oP "^\s*\d*" | grep -oP "\d*")
 	#	return;
 }
 
 function find_all(){
 	###takes the logfile , finds all erasures from sdx=${2} ( needs to pass client name to ./find_n) and prints lines to stdout
 	file=${1}
-	fname=${2}
+	dname=${2}
 	client=${3}
 	i=1
-	N=$(number_of $file $fname)
-	>&2 echo $fname": N="$N
+	N=$(number_of $file $dname)
+	>&2 echo $dname": N="$N
 	while (( $i <= $N )); do
 		
-		>&2 echo $fname":i="$i
+		>&2 echo $dname":i="$i
 		#out is csv line of Nth hd detection
-		out=$(cat $file  | sudo ./find_n.zsh $fname $i $client)
+		out=$( sudo ./find_n.zsh $file $dname $i $client)
 		if [[ $i -gt $N ]]; then
 			>&2 echo "timeout";
 			break ;
