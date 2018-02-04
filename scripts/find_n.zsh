@@ -16,9 +16,9 @@ function find_erase_between(){
 	#>&2 echo here
 	#>&2 echo sedcmd=$sedcmd
 	#do variables have global scope?
-	pass0=$(cat -n $fname | sed -n $sedcmd | grep "nwipe: notice: Verified that '$dname' is empty.")
+	pass0=$(sed -n $sedcmd  $fname| grep "nwipe: notice: Verified that '$dname' is empty.")
 	#>&2 echo pass0=$pass0
-	pass1_t=$(cat -n $fname | sed -n $sedcmd | grep "nwipe: notice: Blanked device '$dname'."| grep -oP -e "\[.*\]"  ) #sends time of blanked device
+	pass1_t=$(sed -n $sedcmd $fname | grep "nwipe: notice: Blanked device '$dname'."| grep -oP -e "\[.*\]"  ) #sends time of blanked device
 	#>&2 echo pass1=$pass1
 	#pass1_n=$(cat -n temp | sed -n ${M},${m}p|grep "nwipe: notice: Blanked device '$dname'."  | grep -oP "^\s*\d*" | grep -oP "\d*")
 	if [[ -z $pass0 ]] || [[ -z $pass1_t ]]
@@ -43,7 +43,7 @@ function find_start_between(){
 	fi
 	sedcmd="${n},${m}p"
 	#>&2 echo sedcmd=$sedcmd
-	E=$(cat -n $fname |sed -n $sedcmd | grep "nwipe: notice: Invoking method '.*' on device '$dname'")
+	E=$(sed -n $sedcmd $fname | grep "nwipe: notice: Invoking method '.*' on device '$dname'")
 	echo $E
 }
 function find_size_between(){
@@ -58,7 +58,7 @@ function find_size_between(){
 	fi
 	sedcmd="${n},${m}p"
 	#>&2 echo sedcmd=$sedcmd
-	size=$(cat -n $fname |sed -n $sedcmd | grep "nwipe: info: Device '$dname' is size" | sed -n 1,1p | grep -oP "\s\d*.$" | grep -oP "\d*")
+	size=$( sed -n $sedcmd $fname | grep "nwipe: info: Device '$dname' is size" | sed -n 1,1p | grep -oP "\s\d*.$" | grep -oP "\d*")
 	echo $size
 }
 function find_n(){
@@ -82,7 +82,7 @@ function find_n(){
 	A_t=$( grep $fname -n -e "$gstr" | sed -n ${N},${N}p | grep -oP -e "\[.*\]") 
 	A_n=$( grep $fname -n -e "$gstr" | sed -n ${N},${N}p | grep -oP "^\d*")
 	#gets line number of next drive in put into sda along with
-	A_next_n=$(grep $fname -n -e "nwipe: info: Device $dname has serial number"| sed -n $((N+1)),$((N+1))p | grep -oP "^\d*" )
+	A_next_n=$(grep $fname -n -e "gstr"| sed -n $((N+1)),$((N+1))p | grep -oP "^\d*" )
 	E=$(find_start_between $dname $A_n $A_next_n)
 	#>&2 echo E=$E
 	#>&2 echo A=$A	

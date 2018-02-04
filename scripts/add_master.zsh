@@ -44,7 +44,7 @@ function find_all(){
 		
 		>&2 echo $dname":i="$i
 		#out is csv line of Nth hd detection
-		out=$( sudo ./find_n.zsh $file $dname $i $client)
+		out=$(sudo ./find_n.zsh $file $dname $i $client)
 		if [[ $i -gt $N ]]; then
 			>&2 echo "timeout";
 			break ;
@@ -69,11 +69,11 @@ function logfile_to_g(){
 	#takes the nwipe logfile (${1}), and calls find_n for sd[a-h], N many times to extract all the erasures data into a readable csv file
 	file=${1}
 	client=$(echo $file |grep -oP "test\d{1,2}")
-	name=sda
+	dname=sda
 	>&2 echo extracting data from $file
 	while true; do
 		#>&2 echo "finding all $name "
-		out=$(find_all $file $name $client  2>/dev/null )
+		out=$(find_all $file $dname $client  2>/dev/null )
 		#>&2 echo out=$out
 		if [[ $out ]] ; then
 			#>&2 echo PRINTINGOUT
@@ -81,8 +81,8 @@ function logfile_to_g(){
 			printf "\n"
 	
 		fi
-		name=$(cycle $name);
-		if [[ $name == end ]]; then
+		name=$(cycle $dname);
+		if [[ $dname == end ]]; then
 			break;
 		fi
 	done
