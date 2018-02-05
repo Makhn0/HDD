@@ -18,7 +18,7 @@ function find_erase_between(){
 	#do variables have global scope?
 	pass0=$(sed -n $sedcmd  $fname| grep "nwipe: notice: Verified that '$dname' is empty.")
 	#>&2 echo pass0=$pass0
-	pass1_t=$(sed -n $sedcmd $fname | grep "nwipe: notice: Blanked device '$dname'."| grep -oP -e "\[.*\]"  ) #sends time of blanked device
+	pass1_t=$(sed -n $sedcmd $fname  | grep -n -e"nwipe: notice: Blanked device '$dname'."| sed -n 1,1p | grep -oP -e "\[.*\]"  ) #sends time of blanked device
 	#>&2 echo pass1=$pass1
 	#pass1_n=$(cat -n temp | sed -n ${M},${m}p|grep "nwipe: notice: Blanked device '$dname'."  | grep -oP "^\s*\d*" | grep -oP "\d*")
 	if [[ -z $pass0 ]] || [[ -z $pass1_t ]]
@@ -67,8 +67,9 @@ function find_n(){
 	## intended to be piped into by cat logfile
 	fname=${1}
 	dname=/dev/${2} 
-	client=${3} 
-	N=${4}
+	N=${3}
+	client=${4} 
+	
 	
 	
 	#>&2 echo dname=$dname
@@ -82,7 +83,7 @@ function find_n(){
 	A_t=$( grep $fname -n -e "$gstr" | sed -n ${N},${N}p | grep -oP -e "\[.*\]") 
 	A_n=$( grep $fname -n -e "$gstr" | sed -n ${N},${N}p | grep -oP "^\d*")
 	#gets line number of next drive in put into sda along with
-	A_next_n=$(grep $fname -n -e "gstr"| sed -n $((N+1)),$((N+1))p | grep -oP "^\d*" )
+	A_next_n=$(grep $fname -n -e "$gstr" | sed -n "$((N+1)),$((N+1))p"  | grep -oP "^\d*" )
 	E=$(find_start_between $dname $A_n $A_next_n)
 	#>&2 echo E=$E
 	#>&2 echo A=$A	
