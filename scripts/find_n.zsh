@@ -70,20 +70,17 @@ function find_n(){
 	N=${3}
 	client=${4} 
 	
-	
-	
-	#>&2 echo dname=$dname
-	#sudo cat > temp
-	
-	#$(pwd |grep -oP "test\d{1,2}")
-	#client=$(pwd | grep -oP -e "scrip.{1,2}$")
-	#gets serial number from stdout
 	gstr="nwipe: info: Device $dname has serial number"
-	A=$( grep $fname -n -e "$gstr" | sed -n ${N},${N}p |grep -o "\S*\s*$" ) #some times logfile prints extra spaces at the end
-	A_t=$( grep $fname -n -e "$gstr" | sed -n ${N},${N}p | grep -oP -e "\[.*\]") 
-	A_n=$( grep $fname -n -e "$gstr" | sed -n ${N},${N}p | grep -oP "^\d*")
+	starts=$(grep $fname -n -e "$gstr")
+	startline=$(sed -n ${N},${N}p <<<$starts)
+	#printf "%s\n" "$starts" 
+	#printf "\n"
+	#printf "%s\n" "$startline"
+	A=$( grep -o "\S*\s*$" <<< $startline ) #some times logfile prints extra spaces at the end
+	A_t=$( grep -oP -e "\[.*\]" <<< $startline) 
+	A_n=$( grep -oP "^\d*" <<< $startline)
 	#gets line number of next drive in put into sda along with
-	A_next_n=$(grep $fname -n -e "$gstr" | sed -n "$((N+1)),$((N+1))p"  | grep -oP "^\d*" )
+	A_next_n=$(sed -n "$((N+1)),$((N+1))p" <<< $starts | grep -oP "^\d*" )
 	E=$(find_start_between $dname $A_n $A_next_n)
 	#>&2 echo E=$E
 	#>&2 echo A=$A	
