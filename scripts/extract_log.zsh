@@ -68,7 +68,7 @@ function find_all(){
 function logfile_to_g(){
 	#takes the nwipe logfile (${1}), and calls find_n for sd[a-h], N many times to extract all the erasures data into a readable csv file
 	file=${1}
-	client=$(echo $file |grep -oP "test\d{1,2}")
+	client=$(grep -oP "test\d{1,2}"<<< $file)
 	name=sda
 	>&2 echo extracting data from $file
 	while true; do
