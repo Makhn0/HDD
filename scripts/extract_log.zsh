@@ -28,7 +28,7 @@ function number_of(){
 	#echo $n
 	#echo 100
 	>&2 echo inputs ${1} ${2}
-	echo $(cat -n ${1} | grep "nwipe: info: Device /dev/${2} has serial number" | wc | grep -oP "^\s*\d*" | grep -oP "\d*")
+	echo $( grep ${1} -n -e "nwipe: info: Device /dev/${2} has serial number" | wc | grep -oP "^\s*\d*" | grep -oP "\d*")
 	#	return;
 }
 
@@ -44,7 +44,7 @@ function find_all(){
 		
 		>&2 echo $fname":i="$i
 		#out is csv line of Nth hd detection
-		out=$(cat $file  | sudo ./find_n.zsh $fname $i $client)
+		out=$(   sudo ./find_n.zsh $file $fname $i $client)
 		if [[ $i -gt $N ]]; then
 			>&2 echo "timeout";
 			break ;
@@ -68,7 +68,7 @@ function find_all(){
 function logfile_to_g(){
 	#takes the nwipe logfile (${1}), and calls find_n for sd[a-h], N many times to extract all the erasures data into a readable csv file
 	file=${1}
-	client=$(echo $file |grep -oP "test\d{1,2}")
+	client=$(grep -oP "test\d{1,2}"<<< $file)
 	name=sda
 	>&2 echo extracting data from $file
 	while true; do

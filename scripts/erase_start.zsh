@@ -26,7 +26,6 @@ function callNwipe(){
 	printf "executing: sudo ./nwipe $args -l$logfile $Narg"
 	sudo ./nwipe $args -l$logfile $Narg
 	printf "finished\n"
-		#printf "%s\n" "in "
 }
 function time(){
 	date

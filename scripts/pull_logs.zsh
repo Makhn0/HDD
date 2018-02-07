@@ -18,7 +18,7 @@ function createMaster(){
 		clientLog=$ndir/Log
 		
 		if [[ -e $clientLog ]]; then
-			sudo ./add_master.zsh $clientLog >> $outfile
+			sudo ./extract_log.zsh $clientLog >> $outfile
 			#test above code before uncommenting below
 			cat $clientLog >> $ndir/archive #move log contents to archive folder so successive calls to this function don't add the same data
 			echo "" > $clientLog #erasesLog file
@@ -31,3 +31,13 @@ function createMaster(){
 }
 
 createMaster 
+
+##add to .bashrc later find way to load on clients
+#the idea is to have standard commands for testing erasing etc. 
+##whose implementation we can change w/o changing
+#name of command
+#hdir=/home/hdd-test-server/HDD/scripts
+#alias starttest=$hdir/oldscripts/hdd_test_smart0.zsh
+#alias erase=$hdir/erase_start.zsh
+#alias pullLogs=$hdir/pull_logs.zsh
+#alias update=$hdir/oldscripts/homeupdate.zsh
