@@ -60,7 +60,7 @@ function createMaster(){
 }
 createMaster ${1}
 
-##add to .bashrc later find way to load on clients
+##add to .bashrc .zshrc/alias.zsh later find way to load on clients
 #the idea is to have standard commands for testing erasing etc. 
 ##whose implementation we can change w/o changing
 #name of command

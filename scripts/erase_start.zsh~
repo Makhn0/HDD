@@ -26,19 +26,20 @@ function callNwipe(){
 	printf "executing: sudo ./nwipe $args -l$logfile $Narg"
 	sudo ./nwipe $args -l$logfile $Narg
 	printf "finished\n"
-		#printf "%s\n" "in "
 }
 function time(){
 	date
 	sudo ntpdate 192.168.1.1
 	date
 }
-main(){
+function erase_main(){
 	time
 	if [[ $(pwd) =~ ^/home/test[1-5]?[0-9]$ ]]; then #minor bug: test0 passes
 		#sudo ./nwipe ${1} --autonuke --nogui -l$(pwd)/nwipe_2018./
 		drives=${1}
 		args=${2}
+		>&2 echo drives=$drives
+		>&2 echo args=$args
 		Dir=$(pwd)/nwipe_2018
 		logfile=$Dir/Log
 		if [[ -e $Dir ]]; then
@@ -60,4 +61,8 @@ main(){
 
 	fi
 }
-main ${1} ${2}  #sdx, optional args
+if [[ ${1} == '-a' ]]; then
+printf "detects -a"
+erase_main ${2} "--autonuke"
+fi
+erase_main ${1} ${2}  #sdx, optional args

@@ -38,6 +38,8 @@ function erase_main(){
 		#sudo ./nwipe ${1} --autonuke --nogui -l$(pwd)/nwipe_2018./
 		drives=${1}
 		args=${2}
+		>&2 echo drives=$drives
+		>&2 echo args=$args
 		Dir=$(pwd)/nwipe_2018
 		logfile=$Dir/Log
 		if [[ -e $Dir ]]; then
@@ -59,4 +61,9 @@ function erase_main(){
 
 	fi
 }
-erase_main ${1} ${2}  #sdx, optional args
+if [[ ${1} == '-a' ]]; then
+	printf "detects -a"
+	erase_main ${2} "--autonuke"
+else
+	erase_main ${1} ${2}  #sdx, optional args
+fi

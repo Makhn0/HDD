@@ -53,7 +53,7 @@ function createMaster(){
 	elif [[ ${1} == '' ]]; then
 		print_noargs
 	else
-		$(sudo extract_from ${1})
+		extract_from ${1}
 	fi
 	>&2 printf "%s\n" "finished updating $outfile"
 	

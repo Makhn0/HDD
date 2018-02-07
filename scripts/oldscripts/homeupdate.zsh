@@ -9,6 +9,7 @@ function updateClients(){
 		sudo cp ~/HDD/scripts/oldscripts/hdd_test_smart0.zsh /home/'test'$Count/;	
 		sudo cp ~/HDD/scripts/erase_start.zsh /home/'test'$Count/;	#step 2
 		#sudo cp -r /usr/sbin/nwipe /home/'test'$Count/nwipe;
+		sudo cp ~/HDD/scripts/oldscripts/aliases.zsh /home/'test'$Count/.zsh/aliases.zsh
 		sudo cp ~/HDD/bin/ewhde /home/'test'$Count/ewhde; #change to /usr/sbin?
 		#sudo cp ~/HDD/DateTest /home/'test'$Count/DateTest;
 		
