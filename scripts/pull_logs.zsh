@@ -1,7 +1,7 @@
 #!/bin/bash
 server=/home/hdd-test-server
-ndir=$server/nwipe_2018
-outfile=$ndir/master.csv
+ndir_s=$server/nwipe_2018
+outfile=$ndir_s/master.csv
 function print_noargs(){
 	printf "tell me where to pull from \n"	
 	}
@@ -10,13 +10,13 @@ function extract_from(){
 	Count=${1}
 	>&2 echo $Count;
 		client=/home/test$Count
-		ndir=$client/nwipe_2018
-		clientLog=$ndir/Log
+		ndir_c=$client/nwipe_2018
+		clientLog=$ndir_c/Log
 		
 		if [[ -e $clientLog ]]; then
 			sudo ./extract_log.zsh $clientLog >> $outfile
 			#test above code before uncommenting below
-			cat $clientLog >> $ndir/archive #move log contents to archive folder so successive calls to this function don't add the same data
+			cat $clientLog >> $ndir_c/archive #move log contents to archive folder so successive calls to this function don't add the same data
 			echo "" > $clientLog #erasesLog file
 		else
 			>&2 echo "no nwipe_2018/Log file for $client"
@@ -34,11 +34,11 @@ function createMaster_all(){
 }
 function createMaster(){
 	>&2 echo outfile=$outfile
-	if [[ -e $ndir ]]; then
+	if [[ -e $ndir_s ]]; then
 		>&2 echo "~/nwipe_2018 exists"
 	else
 		>&2 echo "creating ~/nwipe_2018 folder"
-		sudo mkdir $ndir
+		sudo mkdir $ndir_s
 	fi
 	if [[ -e $outfile ]]; then
 		>&2 echo "outfile already exists"
