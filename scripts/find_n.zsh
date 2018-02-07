@@ -72,15 +72,15 @@ function find_n(){
 	
 	gstr="nwipe: info: Device $dname has serial number"
 	starts=$(grep $fname -n -e "$gstr")
-	startline=$(sed -n ${N},${N}p <<<$starts)
-	#printf "%s\n" "$starts" 
+	startline=$(sed -n ${N},${N}p <<< "$starts")
+	#printf "start=%s\n" "$starts" 
 	#printf "\n"
-	#printf "%s\n" "$startline"
-	A=$( grep -o "\S*\s*$" <<< $startline ) #some times logfile prints extra spaces at the end
+	#printf "startline==%s\n" "$startline"
+	A=$( grep -o "\S*\s*$" <<< "$startline" ) #some times logfile prints extra spaces at the end
 	A_t=$( grep -oP -e "\[.*\]" <<< $startline) 
-	A_n=$( grep -oP "^\d*" <<< $startline)
+	A_n=$( grep -oP "^\d*" <<< "$startline")
 	#gets line number of next drive in put into sda along with
-	A_next_n=$(sed -n "$((N+1)),$((N+1))p" <<< $starts | grep -oP "^\d*" )
+	A_next_n=$(sed -n "$((N+1)),$((N+1))p" <<< "$starts" | grep -oP "^\d*" )
 	E=$(find_start_between $dname $A_n $A_next_n)
 	#>&2 echo E=$E
 	#>&2 echo A=$A	
