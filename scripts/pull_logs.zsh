@@ -6,7 +6,7 @@ function print_noargs(){
 	}
 function extract_from(){
 	#takes client number and extracts /home/test#/nwipe_2018/Log to master
-	count=${1}
+	Count=${1}
 	>&2 echo $Count;
 		client=/home/test$Count
 		ndir=$client/nwipe_2018
