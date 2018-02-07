@@ -1,6 +1,7 @@
 #!/bin/bash
 server=/home/hdd-test-server
-outfile=$server/nwipe_2018/master.csv
+ndir=$server/nwipe_2018
+outfile=$ndir/master.csv
 function print_noargs(){
 	printf "tell me where to pull from \n"	
 	}
@@ -24,30 +25,37 @@ function extract_from(){
 }
 function createMaster_all(){
 	#retrieves all of the log data from all the clients' /nwipe_2018/log files, formats them with ./add_master redirects output to master.csv
-
-	>&2 echo outfile=$outfile
-	if [[ -e $outfile ]]; then
-		>&2 echo "outfile already exists"
-	else
-		>&2 echo "creating outputfile at $outfile"
-		touch $outfile
-	fi
 	Count=1;
 	while (( $Count != 51 )); do
 		extract_from $Count
 		Count=$(($Count+1))
 	done;	
-	>&2 printf "%s\n" "finished creating $outfile"
+	
 }
 function createMaster(){
+	>&2 echo outfile=$outfile
+	if [[ -e $ndir ]]; then
+		>&2 echo "~/nwipe_2018 exists"
+	else
+		>&2 echo "creating ~/nwipe_2018 folder"
+		sudo mkdir $ndir
+	fi
+	if [[ -e $outfile ]]; then
+		>&2 echo "outfile already exists"
+	else
+		>&2 echo "creating outputfile at $outfile"
+		sudo touch $outfile
+	fi
 	if [[ ${1} == '--all' ]]; then
-		createMaster_all
+		#todo add "are u sure" method
+		sudo createMaster_all
 	
 	elif [[ ${1} == '' ]]; then
 		print_noargs
 	else
 		extract_from ${1}
 	fi
+	>&2 printf "%s\n" "finished updating $outfile"
 	
 }
 createMaster ${1}
