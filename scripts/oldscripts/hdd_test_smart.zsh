@@ -436,15 +436,15 @@ function zero_out(){
 #This checks whether the shred zero out is still running.
 function check_shred(){
 	if [[ $HDDType != "scsi" ]]; then
-        if (( $ShredPasses < 10 )); then
-	        local ShredPidPs="$(sudo ps $ShredPid[$1] | grep "sudo shred -n" | awk '{print substr($0,28,24)}')";
-        elif (( $ShredPasses > 9 )) && (( $ShredPasses < 100 )); then
-	        local ShredPidPs="$(sudo ps $ShredPid[$1] | grep "sudo shred -n" | awk '{print substr($0,28,25)}')";
-	    else 
-            local ShredPidPs="$(sudo ps $ShredPid[$1] | grep "sudo shred -n" | awk '{print substr($0,28,26)}')";
-	    fi
-    else
-	    local DDPidPs="$(sudo ps ${ShredPid}[${1}] | grep 'dd if=/dev/zero of=/dev' | awk '{print substr($0,28,24)}')";
+        	if (( $ShredPasses < 10 )); then
+	      		local ShredPidPs="$(sudo ps $ShredPid[$1] | grep "sudo shred -n" | awk '{print substr($0,28,24)}')";
+        	elif (( $ShredPasses > 9 )) && (( $ShredPasses < 100 )); then
+	        	local ShredPidPs="$(sudo ps $ShredPid[$1] | grep "sudo shred -n" | awk '{print substr($0,28,25)}')";
+	    	else 
+            		local ShredPidPs="$(sudo ps $ShredPid[$1] | grep "sudo shred -n" | awk '{print substr($0,28,26)}')";
+	    	fi
+	else
+		local DDPidPs="$(sudo ps ${ShredPid}[${1}] | grep 'dd if=/dev/zero of=/dev' | awk '{print substr($0,28,24)}')";
 	fi
         if [[ ${ShredPidPs} != "sudo shred -n ${ShredPasses} /dev/${1}" ]] && [[ ${DDPidPs} != "dd if=/dev/zero of=/dev/" ]]; then 
 		Queue+=(${1} 15);
