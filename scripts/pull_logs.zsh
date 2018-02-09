@@ -4,23 +4,47 @@ ndir_s=$server/nwipe_2018
 outfile=$ndir_s/master.csv
 function print_noargs(){
 	printf "tell me where to pull from \n"	
-	}
+}
+function archive(){
+	#takes directory ${1} and file ${2} moves file to archive
+	cat ${2} >> ${1}/archive #move log contents to archive folder so successive calls to this function don't add the same data
+	echo "" > ${2} #erasesLog file
+}
 function extract_from(){
 	#takes client number and extracts /home/test#/nwipe_2018/Log to master
 	Count=${1}
 	>&2 echo $Count;
-		client=/home/test$Count
-		ndir_c=$client/nwipe_2018
-		clientLog=$ndir_c/Log
+	client=/home/test$Count
+	ndir_c=$client/nwipe_2018
+	clientLog=$ndir_c/Log
 		
-		if [[ -e $clientLog ]]; then
-			sudo ./extract_log.zsh $clientLog >> $outfile
-			#test above code before uncommenting below
-			cat $clientLog >> $ndir_c/archive #move log contents to archive folder so successive calls to this function don't add the same data
-			echo "" > $clientLog #erasesLog file
-		else
-			>&2 echo "no nwipe_2018/Log file for $client"
-		fi
+	if [[ -e $clientLog ]]; then
+		sudo ./extract_log.zsh $clientLog >> $outfile
+		#test above code before uncommenting below
+		archive $clientLog $ndir_c;
+		#cat $clientLog >> $ndir_c/archive #move log contents to archive folder so successive calls to this function don't add the same data
+		#echo "" > $clientLog #erasesLog file
+	else
+		>&2 echo "no nwipe_2018/Log file for $client"
+	fi
+	
+}
+function get_smart_log(){
+	Count=${1}
+	>&2 echo $Count;
+	client=/home/test$Count
+	smartdir_c=$client/smart_2018
+	clientLog=$smartdir_c/Log
+		
+	if [[ -e $clientLog ]]; then
+		sudo cat $clientLog >> $outfile
+		#test above code before uncommenting below
+		archive $clientLog $ndir_c;
+		#cat $clientLog >> $smartdir_c/archive #move log contents to archive folder so successive calls to this function don't add the same data
+		#echo "" > $clientLog #erasesLog file
+	else
+		>&2 echo "no smart_2018/Log file for $client"
+	fi
 	
 }
 function createMaster_all(){
@@ -54,6 +78,7 @@ function createMaster(){
 		print_noargs
 	else
 		extract_from ${1}
+		get_smart_log ${1}
 	fi
 	>&2 printf "%s\n" "finished updating $outfile"
 	

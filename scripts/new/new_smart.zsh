@@ -59,7 +59,7 @@ QueueStateString=( 0 "Not Connected / Scheduled" 1 "Queued for Smart test" 2 "Sm
 #error codes are set: (0 no error) (1 smart testing error) (2 dd write error) (3 dd read error) (4 0 out error) (5 hash compare error) (6 formatting error) (7 logic broke and there are more than one errors)
 typeset -A Error
 typeset -A ErrorString
-ErrorString=( 0 "No errors" 1 "Smart testing error" 2 "dd write error" 3 "dd read error" 4 "0 out error" 5 "Hash compare error" 6 "Formatting error" 7 "Logic broken, seek mediation" )
+ErrorString=( 0 "No errors" 1 "Smart testing error" 2 "dd write error" 3 "dd read error" 4 "0 out error" 5 "Hash compare error" 6 "Formatting error" 7 "failed bb test" 8 "Logic broken, seek mediation" )
 
 #Holds the serial, model, and manufacturer so we can make sure we don't test the same drive twice in a row, cause that'd just be silly.
 typeset -A SerialNumber
@@ -77,9 +77,9 @@ typeset -A StartTime
 typeset -A RunTime
 
 #Gets the batch name and HDD type from args from the command line.
-typeset Batch=$1
-typeset HDDType=$2
-typeset ShredPasses=$3
+typeset Batch="smart_2018/Log" #$1
+#typeset HDDType=$2
+#typeset ShredPasses=$3
 
 ###########################################################################################
 #Get some functions built so we can do things somewhat reliably and not duplicate efforts.#
@@ -128,6 +128,15 @@ function reinitialize_variables(){
 #May need to update for ide drives in the future
 
 #This kills the smartctl deer
+function fail_drive(){
+	# fails drive ${1] sets its queue to 20 and sets it's error code to ${2}
+	Queue+=(${1} 20);
+	if (( $Error[$1] == 0 )); then
+		Error+=(${1} ${2});
+	else
+		Error+=(${1} 8);
+	fi
+}
 function kill_smartctl(){
 	SmartKill+=(${1} 0);
 	sudo smartctl -X /dev/${1} 1>/dev/null;
@@ -141,16 +150,14 @@ function kill_smartctl(){
 
 #Invoke smartctl on $1
 function smartctl_watched(){
-	if [[ $HDDType == "sata" ]] || [[ $HDDType == "sas" ]] || [[ $HDDType == "ide" ]]; then
+
 		sudo smartctl --device=auto --smart=on --saveauto=on --tolerance=normal --test=long /dev/$1 1>/dev/null;
 		SmartKill+=(${1} 0);
 		Locks+=(${1} 1);
 		Queue+=(${1} 2);
 	
-	else
-		print "INVOCATION ERROR: HDD Type not defined";
-	fi
-}
+		#print "INVOCATION ERROR: HDD Type not defined";
+	
 
 #Checks to see if smartctl is still running the scheduled test.
 function check_smartctl_test_status(){
@@ -162,23 +169,13 @@ function check_smartctl_test_status(){
 		elif [[ ${TestStatus} == *"he previous self-test routine compl"* ]] && [[ ${LogStatus} != "No self-tests have been logged." ]]; then
 			Queue+=(${1} 3);
 		else
-			Queue+=(${1} 20);
-			if (( $Error[$1] == 0 )); then
-				Error+=(${1} 1);
-			else
-				Error+=(${1} 7);
-			fi
+			fail_drive ${1} 1;
 		fi
 	
 		elif [[ $SmartctlPidPs != "sudo smartctl --device=scsi --captive --smart=on --saveauto=on --tolerance=normal --test=long /dev/$1" ]] && [[ ${SmartctlHealth} == "SMART Health Status: OK" ]] && [[ $SmartTestLogFG == "Foreground long   Completed" ]]; then
 			Queue+=(${1} 3);
 		else
-			Queue+=(${1} 20);
-			if (( $Error[$1] == 0 )); then
-				Error+=(${1} 1);
-			else
-				Error+=(${1} 7);
-			fi
+			fail_drive ${1} 1;
 		fi
 	
 }
@@ -212,41 +209,52 @@ function update_run_time(){
 		fi
 	done;
 }
-
+function print_drive(){
+	Disk=${1}
+	print "Model Family:" $ModelFamily[$Disk];
+	print "Model:" $Model[$Disk];
+	print "Serial #:" $SerialNumber[$Disk];
+	print "User Capacity:" $UserCapacity[$Disk]"GB";
+}
 #Parse "sudo smartctl -l selftest /dev/$1" and "sudo smartctl -H /dev/$1" and return pass / fail, model number, serial number, etc to a log file.
 function test_report_log_out(){
-    local DateFinished="$(date +%Y/%m/%d)";
+	local DateFinished="$(date +%Y/%m/%d)";
+	Logf=~/${Batch}_HDD.log;
 	#local SerialCheck="$(sudo cat ~/${Batch}_HDD.log | grep $SerialNumber[$1])";
 	if (( $DriveLoggedOut[$1] == 0 )) && (( $Queue[$1] >= 19 )); then
-			print "Testing Client:" $USER >> ~/${Batch}_HDD.log;
-			print "Model Family:" $ModelFamily[$1] >> ~/${Batch}_HDD.log;
-			print "Model:" $Model[$1] >> ~/${Batch}_HDD.log;
-			print "Serial #:" $SerialNumber[$1] >> ~/${Batch}_HDD.log;
-			print "User Capacity:" $UserCapacity[$1] "GB" >> ~/${Batch}_HDD.log;
-			print "Test and format results:" $QueueStateString[$Queue[$1]] >> ~/${Batch}_HDD.log;
-			print "Date testing completed:" $DateFinished >> ~/${Batch}_HDD.log;
+			print "Testing Client:" $USER >> $Logf
+			print_drive ${1} >> $Logf
+			print "Test and format results:" $QueueStateString[$Queue[$1]] >> $Logf
+			print "Date testing completed:" $DateFinished >> $Logf
 			if (( $Error[$1] != 0 )); then
-				print "Errors:" $ErrorString[$Error[$1]] >> ~/${Batch}_HDD.log;
-				print "" >> ~/${Batch}_HDD.log
+				print "Errors:" $ErrorString[$Error[$1]] >> $Logf
+				print "" >> $Logf
 				print $USER,$ModelFamily[$1],$Model[$1],$SerialNumber[$1],$UserCapacity[$1],$QueueStateString[$Queue[$1]],$ErrorString[$Error[$1]],$DateFinished >> ~/${Batch}_HDD.csv;
 			else
-				print "Errors: N/A" >> ~/${Batch}_HDD.log
-				print "" >> ~/${Batch}_HDD.log
+				print "Errors: N/A" >> $Logf
+				print "" >> $Logf
 				print $USER,$ModelFamily[$1],$Model[$1],$SerialNumber[$1],$UserCapacity[$1],$QueueStateString[$Queue[$1]] >> ~/${Batch}_HDD.csv;
 			fi
 			DriveLoggedOut+=(${1} 1);
 	fi
 }
+function fail_log_out()
+{
+	
+	#consistent with other new log out
+	#echo $client, $A_t, $pass_t, $A, $As, $pass
+	if (( $Error[$1] != 0 )); then
+		echo "$USER,, $SerialNumber[$1],$UserCapacity[$1], not passed" >> ~/smart_2018/Log
+	fi
+}
+
 
 #Keeps the user informed of the states in which various tests are in regards to $1 by clearing the screen then printing to stdout.
 function status_report_stdout(){
 	for Disk in $HDDs; do
 		if (( $Presence[$Disk] == 1 )); then
 			print "Status of:" ${Disk};
-			print "Model Family:" $ModelFamily[$Disk];
-			print "Model:" $Model[$Disk];
-			print "Serial #:" $SerialNumber[$Disk];
-			print "User Capacity:" $UserCapacity[$Disk]"GB";
+			print_drive ${Disk};
 			print "Present Task:" $QueueStateString[$Queue[$Disk]];
 			print "Run Time:" $RunTime[$Disk] "Minutes";
 			print ""
@@ -263,13 +271,11 @@ function partition_disk(){
 	if (( ${PartedExit} == 0 )) && (( ${MkfsExit} == 0 )); then
 		Queue+=(${1} 18);
 	else
-		Queue+=(${1} 20);
-		if (( $Error[$1] == 0 )); then
-			Error+=(${1} 6);
-		else
-			Error+=(${1} 7);
-		fi
+		fail_drive ${1} 6;
 	fi
+}
+function nwipe_out(){
+
 }
 
 #Does a shred write of zeros to the disk $1.
@@ -278,27 +284,29 @@ function zero_out(){
         if [[ $ShredPasses == '' ]]; then
             ShredPasses='1';
         fi
-		sudo shred -n $ShredPasses /dev/${1} 1>/dev/null &;
+	sudo shred -n $ShredPasses /dev/${1} 1>/dev/null &;
         local ShredPidInt=0;
         local ShredPidSet=0;
         local ShredPsCheck=1;
         local ShredPidPs="sudo shred -n ${ShredPasses} /dev/${1}"
         local ShredPidCheck=""
+	local line="$(ps aux | grep "sudo shred -n" | sed -n ${ShredPsCheck},${ShredPsCheck}p"
         while [[ $ShredPidSet == 0 ]]; do
             if [[ $ShredPasses < 10 ]]; then 
-                ShredPidCheck="$(ps aux | grep "sudo shred -n" | sed -n ${ShredPsCheck},${ShredPsCheck}p | awk '{print substr($0,66,24)}')";
+                ShredPidCheck="$( awk '{print substr($0,66,24)}' <<< $line)";
             elif [[ $ShredPasses > 9 ]] && [[ $ShredPasses <100 ]]; then
-                ShredPidCheck="$(ps aux | grep "sudo shred -n" | sed -n ${ShredPsCheck},${ShredPsCheck}p | awk '{print substr($0,66,25)}')";
+                ShredPidCheck="$ awk '{print substr($0,66,25)}' <<< $line )";
             else
-                ShredPidCheck="$(ps aux | grep "sudo shred -n" | sed -n ${ShredPsCheck},${ShredPsCheck}p | awk '{print substr($0,66,26)}')";
+                ShredPidCheck="$( awk '{print substr($0,66,26)}' <<< $line)";
             fi
+	    line="$(ps aux | grep "sudo shred -n" | sed -n ${ShredPsCheck},${ShredPsCheck}p"
             if [[ $ShredPidCheck == $ShredPidPs ]]; then
                 if (( $ShredPasses < 10 )); then 
-                    ShredPidInt="$(ps aux | grep "sudo shred -n" | sed -n ${ShredPsCheck},${ShredPsCheck}p | awk '{print substr($0,10,6)}' | grep  -o '[0-9]\+')";
+                    ShredPidInt="$( awk '{print substr($0,10,6)}' <<< $line  | grep  -o '[0-9]\+'  )";
                 elif (( $ShredPasses > 9 )) && (( $ShredPasses <100 )); then
-                    ShredPidInt="$(ps aux | grep "sudo shred -n" | sed -n ${ShredPsCheck},${ShredPsCheck}p | awk '{print substr($0,10,7)}' | grep  -o '[0-9]\+')";
+                    ShredPidInt="$( awk '{print substr($0,10,7)}' <<< $line | grep  -o '[0-9]\+' )";
                 else
-                    ShredPidInt="$(ps aux | grep "sudo shred -n" | sed -n ${ShredPsCheck},${ShredPsCheck}p | awk '{print substr($0,10,8)}' | grep  -o '[0-9]\+')";
+                    ShredPidInt="$( awk '{print substr($0,10,8)}' <<< $line | grep  -o '[0-9]\+' )";
                 fi
 				ShredPid+=(${1} $ShredPidInt);
                 ShredPidSet=1;
@@ -316,9 +324,9 @@ function check_shred(){
 	        local ShredPidPs="$(sudo ps $ShredPid[$1] | grep "sudo shred -n" | awk '{print substr($0,28,24)}')";
         elif (( $ShredPasses > 9 )) && (( $ShredPasses < 100 )); then
 	        local ShredPidPs="$(sudo ps $ShredPid[$1] | grep "sudo shred -n" | awk '{print substr($0,28,25)}')";
-	    else 
-            local ShredPidPs="$(sudo ps $ShredPid[$1] | grep "sudo shred -n" | awk '{print substr($0,28,26)}')";
-	    fi
+	else 
+        	local ShredPidPs="$(sudo ps $ShredPid[$1] | grep "sudo shred -n" | awk '{print substr($0,28,26)}')";
+	fi
    
 }
 
@@ -333,12 +341,7 @@ function dd_write_file(){
 	if (( ${DDExitStatus} == 0 )); then
 		Queue+=(${1} 6);
 	else
-		Queue+=(${1} 20);
-		if (( $Error[$1] == 0 )); then
-			Error+=(${1} 2);
-		else
-			Error+=(${1} 7);
-		fi
+		fail_drive ${1} 2;
 	fi
 }
 
@@ -349,12 +352,7 @@ function dd_read_file(){
 	if (( ${DDExitStatus} == 0 )); then
 		Queue+=(${1} 9);
 	else
-		Queue+=(${1} 20);
-		if (( $Error[$1] == 0 )); then
-			Error+=(${1} 3);
-		else
-			Error+=(${1} 7);
-		fi
+		fail_drive ${1} 3;
 	fi
 }
 
@@ -367,12 +365,7 @@ function hash_compare_file(){
 	if [[ ${MainFileHash} == ${ReadFileHash} ]]; then
 		Queue+=($1 12);
 	else
-		Queue+=(${1} 20);
-		if (( $Error[$1] == 0 )); then
-			Error+=(${1} 5);
-		else
-			Error+=(${1} 7);
-		fi
+		fail_drive ${1} 5;
 	fi
 }
 
@@ -386,11 +379,13 @@ function get_smartctl_test_percentage(){
 #checks that the relevant SMART variables are all zero
 function bb_test(){
 	#local count=0; for more or less
-	local   bb_5="$(sudo smartctl -A /dev/${1} | awk '/5 Reallocated_Sector_Ct/' | awk '{print substr($0,85,6)}')";
-	local bb_187="$(sudo smartctl -A /dev/${1} | awk '/187 Reported_Uncorrect/' | awk '{print substr($0,85,6)}')";
-	local bb_188="$(sudo smartctl -A /dev/${1} | awk '/188 Command_Timeout/'| awk '{ print substr($0,85,6)}')";
-	local bb_197="$(sudo smartctl -A /dev/${1} | awk '/197 Current_Pending_Sector/'| awk '{ print substr($0,85,6)}')";
-	local bb_198="$(sudo smartctl -A /dev/${1} | awk '/198 Offline_Uncorrectable/' | awk '{ print substr($0,85,6)}')";
+	start="$(sudo smartctl -A /dev/${1})"
+	endcmd="| awk '{print substr($0,85,6)}'"
+	local   bb_5="$( awk '/5 Reallocated_Sector_Ct/' <<< $start | awk '{print substr($0,85,6)}' )";
+	local bb_187="$( awk '/187 Reported_Uncorrect/' <<< $start | awk '{print substr($0,85,6)}' )";
+	local bb_188="$( awk '/188 Command_Timeout/' <<< $start | awk '{ print substr($0,85,6)}')";
+	local bb_197="$( awk '/197 Current_Pending_Sector/' <<< $start | awk '{ print substr($0,85,6)}')";
+	local bb_198="$( awk '/198 Offline_Uncorrectable/' <<< $start | awk '{ print substr($0,85,6)}')";
 	#bb_5="500";
 	if ((bb_5==0))&&((bb_187==0))&&((bb_188==0))&&((bb_197==0))&&((bb_198==0)) ;then
 		#pass
@@ -499,10 +494,10 @@ function queue_job_control(){
 		#13 Queued for 0 out
 		#zero_out will update the queue when it's complete, so until then we will just set the queue to 14.
 		Queue+=(${1} 14);
-		zero_out $1;
+		#zero_out $1;
 	elif (( $Queue[$1] == 14 )); then
 		#14 0 out running
-		check_shred $1;
+		#check_shred $1;
 	elif (( $Queue[$1] == 15 )); then
 		#15 0 out complete
 		#zero_out has updated to queue to here or the error queue code, so we must pass it along the line.
@@ -527,6 +522,7 @@ function queue_job_control(){
 		#20 Finished, failed / error
 		#find_hdd with reinitialize_variables will reset things if the disk is unplugged.
 		test_report_log_out $1;
+		fail_log_out $1;
 	else
 		print "Error with Queue code for:" $Disk;
 		print "How did we even get here?";
