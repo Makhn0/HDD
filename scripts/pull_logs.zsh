@@ -6,9 +6,11 @@ function print_noargs(){
 	printf "tell me where to pull from \n"	
 }
 function archive(){
-	#takes directory ${1} and file ${2} moves file to archive
-	cat ${2} >> ${1}/archive #move log contents to archive folder so successive calls to this function don't add the same data
-	echo "" > ${2} #erasesLog file
+	#takes file ${1} and directory ${2} moves file to archive
+	fil=$1
+	dir=$2
+	cat $fil >> $dir/archive #move log contents to archive folder so successive calls to this function don't add the same data
+	printf "" > $fil #erasesLog file
 }
 function extract_from(){
 	#takes client number and extracts /home/test#/nwipe_2018/Log to master
@@ -39,7 +41,7 @@ function get_smart_log(){
 	if [[ -e $clientLog ]]; then
 		sudo cat $clientLog >> $outfile
 		#test above code before uncommenting below
-		archive $clientLog $ndir_c;
+		archive $clientLog $smartdir_c;
 		#cat $clientLog >> $smartdir_c/archive #move log contents to archive folder so successive calls to this function don't add the same data
 		#echo "" > $clientLog #erasesLog file
 	else
@@ -52,6 +54,7 @@ function createMaster_all(){
 	Count=1;
 	while (( $Count != 51 )); do
 		extract_from $Count
+		get_smart_log $Count
 		Count=$(($Count+1))
 	done;	
 	
@@ -83,6 +86,7 @@ function createMaster(){
 	>&2 printf "%s\n" "finished updating $outfile"
 	
 }
+#get_smart_log ${1}
 createMaster ${1}
 
 ##add to .bashrc .zshrc/alias.zsh later find way to load on clients

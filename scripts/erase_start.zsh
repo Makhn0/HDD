@@ -51,7 +51,7 @@ function erase_main(){
 		if [[ -e $logfile ]]; then
 			printf "logfile exists continuing... \n"
 		else
-			printf "no logfile creating nwipe_2018 now...\n"
+			printf "no logfile creating $logfile now...\n"
 			sudo touch $logfile	
 		fi
 		callNwipe $drives $logfile $args

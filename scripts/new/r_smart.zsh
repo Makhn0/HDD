@@ -227,8 +227,26 @@ function fail_log_out(){
 	
 	#consistent with other new log out
 	#echo $client, $A_t, $pass_t, $A, $As, $pass
-	if (( $Error[$1] != 0 )); then
-		echo "$USER,, $SerialNumber[$1],$UserCapacity[$1], not passed" >> ~/smart_2018/Log
+	if [[ $(pwd) =~ ^/home/test[1-5]?[0-9]$ ]]; then #minor bug: test0 passes
+		client=$(pwd | grep -oP -e "[^/]*$")
+		Dir=$(pwd)/smart_2018
+		logfile=$Dir/Log
+		if [[ -e $Dir ]]; then
+			#>&2 printf "logfile exists continuing....\n"
+		else 
+			#>&2 printf "no Log Folder creating $Dir now...\n "
+			sudo mkdir $Dir
+		fi
+		if [[ -e $logfile ]]; then
+			#>&2 printf "logfile exists continuing... \n"
+		else
+			#>&2 printf "no logfile creating $logfile now...\n"
+			sudo touch $logfile	
+		fi	
+smrtLog="~/smart_2018/Log"
+		if (( $Error[$1] != 0 )); then
+			echo "$client,, $SerialNumber[$1],$UserCapacity[$1], failed smartctl" >> $logfile
+		fi
 	fi
 }
 #Keeps the user informed of the states in which various tests are in regards to $1 by clearing the screen then printing to stdout.
@@ -569,5 +587,15 @@ main(){
 		sleep 1;		
 	done;
 }
-
+function test_fail(){
+reinitialize_variables $1;
+find_hdd $1;
+get_hdd_data $1;
+#queue_job_control $Disk;
+status_report_stdout;
+Error[${1}]=1;
+#echo Error=$Error[$1];
+fail_log_out $1;
+}
 main $1 ;
+
