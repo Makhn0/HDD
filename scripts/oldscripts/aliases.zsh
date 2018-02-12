@@ -40,4 +40,5 @@ alias smartcheck="sudo ./hdd_test_current.zsh default"
 #use on server
 alias pullLogs="sudo $scriptdir/pull_logs.zsh"
 alias Hupdate="sudo $scriptdir/oldscripts/homeupdate.zsh"
+alias searchlogs="sudo $scriptdir/search.zsh"
 
