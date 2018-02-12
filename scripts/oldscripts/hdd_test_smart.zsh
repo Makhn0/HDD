@@ -340,7 +340,7 @@ function test_report_log_out(){
 				print "" >> ~/${Batch}_HDD.log
 				print $USER,$ModelFamily[$1],$Model[$1],$SerialNumber[$1],$UserCapacity[$1],$QueueStateString[$Queue[$1]] >> ~/${Batch}_HDD.csv;
 			fi
-			DriveLoggedOut+=(${1} 1);
+			#DriveLoggedOut+=(${1} 1);
 	fi
 }
 
@@ -665,6 +665,7 @@ function queue_job_control(){
 		#20 Finished, failed / error
 		#find_hdd with reinitialize_variables will reset things if the disk is unplugged.
 		test_report_log_out $1;
+		fail_log_out $1;
 	else
 		print "Error with Queue code for:" $Disk;
 		print "How did we even get here?";
