@@ -430,11 +430,17 @@ function bb_test(){
 function get_hdd_data(){
 	if (( $DriveDataCollected[$1] == 0 )) && (( $Presence[$1] == 1 )) && (( $Queue[$1] != 14 )) ; then
 		
-			local SmartSupportRaw="$(sudo smartctl -i /dev/${1} | awk '/SMART support is:/' | awk '{print substr($0,19,9)}; NR == 1 {exit}')";
-			local ModelFamilyRaw="$(sudo smartctl -i /dev/${1} | awk '/Model Family:/' | awk '{print substr($0,19,35)}')";
-			local ModelRaw="$(sudo smartctl -i /dev/${1} | awk '/Device Model:/' | awk '{print substr($0,19,35)}')";
-			local SerialNumberRaw="$(sudo smartctl -i /dev/${1} | awk '/Serial Number:/' | awk '{print substr($0,19,35)}')";
-			local UserCapacityGB="$(sudo smartctl -i /dev/${1} | awk '/User Capacity:/' | awk -F"[" '{print $2}' | grep -o '[0-9]\+' | head -n 1)";
+			local smart_i="$(sudo smartctl -i /dev/${1})"
+			local SmartSupportRaw="$( awk '/SMART support is:/' <<< $smart_i | awk '{print substr($0,19,9)}; NR == 1 {exit}')";
+			local ModelFamilyRaw="$( awk '/Model Family:/' <<< $smart_i | awk '{print substr($0,19,35)}')";
+			local ModelRaw="$(awk '/Device Model:/' <<< $smart_i | awk '{print substr($0,19,35)}')";
+			local SerialNumberRaw="$( awk '/Serial Number:/' <<< $smart_i | awk '{print substr($0,19,35)}')";
+			local UC="$( awk '/User Capacity:/' <<< $smart_i | awk -F"[" '{print $2}' ) "
+			local TB="$( grep -o TB <<< $UC)"
+			local UserCapacityGB="$( grep -o '[0-9]\+' <<< $UC | head -n 1)";
+			if [[ $TB ]]; then
+				UserCapacityGB+="000"
+			fi
 			local DateTime="$(date +%s)";
 			StartTime+=(${1} $DateTime);
 		
