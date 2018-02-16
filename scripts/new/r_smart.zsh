@@ -590,7 +590,7 @@ main(){
 		clear;
 		if (( $count == 3 )); then
 			>&2 echo "testing"
-			test_live ${1} ;
+			#test_live ${1} ;
 		fi	
 		>&2 echo count=$count
 		>&2 echo queuestate=$Queue[${1}];
