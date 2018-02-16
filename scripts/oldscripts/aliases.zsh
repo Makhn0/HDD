@@ -36,7 +36,7 @@ scriptdir=/home/hdd-test-server/HDD/scripts
 #use on client
 alias erase="sudo ./erase_start.zsh"
 alias eraseauto="sudo ./erase_start.zsh -a "
-alias smartcheck="sudo ./hdd_test_current.zsh default"
+alias smartcheck="sudo ./hdd_test_current.zsh default 2>/dev/null"
 #use on server
 alias pullLogs="sudo $scriptdir/pull_logs.zsh"
 alias Hupdate="sudo $scriptdir/oldscripts/homeupdate.zsh"

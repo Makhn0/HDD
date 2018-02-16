@@ -59,7 +59,7 @@ QueueStateString=( 0 "Not Connected / Scheduled" 1 "Queued for Smart test" 2 "Sm
 #error codes are set: (0 no error) (1 smart testing error) (2 dd write error) (3 dd read error) (4 0 out error) (5 hash compare error) (6 formatting error) (7 logic broke and there are more than one errors)
 typeset -A Error
 typeset -A ErrorString
-ErrorString=( 0 "No errors" 1 "Smart testing error" 2 "dd write error" 3 "dd read error" 4 "0 out error" 5 "Hash compare error" 6 "Formatting error" 7 "Logic broken, seek mediation" )
+ErrorString=( 0 "No errors" 1 "Smart testing error" 2 "dd write error" 3 "dd read error" 4 "0 out error" 5 "Hash compare error" 6 "Formatting error" 7 "bb test fail" 8 "Logic broken, seek mediation" )
 
 #Holds the serial, model, and manufacturer so we can make sure we don't test the same drive twice in a row, cause that'd just be silly.
 typeset -A SerialNumber
@@ -150,6 +150,15 @@ function smartctl_watched(){
 	
 }
 
+fucntion fail_drive(){ 
+	>&2 printf " failing %s with %s \n" ${1} ${2}
+	Queue+=(${1} 20);
+	if (( $Error[$1] == 0 )); then
+		Error+=(${1} ${2});
+	else
+		Error+=(${1} 8);
+	fi
+}
 #Checks to see if smartctl is still running the scheduled test.
 function check_smartctl_test_status(){
 	local TestStatus="$(sudo smartctl -a /dev/${1} | awk '/Self-test execution status:/' | awk '{print substr($0,41,37)}')";
@@ -159,12 +168,13 @@ function check_smartctl_test_status(){
 	elif [[ ${TestStatus} == *"he previous self-test routine compl"* ]] && [[ ${LogStatus} != "No self-tests have been logged." ]]; then
 		Queue+=(${1} 3);
 	else
-		Queue+=(${1} 20);
-		if (( $Error[$1] == 0 )); then
-			Error+=(${1} 1);
-		else
-			Error+=(${1} 7);
-		fi
+		fail_drive ${1} 1;
+		#Queue+=(${1} 20);
+		#if (( $Error[$1] == 0 )); then
+		#	Error+=(${1} 1);
+		#else
+		#	Error+=(${1} 7);
+		#fi
 	fi
 }
 
@@ -248,6 +258,7 @@ smrtLog="~/smart_2018/Log"
 			echo "$client,, $SerialNumber[$1],$UserCapacity[$1], failed smartctl" >> $logfile
 		fi
 	fi
+	
 }
 #Keeps the user informed of the states in which various tests are in regards to $1 by clearing the screen then printing to stdout.
 function status_report_stdout(){
@@ -277,12 +288,13 @@ function partition_disk(){
 	if (( ${PartedExit} == 0 )) && (( ${MkfsExit} == 0 )); then
 		Queue+=(${1} 18);
 	else
-		Queue+=(${1} 20);
-		if (( $Error[$1] == 0 )); then
-			Error+=(${1} 6);
-		else
-			Error+=(${1} 7);
-		fi
+		fail_drive ${1} 6;
+		#Queue+=(${1} 20);
+		#if (( $Error[$1] == 0 )); then
+		#	Error+=(${1} 6);
+		#else
+		#	Error+=(${1} 7);
+		#fi
 	fi
 }
 
@@ -351,12 +363,7 @@ function dd_write_file(){
 	if (( ${DDExitStatus} == 0 )); then
 		Queue+=(${1} 6);
 	else
-		Queue+=(${1} 20);
-		if (( $Error[$1] == 0 )); then
-			Error+=(${1} 2);
-		else
-			Error+=(${1} 7);
-		fi
+		fail_drive ${1} 2;
 	fi
 }
 
@@ -367,12 +374,7 @@ function dd_read_file(){
 	if (( ${DDExitStatus} == 0 )); then
 		Queue+=(${1} 9);
 	else
-		Queue+=(${1} 20);
-		if (( $Error[$1] == 0 )); then
-			Error+=(${1} 3);
-		else
-			Error+=(${1} 7);
-		fi
+		fail_drive ${1} 3;
 	fi
 }
 
@@ -385,12 +387,7 @@ function hash_compare_file(){
 	if [[ ${MainFileHash} == ${ReadFileHash} ]]; then
 		Queue+=($1 12);
 	else
-		Queue+=(${1} 20);
-		if (( $Error[$1] == 0 )); then
-			Error+=(${1} 5);
-		else
-			Error+=(${1} 7);
-		fi
+		fail_drive ${1} 5;
 	fi
 }
 
@@ -422,7 +419,7 @@ function bb_test(){
 		dd_write_file $1;
 	else
 		#fail
-		Queue+=(${1} 20);
+		fail_drive ${1} 7;
 		#echo fail;
 	fi
 }
@@ -558,6 +555,10 @@ function queue_job_control(){
 	fi
 }
 
+function test_live(){
+	fail_drive ${1} 7;
+	
+}
 #This is the main algorithm that keeps everything running as it should.
 main(){
 	clear;
@@ -569,6 +570,7 @@ main(){
 	for Disk in $HDDs; do
 		reinitialize_variables $Disk;
 	done;
+	local count=0
 	while true; do
 		for Disk in $HDDs; do
 			find_hdd $Disk;
@@ -584,6 +586,13 @@ main(){
 			fi
 		done;
 		clear;
+		if (( $count == 5 )); then
+			>&2 echo "testing"
+			test_live ${1} ;
+		fi	
+		>&2 echo count=$count
+		>&2 echo queuestate=$Queue[${1}];
+		((count +=1 ));
 		update_run_time;
 		print "Batch Name: " $Batch;
 		#print "this is printing"
@@ -594,7 +603,7 @@ main(){
 	done;
 }
 function test_fail(){
-reinitialize_variables $1;
+reinitialize_variables ${1};
 find_hdd $1;
 get_hdd_data $1;
 #queue_job_control $Disk;
@@ -604,4 +613,4 @@ Error[${1}]=1;
 fail_log_out $1;
 }
 main $1 ;
-
+#test_fail $1;
