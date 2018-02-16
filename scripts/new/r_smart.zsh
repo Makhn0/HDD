@@ -401,20 +401,22 @@ function get_smartctl_test_percentage(){
 #checks that the relevant SMART variables are all zero
 function bb_test(){
 	#local count=0; for more or less
-	local   bb_5="$(sudo smartctl -A /dev/${1} | awk '/5 Reallocated_Sector_Ct/' | awk '{print substr($0,85,6)}')";
-	local bb_187="$(sudo smartctl -A /dev/${1} | awk '/187 Reported_Uncorrect/' | awk '{print substr($0,85,6)}')";
-	local bb_188="$(sudo smartctl -A /dev/${1} | awk '/188 Command_Timeout/'| awk '{ print substr($0,85,6)}')";
-	local bb_197="$(sudo smartctl -A /dev/${1} | awk '/197 Current_Pending_Sector/'| awk '{ print substr($0,85,6)}')";
-	local bb_198="$(sudo smartctl -A /dev/${1} | awk '/198 Offline_Uncorrectable/' | awk '{ print substr($0,85,6)}')";
+	local sA="$(sudo smartctl -A /dev/${1} )"
+	local awkcmd='{ print substr($0,85,6)}'
+	local  bb_5="$( awk '/5 Reallocated_Sector_Ct/' <<< $sA | awk $awkcmd)";
+	local bb_187="$( awk '/187 Reported_Uncorrect/' <<< $sA  | awk $awkcmd)";
+	local bb_188="$( awk '/188 Command_Timeout/' <<< $sA | awk $awkcmd)";
+	local bb_197="$( awk '/197 Current_Pending_Sector/' <<< $sA | awk $awkcmd)";
+	local bb_198="$( awk '/198 Offline_Uncorrectable/' <<< $sA  | awk $awkcmd)";
 	#bb_5="500";
 	if ((bb_5==0))&&((bb_187==0))&&((bb_188==0))&&((bb_197==0))&&((bb_198==0)) ;then
 		#pass
-		#echo $bb_5;
-		#echo $bb_187;
-		#echo $bb_188;
-		#echo $bb_197;
-		#echo $bb_198;
-		#echo pass;
+		>&2 echo 5:$bb_5;
+		>&2 echo 187:$bb_187;
+		>&2 echo 188:$bb_188;
+		>&2 echo 197:$bb_197;
+		>&2 echo 198:$bb_198;
+		>&2 echo pass;
 		Queue+=(${1} 5);
 		dd_write_file $1;
 	else
@@ -556,7 +558,7 @@ function queue_job_control(){
 }
 
 function test_live(){
-	fail_drive ${1} 7;
+	bb_test $1;
 	
 }
 #This is the main algorithm that keeps everything running as it should.
@@ -586,7 +588,7 @@ main(){
 			fi
 		done;
 		clear;
-		if (( $count == 5 )); then
+		if (( $count == 3 )); then
 			>&2 echo "testing"
 			test_live ${1} ;
 		fi	
