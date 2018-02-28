@@ -56,7 +56,7 @@ function erase_main(){
 		fi
 		touch $Dir/Lock
 		callNwipe $drives $logfile $args
-		sudo rm $Dir/Lock
+		rm $Dir/Lock
 	else
 	
 		printf "%s\n" "you are in $(pwd)" "Please cd to home directory i.e. /home/test#  "
